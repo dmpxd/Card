@@ -104,7 +104,7 @@
     font-weight: 600; font-size: clamp(11.5px, 3.1vw, 14.5px);
     text-transform: uppercase; letter-spacing: 0.01em;
     display:flex; align-items:center; justify-content:center; text-align:center;
-    padding: 6px; cursor:pointer;
+    padding: 6px; cursor:pointer; line-height:1.15; overflow-wrap: break-word; hyphens: auto;
     transition: transform 0.12s ease, background 0.15s ease, box-shadow 0.15s ease;
     user-select:none;
   }
@@ -280,6 +280,108 @@ const PUZZLES = [
     { name: "Olympic combat sports", tier: 2, words: ["JUDO","TAEKWONDO","SAMBO","SUMO"] },
     { name: "Playground games worldwide", tier: 3, words: ["HOPSCOTCH","KABADDI","MARBLES","TAG"] },
     { name: "Trick-taking card games", tier: 4, words: ["BRIDGE","WHIST","CANASTA","SKAT"] },
+  ]},
+  { title: "Stage & screen", categories: [
+    { name: "Shakespeare plays", tier: 1, words: ["HAMLET","MACBETH","OTHELLO","TEMPEST"] },
+    { name: "Broadway musicals", tier: 2, words: ["HAMILTON","WICKED","CHICAGO","RENT"] },
+    { name: "Renaissance painters", tier: 3, words: ["TITIAN","RAPHAEL","BOTTICELLI","CARAVAGGIO"] },
+    { name: "French New Wave directors", tier: 4, words: ["GODARD","TRUFFAUT","VARDA","ROHMER"] },
+  ]},
+  { title: "Stars, stripes & shires", categories: [
+    { name: "___ State (US nicknames)", tier: 1, words: ["EMPIRE","SUNSHINE","GOLDEN","SILVER"] },
+    { name: "British royal houses", tier: 2, words: ["TUDOR","STUART","HANOVER","WINDSOR"] },
+    { name: "American diner staples", tier: 3, words: ["MILKSHAKE","PANCAKE","BURGER","MEATLOAF"] },
+    { name: "Ivy League schools", tier: 4, words: ["YALE","BROWN","CORNELL","COLUMBIA"] },
+  ]},
+  { title: "Colors & gems", categories: [
+    { name: "Gemstones", tier: 1, words: ["JADE","OPAL","AMBER","TURQUOISE"] },
+    { name: "Shades of blue", tier: 2, words: ["INDIGO","COBALT","CERULEAN","AZURE"] },
+    { name: "Sky phenomena", tier: 3, words: ["AURORA","MIRAGE","HALO","RAINBOW"] },
+    { name: "Historic dyes & pigments", tier: 4, words: ["TYRIAN PURPLE","WOAD","HENNA","OCHRE"] },
+  ]},
+  { title: "Lay of the land", categories: [
+    { name: "Landlocked countries", tier: 1, words: ["BOLIVIA","MONGOLIA","CHAD","NEPAL"] },
+    { name: "Peninsulas", tier: 2, words: ["IBERIA","BALKAN","KOREA","ARABIA"] },
+    { name: "Island nations", tier: 3, words: ["PHILIPPINES","INDONESIA","MALDIVES","MADAGASCAR"] },
+    { name: "Straits", tier: 4, words: ["GIBRALTAR","BOSPHORUS","MALACCA","HORMUZ"] },
+  ]},
+  { title: "Shelter & structure", categories: [
+    { name: "Traditional dwellings", tier: 1, words: ["YURT","IGLOO","HOGAN","RONDAVEL"] },
+    { name: "Marketplaces", tier: 2, words: ["SOUK","BAZAAR","AGORA","MERCADO"] },
+    { name: "Sacred structures", tier: 3, words: ["PAGODA","STUPA","ZIGGURAT","MINARET"] },
+    { name: "Fortifications", tier: 4, words: ["CITADEL","KASBAH","ALCAZAR","BASTION"] },
+  ]},
+  { title: "Word origins", categories: [
+    { name: "English loanwords", tier: 1, words: ["KARAOKE","SAFARI","TYCOON","ROBOT"] },
+    { name: "Greetings borrowed into English", tier: 2, words: ["ALOHA","SHALOM","NAMASTE","CIAO"] },
+    { name: "Words for specific quantities", tier: 3, words: ["DOZEN","SCORE","GROSS","MYRIAD"] },
+    { name: "Uncommon units of time", tier: 4, words: ["FORTNIGHT","DECADE","LUSTRUM","EON"] },
+  ]},
+  { title: "Feast & fast", categories: [
+    { name: "Asian noodles", tier: 1, words: ["RAMEN","PHO","UDON","SOBA"] },
+    { name: "Cheeses of the world", tier: 2, words: ["BRIE","GOUDA","FETA","HALLOUMI"] },
+    { name: "Sweet pastries", tier: 3, words: ["BAKLAVA","STRUDEL","CANNOLI","CROISSANT"] },
+    { name: "Fermented foods", tier: 4, words: ["KIMCHI","KEFIR","MISO","SAUERKRAUT"] },
+  ]},
+  { title: "Martial arts & sport", categories: [
+    { name: "Racquet sports", tier: 1, words: ["SQUASH","PADEL","BADMINTON","PICKLEBALL"] },
+    { name: "Winter sports", tier: 2, words: ["LUGE","BIATHLON","CURLING","SKELETON"] },
+    { name: "Martial arts", tier: 3, words: ["KARATE","AIKIDO","SILAT","MUAY THAI"] },
+    { name: "Athletics field events", tier: 4, words: ["DISCUS","JAVELIN","HAMMER","POLE VAULT"] },
+  ]},
+  { title: "Royals & rulers", categories: [
+    { name: "Titles of nobility", tier: 1, words: ["DUKE","BARON","VISCOUNT","MARQUESS"] },
+    { name: "Historic queens & empresses", tier: 2, words: ["CLEOPATRA","NEFERTITI","CATHERINE","VICTORIA"] },
+    { name: "Historic empires", tier: 3, words: ["OTTOMAN","MUGHAL","BYZANTINE","INCA"] },
+    { name: "Ancient Egyptian terms", tier: 4, words: ["PHARAOH","SPHINX","PAPYRUS","HIEROGLYPH"] },
+  ]},
+  { title: "Space & science", categories: [
+    { name: "Moons of the solar system", tier: 1, words: ["EUROPA","TITAN","TRITON","CHARON"] },
+    { name: "Space missions & probes", tier: 2, words: ["VOYAGER","SPUTNIK","CHANDRAYAAN","ARTEMIS"] },
+    { name: "Units in physics", tier: 3, words: ["JOULE","NEWTON","PASCAL","TESLA"] },
+    { name: "Nobel science laureates", tier: 4, words: ["CURIE","BOHR","FEYNMAN","RAMAN"] },
+  ]},
+  { title: "Waterways", categories: [
+    { name: "Waterfalls", tier: 1, words: ["NIAGARA","VICTORIA","ANGEL","IGUAZU"] },
+    { name: "Canals", tier: 2, words: ["SUEZ","PANAMA","CORINTH","KIEL"] },
+    { name: "Coastal landforms", tier: 3, words: ["FJORD","LAGOON","ATOLL","ESTUARY"] },
+    { name: "Great lakes of the world", tier: 4, words: ["BAIKAL","TITICACA","TANGANYIKA","ERIE"] },
+  ]},
+  { title: "Celebrations around the world", categories: [
+    { name: "Harvest festivals", tier: 1, words: ["THANKSGIVING","ONAM","PONGAL","SUKKOT"] },
+    { name: "Carnival celebrations", tier: 2, words: ["CARNIVAL","MARDI GRAS","JUNKANOO","FASTNACHT"] },
+    { name: "Festivals of light", tier: 3, words: ["HANUKKAH","DIWALI","YALDA","ST LUCIA"] },
+    { name: "Ancestor & remembrance festivals", tier: 4, words: ["OBON","SAMHAIN","CHUSEOK","DIA DE MUERTOS"] },
+  ]},
+  { title: "Language & code", categories: [
+    { name: "NATO phonetic alphabet words", tier: 1, words: ["ALPHA","BRAVO","TANGO","ZULU"] },
+    { name: "Communication systems", tier: 2, words: ["BRAILLE","MORSE CODE","SEMAPHORE","SIGN LANGUAGE"] },
+    { name: "Classical languages", tier: 3, words: ["LATIN","SANSKRIT","SUMERIAN","COPTIC"] },
+    { name: "Constructed languages", tier: 4, words: ["ESPERANTO","KLINGON","DOTHRAKI","VOLAPUK"] },
+  ]},
+  { title: "Art & architecture", categories: [
+    { name: "Art movements", tier: 1, words: ["CUBISM","SURREALISM","IMPRESSIONISM","BAUHAUS"] },
+    { name: "Architectural styles", tier: 2, words: ["GOTHIC","BAROQUE","BRUTALIST","ART DECO"] },
+    { name: "Famous museums", tier: 3, words: ["LOUVRE","PRADO","HERMITAGE","UFFIZI"] },
+    { name: "Sculptors", tier: 4, words: ["RODIN","BERNINI","MOORE","GIACOMETTI"] },
+  ]},
+  { title: "Body of knowledge", categories: [
+    { name: "Branches of mathematics", tier: 1, words: ["ALGEBRA","TOPOLOGY","CALCULUS","TRIGONOMETRY"] },
+    { name: "Schools of philosophy", tier: 2, words: ["STOICISM","CONFUCIANISM","EXISTENTIALISM","UTILITARIANISM"] },
+    { name: "Ancient philosophers", tier: 3, words: ["CONFUCIUS","SOCRATES","IBN SINA","LAOZI"] },
+    { name: "Elements named after scientists", tier: 4, words: ["CURIUM","EINSTEINIUM","NOBELIUM","MENDELEVIUM"] },
+  ]},
+  { title: "Cinema of the world", categories: [
+    { name: "Film genres", tier: 1, words: ["NOIR","WESTERN","GIALLO","WUXIA"] },
+    { name: "Film awards", tier: 2, words: ["OSCAR","PALME D'OR","GOLDEN BEAR","GOLDEN LION"] },
+    { name: "National cinema movements", tier: 3, words: ["NEOREALISM","BOLLYWOOD","NOLLYWOOD","DOGME 95"] },
+    { name: "Iconic directors", tier: 4, words: ["KUROSAWA","FELLINI","ALMODOVAR","WONG KAR-WAI"] },
+  ]},
+  { title: "Currency & commerce", categories: [
+    { name: "Stock market indices", tier: 1, words: ["NASDAQ","NIKKEI","FTSE","SENSEX"] },
+    { name: "Economic terms", tier: 2, words: ["INFLATION","GDP","TARIFF","RECESSION"] },
+    { name: "Historic trade routes", tier: 3, words: ["SILK ROAD","AMBER ROAD","INCENSE ROUTE","SPICE ROUTE"] },
+    { name: "Ancient & alternative currencies", tier: 4, words: ["COWRIE SHELLS","WAMPUM","RAI STONES","SALT"] },
   ]},
 ];
 
