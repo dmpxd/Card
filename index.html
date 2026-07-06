@@ -1,1060 +1,563 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Snodmp</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Nunito:wght@400;600;700;800&family=JetBrains+Mono:wght@600&display=swap" rel="stylesheet">
+<title>Combo Bubble Shooter</title>
+
 <style>
-  :root{
-    --navy-deep:#081020;
-    --navy:#0d1b30;
-    --navy-light:#13294a;
-    --glass:rgba(255,255,255,0.055);
-    --glass-border:rgba(255,255,255,0.11);
-    --foam:#eaf6ff;
-    --blue:#4ea8de;
-    --red:#ff6b5b;
-    --yellow:#ffd166;
-    --green:#06d6a0;
-    --ink-soft:#9db4d1;
-  }
-  *{box-sizing:border-box;}
-  html,body{height:100%;}
-  body{
-    margin:0;
-    min-height:100vh;
-    font-family:'Nunito',sans-serif;
-    color:var(--foam);
-    background:
-      radial-gradient(ellipse at 20% -10%, #163258 0%, transparent 55%),
-      radial-gradient(ellipse at 90% 10%, #0f2a44 0%, transparent 50%),
-      linear-gradient(180deg, var(--navy-deep) 0%, var(--navy) 55%, #061020 100%);
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    padding:22px 14px 40px;
-    overflow-x:hidden;
-    position:relative;
-  }
-  /* ambient caustic shimmer */
-  body::before{
-    content:"";
-    position:fixed;
-    inset:0;
-    pointer-events:none;
-    background:
-      repeating-linear-gradient(115deg, rgba(255,255,255,0.025) 0px, rgba(255,255,255,0.025) 2px, transparent 2px, transparent 140px);
-    animation:driftLight 18s linear infinite;
-    opacity:0.5;
-    z-index:0;
-  }
-  @keyframes driftLight{
-    0%{transform:translate(-40px,-20px);}
-    100%{transform:translate(40px,20px);}
-  }
 
-  .wrap{ position:relative; z-index:1; width:100%; max-width:560px; display:flex; flex-direction:column; align-items:center; }
-
-  header{ text-align:center; margin-bottom:14px; position:relative; }
-  #soundToggle{
-    position:absolute;
-    top:2px;
-    right:0;
-    background:var(--glass);
-    border:1px solid var(--glass-border);
-    color:var(--foam);
-    width:34px;
-    height:34px;
-    border-radius:50%;
-    font-size:1rem;
-    cursor:pointer;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-  }
-  #soundToggle.muted{ opacity:0.45; }
-  h1{
-    font-family:'Baloo 2', sans-serif;
-    font-weight:800;
-    font-size:clamp(2.1rem, 8vw, 2.9rem);
-    letter-spacing:0.5px;
-    margin:0;
-    background:linear-gradient(180deg, #eaf6ff, #9fd8ff 60%, #4ea8de);
-    -webkit-background-clip:text;
-    background-clip:text;
-    color:transparent;
-    text-shadow:0 2px 18px rgba(78,168,222,0.35);
-  }
-  header p{
-    margin:4px 0 0;
-    font-size:0.85rem;
-    color:var(--ink-soft);
-    font-weight:600;
-    letter-spacing:0.4px;
-  }
-
-  .hud{
-    width:100%;
-    display:grid;
-    grid-template-columns:1fr 1fr 1fr;
-    gap:10px;
-    margin-bottom:16px;
-  }
-  .hud-card{
-    background:var(--glass);
-    border:1px solid var(--glass-border);
-    backdrop-filter:blur(8px);
-    border-radius:16px;
-    padding:10px 8px;
+body{
+    background:#181818;
+    color:white;
+    font-family:Arial;
     text-align:center;
-  }
-  .hud-card .label{
-    font-size:0.62rem;
-    text-transform:uppercase;
-    letter-spacing:1.2px;
-    color:var(--ink-soft);
-    font-weight:700;
-    margin-bottom:2px;
-  }
-  .hud-card .value{
-    font-family:'Baloo 2', sans-serif;
-    font-weight:700;
-    font-size:1.5rem;
-    color:var(--foam);
-  }
-  #turnsValue.low{ color:var(--red); }
-  #scoreValue{ color:var(--yellow); }
-  #bestValue{ color:var(--green); }
+}
 
-  .board-frame{
-    position:relative;
-    width:100%;
-    background:linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
-    border:1px solid var(--glass-border);
-    border-radius:22px;
-    padding:10px;
-    box-shadow: inset 0 2px 20px rgba(0,0,0,0.35), 0 10px 30px rgba(0,0,0,0.35);
-  }
-  #board{
-    display:grid;
-    grid-template-columns:repeat(9, 1fr);
-    gap:6px;
-    position:relative;
-  }
-  .cell{
-    position:relative;
-    width:100%;
-    aspect-ratio:1/1;
+canvas{
+    background:#222;
+    border-radius:12px;
+    border:2px solid #444;
+}
+
+.ui{
     display:flex;
-    align-items:center;
     justify-content:center;
-  }
-  .bubble{
-    position:relative;
-    width:88%;
-    height:88%;
+    gap:40px;
+    margin-bottom:10px;
+}
+
+.badge{
+    display:inline-block;
+    width:18px;
+    height:18px;
     border-radius:50%;
-    border:none;
     cursor:pointer;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    font-size:1.1rem;
-    font-weight:800;
-    color:rgba(255,255,255,0.92);
-    box-shadow:
-      inset -4px -6px 10px rgba(0,0,0,0.25),
-      inset 4px 5px 8px rgba(255,255,255,0.35),
-      0 3px 8px rgba(0,0,0,0.3);
-    animation:bob 3.4s ease-in-out infinite;
-    animation-delay:calc(var(--d, 0) * 1s);
-    transition:transform 0.12s ease;
-  }
-  .bubble:active{ transform:scale(0.9); }
-  @keyframes bob{
-    0%,100%{ transform:translateY(0px); }
-    50%{ transform:translateY(-4px); }
-  }
-  .bubble.color-blue{ background:radial-gradient(circle at 35% 28%, #bfe6ff, var(--blue) 60%, #2f7bb0); }
-  .bubble.color-red{ background:radial-gradient(circle at 35% 28%, #ffd0c8, var(--red) 60%, #d1493a); }
-  .bubble.color-yellow{ background:radial-gradient(circle at 35% 28%, #fff3cf, var(--yellow) 60%, #d9a12e); }
-  .bubble.color-green{ background:radial-gradient(circle at 35% 28%, #baffe9, var(--green) 60%, #04a37e); }
-  .bubble.type-bomb{
-    background:radial-gradient(circle at 35% 28%, #6b7b8f, #2a3646 55%, #10151d);
-    box-shadow:
-      inset -4px -6px 10px rgba(0,0,0,0.5),
-      inset 4px 5px 8px rgba(255,255,255,0.15),
-      0 0 12px rgba(255,107,91,0.35);
-  }
-  .bubble.type-rainbow{
-    background:conic-gradient(from 0deg, var(--blue), var(--green), var(--yellow), var(--red), var(--blue));
-    animation:bob 3.4s ease-in-out infinite, spin 6s linear infinite;
-  }
-  @keyframes spin{ from{ filter:hue-rotate(0deg);} to{ filter:hue-rotate(360deg);} }
-  .bubble .badge{
+    position:relative;
+}
+
+.tooltip{
     position:absolute;
-    font-size:0.85rem;
-    filter:drop-shadow(0 1px 2px rgba(0,0,0,0.5));
-  }
-  .bubble .mult-badge{
-    font-family:'JetBrains Mono', monospace;
-    font-size:0.78rem;
-    font-weight:700;
-    background:rgba(0,0,0,0.28);
-    padding:1px 4px;
+    bottom:30px;
+    left:-40px;
+
+    background:#333;
+    padding:8px;
     border-radius:6px;
-  }
 
-  .cell.popping .bubble{
-    animation:none;
-    transform:scale(1.35);
-    opacity:0;
-    transition:all 0.28s cubic-bezier(.4,0,1,1);
-  }
-  .cell.dropped .bubble{
-    animation:dropIn 0.32s ease-out, bob 3.4s ease-in-out infinite 0.32s;
-  }
-  @keyframes dropIn{
-    from{ transform:translateY(-140%); opacity:0.4; }
-    to{ transform:translateY(0); opacity:1; }
-  }
-  .cell.shake{ animation:shakeCell 0.3s ease; }
-  @keyframes shakeCell{
-    0%,100%{ transform:translateX(0); }
-    25%{ transform:translateX(-4px); }
-    75%{ transform:translateX(4px); }
-  }
+    width:140px;
 
-  .floaters{ position:absolute; inset:0; pointer-events:none; overflow:visible; }
-  .float-text{
-    position:absolute;
-    font-family:'Baloo 2', sans-serif;
-    font-weight:700;
-    color:var(--yellow);
-    text-shadow:0 2px 6px rgba(0,0,0,0.5);
-    animation:floatUp 0.9s ease-out forwards;
-    white-space:nowrap;
-  }
-  @keyframes floatUp{
-    0%{ transform:translateY(0) scale(0.8); opacity:0; }
-    15%{ opacity:1; transform:translateY(-6px) scale(1.05); }
-    100%{ transform:translateY(-46px) scale(1); opacity:0; }
-  }
-
-  .legend{
-    width:100%;
-    margin-top:18px;
-    display:flex;
-    gap:10px;
-    justify-content:center;
-    flex-wrap:wrap;
-  }
-  .legend-item{
-    position:relative;
-    display:flex;
-    align-items:center;
-    gap:6px;
-    background:var(--glass);
-    border:1px solid var(--glass-border);
-    padding:6px 10px 6px 6px;
-    border-radius:999px;
-    cursor:pointer;
-  }
-  .legend-icon{
-    width:26px; height:26px; border-radius:50%;
-    display:flex; align-items:center; justify-content:center;
-    font-size:0.85rem;
-    flex-shrink:0;
-  }
-  .legend-icon.bomb{ background:radial-gradient(circle at 35% 28%, #6b7b8f, #2a3646 60%, #10151d); }
-  .legend-icon.rainbow{ background:conic-gradient(from 0deg, var(--blue), var(--green), var(--yellow), var(--red), var(--blue)); }
-  .legend-icon.lightning{ background:radial-gradient(circle at 35% 28%, #fff3cf, var(--yellow) 60%, #d9a12e); }
-  .legend-icon.mult{ background:radial-gradient(circle at 35% 28%, #ffd0c8, var(--red) 60%, #d1493a); font-family:'JetBrains Mono',monospace; font-size:0.62rem; }
-  .legend-label{ font-size:0.72rem; font-weight:700; color:var(--ink-soft); }
-  .tooltip{
-    position:absolute;
-    bottom:calc(100% + 8px);
-    left:50%;
-    transform:translateX(-50%) translateY(4px);
-    width:190px;
-    background:#0d1b30;
-    border:1px solid var(--glass-border);
-    color:var(--foam);
-    font-size:0.72rem;
-    font-weight:600;
-    line-height:1.35;
-    padding:9px 10px;
-    border-radius:10px;
     opacity:0;
     pointer-events:none;
-    transition:opacity 0.15s ease, transform 0.15s ease;
-    z-index:5;
-    box-shadow:0 8px 20px rgba(0,0,0,0.4);
-  }
-  .legend-item:hover .tooltip, .legend-item.tap-active .tooltip{
+
+    transition:0.2s;
+}
+
+.badge:hover .tooltip{
     opacity:1;
-    transform:translateX(-50%) translateY(0);
-  }
+}
 
-  .modal-overlay{
-    position:fixed; inset:0;
-    background:rgba(4,9,18,0.72);
-    backdrop-filter:blur(3px);
-    display:flex; align-items:center; justify-content:center;
-    z-index:50;
-    opacity:0; pointer-events:none;
-    transition:opacity 0.25s ease;
-  }
-  .modal-overlay.show{ opacity:1; pointer-events:auto; }
-  .modal{
-    background:linear-gradient(180deg, #14284a, #0c1a30);
-    border:1px solid var(--glass-border);
-    border-radius:20px;
-    padding:28px 26px;
-    text-align:center;
-    width:min(340px, 86vw);
-    box-shadow:0 20px 60px rgba(0,0,0,0.5);
-    transform:scale(0.92);
-    transition:transform 0.25s ease;
-  }
-  .modal-overlay.show .modal{ transform:scale(1); }
-  .modal h2{
-    font-family:'Baloo 2', sans-serif;
-    margin:0 0 6px;
-    font-size:1.6rem;
-    color:var(--foam);
-  }
-  .modal .final-score{
-    font-family:'Baloo 2', sans-serif;
-    font-size:2.6rem;
-    font-weight:800;
-    color:var(--yellow);
-    margin:6px 0;
-  }
-  .modal .best-line{ font-size:0.85rem; color:var(--ink-soft); font-weight:700; margin-bottom:18px; }
-  .modal .best-line.new{ color:var(--green); }
-  button.primary{
-    font-family:'Nunito',sans-serif;
-    font-weight:800;
-    font-size:0.95rem;
-    color:#0b1424;
-    background:linear-gradient(180deg, #7fd8ff, #4ea8de);
-    border:none;
-    padding:12px 26px;
-    border-radius:999px;
-    cursor:pointer;
-    box-shadow:0 6px 18px rgba(78,168,222,0.35);
-  }
-  button.primary:active{ transform:translateY(1px); }
-
-  .toast{
-    position:fixed;
-    top:16px; left:50%;
-    transform:translateX(-50%) translateY(-140%);
-    background:#0d1b30;
-    border:1px solid var(--glass-border);
-    padding:8px 16px;
-    border-radius:999px;
-    font-size:0.78rem;
-    font-weight:700;
-    color:var(--ink-soft);
-    z-index:60;
-    transition:transform 0.3s ease;
-  }
-  .toast.show{ transform:translateX(-50%) translateY(0); }
-
-  @media (max-width:380px){
-    .hud-card .value{ font-size:1.2rem; }
-    .legend-label{ display:none; }
-    .legend-item{ padding:6px; }
-  }
 </style>
 </head>
+
 <body>
-  <div class="wrap">
-    <header>
-      <button id="soundToggle" aria-label="Toggle sound">🔊</button>
-      <h1>Snodmp</h1>
-      <p>Pop clusters. Chase the combo. 30 turns to your best tide.</p>
-    </header>
 
-    <div class="hud">
-      <div class="hud-card">
-        <div class="label">Score</div>
-        <div class="value" id="scoreValue">0</div>
-      </div>
-      <div class="hud-card">
-        <div class="label">Turns</div>
-        <div class="value" id="turnsValue">30</div>
-      </div>
-      <div class="hud-card">
-        <div class="label">Best</div>
-        <div class="value" id="bestValue">0</div>
-      </div>
-    </div>
+<h1>Bubble Combo</h1>
 
-    <div class="board-frame">
-      <div id="board"></div>
-      <div class="floaters" id="floaters"></div>
-    </div>
+<div class="ui">
 
-    <div class="legend">
-      <div class="legend-item" tabindex="0">
-        <div class="legend-icon bomb">💣</div>
-        <div class="legend-label">Bomb</div>
-        <div class="tooltip">Tap it directly to blast a 3×3 patch around it, any colors.</div>
-      </div>
-      <div class="legend-item" tabindex="0">
-        <div class="legend-icon rainbow">🌈</div>
-        <div class="legend-label">Rainbow</div>
-        <div class="tooltip">Bridges any group it touches. Tap it alone to clear every bubble of the board's most common color.</div>
-      </div>
-      <div class="legend-item" tabindex="0">
-        <div class="legend-icon lightning">⚡</div>
-        <div class="legend-label">Bolt</div>
-        <div class="tooltip">Pop it inside a group and its whole row + column clear too.</div>
-      </div>
-      <div class="legend-item" tabindex="0">
-        <div class="legend-icon mult">x2</div>
-        <div class="legend-label">x2</div>
-        <div class="tooltip">Pop it inside a group to double that pop's score.</div>
-      </div>
-    </div>
-  </div>
+<div>Score: <span id="score">0</span></div>
 
-  <div class="modal-overlay" id="modalOverlay">
-    <div class="modal">
-      <h2>Tide's out</h2>
-      <div class="final-score" id="finalScore">0</div>
-      <div class="best-line" id="bestLine">Best: 0</div>
-      <button class="primary" id="playAgainBtn">Play again</button>
-    </div>
-  </div>
+<div>Turns: <span id="turns">30</span></div>
 
-  <div class="toast" id="toast"></div>
+<div>
+Highscore:
+<span id="highscore"></span>
+</div>
+
+</div>
+
+
+<div>
+
+<div class="badge" style="background:gold">
+
+<div class="tooltip">
+Bomb bubble<br>
+Removes nearby bubbles
+</div>
+
+</div>
+
+
+<div class="badge" style="background:violet">
+
+<div class="tooltip">
+Rainbow bubble<br>
+Matches any color
+</div>
+
+</div>
+
+<div class="badge" style="background:white">
+
+<div class="tooltip">
+Lightning bubble<br>
+Deletes a whole row
+</div>
+
+</div>
+
+</div>
+
+<br>
+
+<canvas id="game"
+width="700"
+height="800"></canvas>
 
 <script>
-(function(){
-  const ROWS = 8, COLS = 9;
-  const COLORS = ['blue','red','yellow','green'];
-  const MAX_TURNS = 30;
-  const STORAGE_KEY = 'tidepop_highscore';
 
-  let board = [];
-  let score = 0;
-  let turns = MAX_TURNS;
-  let best = 0;
-  let busy = false;
-  let soundOn = true;
-  let audioCtx = null;
+const canvas =
+document.getElementById("game");
 
-  function initAudio(){
-    if(!audioCtx){
-      try{
-        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      }catch(e){ audioCtx = null; }
-    }
-    if(audioCtx && audioCtx.state === 'suspended'){
-      audioCtx.resume();
-    }
-  }
+const ctx =
+canvas.getContext("2d");
 
-  function playBubblePop(){
-    if(!soundOn) return;
-    initAudio();
-    if(!audioCtx) return;
-    const t = audioCtx.currentTime;
-    const randSemi = (Math.random()*3 - 1.5);
-    const startFreq = 620 * Math.pow(2, randSemi/12);
-    const endFreq = 190 * Math.pow(2, randSemi/12);
+const R = 22;
 
-    // the "gum snap" - soft rounded pitch drop, low-passed for a muffled, plush tone
-    const osc = audioCtx.createOscillator();
-    osc.type = 'sine';
-    osc.frequency.setValueAtTime(startFreq, t);
-    osc.frequency.exponentialRampToValueAtTime(endFreq, t+0.13);
-    const oscFilter = audioCtx.createBiquadFilter();
-    oscFilter.type = 'lowpass';
-    oscFilter.frequency.value = 1400;
-    oscFilter.Q.value = 0.4;
-    const gain = audioCtx.createGain();
-    gain.gain.setValueAtTime(0.0001, t);
-    gain.gain.exponentialRampToValueAtTime(0.38, t+0.018);
-    gain.gain.exponentialRampToValueAtTime(0.0001, t+0.16);
-    osc.connect(oscFilter).connect(gain).connect(audioCtx.destination);
-    osc.start(t);
-    osc.stop(t+0.18);
+const colors =
+[
+"red",
+"blue",
+"green",
+"yellow"
+];
 
-    // a whisper of low-passed noise for body, no harsh click
-    const bufferSize = Math.floor(audioCtx.sampleRate * 0.03);
-    const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
-    const data = buffer.getChannelData(0);
-    for(let i=0;i<bufferSize;i++){
-      data[i] = (Math.random()*2 - 1) * (1 - i/bufferSize);
-    }
-    const noise = audioCtx.createBufferSource();
-    noise.buffer = buffer;
-    const filter = audioCtx.createBiquadFilter();
-    filter.type = 'lowpass';
-    filter.frequency.value = 900;
-    const nGain = audioCtx.createGain();
-    nGain.gain.setValueAtTime(0.1, t);
-    nGain.gain.exponentialRampToValueAtTime(0.001, t+0.045);
-    noise.connect(filter).connect(nGain).connect(audioCtx.destination);
-    noise.start(t);
-  }
+let turns=30;
 
-  function playChime(rising){
-    if(!soundOn) return;
-    initAudio();
-    if(!audioCtx) return;
-    const t = audioCtx.currentTime;
-    const notes = rising ? [523,659,784,988] : [392,330];
-    notes.forEach((freq, i)=>{
-      const osc = audioCtx.createOscillator();
-      const gain = audioCtx.createGain();
-      osc.type = 'triangle';
-      osc.frequency.value = freq;
-      const start = t + i*0.09;
-      gain.gain.setValueAtTime(0.0001, start);
-      gain.gain.exponentialRampToValueAtTime(0.25, start+0.01);
-      gain.gain.exponentialRampToValueAtTime(0.0001, start+0.28);
-      osc.connect(gain).connect(audioCtx.destination);
-      osc.start(start);
-      osc.stop(start+0.3);
-    });
-  }
+let score=0;
 
-  const boardEl = document.getElementById('board');
-  const floatersEl = document.getElementById('floaters');
-  const scoreEl = document.getElementById('scoreValue');
-  const turnsEl = document.getElementById('turnsValue');
-  const bestEl = document.getElementById('bestValue');
-  const modalOverlay = document.getElementById('modalOverlay');
-  const finalScoreEl = document.getElementById('finalScore');
-  const bestLineEl = document.getElementById('bestLine');
-  const toastEl = document.getElementById('toast');
+let nextColor=randomColor();
 
-  function randomCellType(){
-    const r = Math.random();
-    if(r < 0.045) return {type:'bomb', color:null};
-    if(r < 0.09) return {type:'rainbow', color:null};
-    if(r < 0.135) return {type:'lightning', color: COLORS[Math.floor(Math.random()*COLORS.length)]};
-    if(r < 0.18) return {type:'multiplier', color: COLORS[Math.floor(Math.random()*COLORS.length)]};
-    return {type:'normal', color: COLORS[Math.floor(Math.random()*COLORS.length)]};
-  }
+let board=[];
 
-  function generateBoard(){
-    const b = [];
-    for(let r=0;r<ROWS;r++){
-      const row = [];
-      for(let c=0;c<COLS;c++){
-        row.push(randomCellType());
-      }
-      b.push(row);
-    }
-    return b;
-  }
+const rows=10;
+const cols=14;
 
-  function getMatchKey(cell){
-    if(!cell) return null;
-    if(cell.type === 'rainbow') return 'WILD';
-    return cell.color;
-  }
+const shooter =
+{
+x:350,
+y:740
+};
 
-  function floodFill(startR, startC){
-    const target = getMatchKey(board[startR][startC]);
-    if(target === null || target === 'WILD') return new Set();
-    const seen = new Set();
-    const stack = [[startR,startC]];
-    const key = (r,c)=>r+'_'+c;
-    seen.add(key(startR,startC));
-    while(stack.length){
-      const [r,c] = stack.pop();
-      const neighbors = [[r-1,c],[r+1,c],[r,c-1],[r,c+1]];
-      for(const [nr,nc] of neighbors){
-        if(nr<0||nr>=ROWS||nc<0||nc>=COLS) continue;
-        const k = key(nr,nc);
-        if(seen.has(k)) continue;
-        const cell = board[nr][nc];
-        if(!cell) continue;
-        const mk = getMatchKey(cell);
-        if(mk === target || mk === 'WILD'){
-          seen.add(k);
-          stack.push([nr,nc]);
-        }
-      }
-    }
-    return seen;
-  }
+const hs =
+localStorage.getItem("bubbleHS")||0;
 
-  function hasValidMoves(){
-    for(let r=0;r<ROWS;r++){
-      for(let c=0;c<COLS;c++){
-        const cell = board[r][c];
-        if(!cell) continue;
-        if(cell.type === 'bomb' || cell.type === 'rainbow') return true;
-        const group = floodFill(r,c);
-        if(group.size >= 2) return true;
-      }
-    }
-    return false;
-  }
+document.getElementById("highscore")
+.innerText=hs;
 
-  function ensurePlayableBoard(){
-    let tries = 0;
-    board = generateBoard();
-    while(!hasValidMoves() && tries < 12){
-      board = generateBoard();
-      tries++;
-    }
-  }
 
-  function calcScore(n, doubled){
-    let s = Math.round(5 * n * n);
-    if(doubled) s *= 2;
-    return s;
-  }
+function randomColor(){
 
-  function comboLabel(n){
-    if(n >= 14) return 'JACKPOT!';
-    if(n >= 9) return 'AMAZING!';
-    if(n >= 6) return 'GREAT!';
-    if(n >= 4) return 'NICE!';
-    return null;
-  }
+return colors[
+Math.floor(
+Math.random()*4
+)
+];
 
-  function render(newlyDropped){
-    boardEl.innerHTML = '';
-    for(let r=0;r<ROWS;r++){
-      for(let c=0;c<COLS;c++){
-        const cellDiv = document.createElement('div');
-        cellDiv.className = 'cell';
-        cellDiv.dataset.r = r;
-        cellDiv.dataset.c = c;
-        const cell = board[r][c];
-        if(cell){
-          const btn = document.createElement('button');
-          btn.className = 'bubble';
-          if(cell.type === 'normal'){
-            btn.classList.add('color-'+cell.color);
-          } else if(cell.type === 'bomb'){
-            btn.classList.add('type-bomb');
-            btn.innerHTML = '<span class="badge">💣</span>';
-          } else if(cell.type === 'rainbow'){
-            btn.classList.add('type-rainbow');
-          } else if(cell.type === 'lightning'){
-            btn.classList.add('color-'+cell.color);
-            btn.innerHTML = '<span class="badge">⚡</span>';
-          } else if(cell.type === 'multiplier'){
-            btn.classList.add('color-'+cell.color);
-            btn.innerHTML = '<span class="mult-badge">x2</span>';
-          }
-          btn.style.setProperty('--d', (Math.random()*3).toFixed(2));
-          if(newlyDropped && newlyDropped.has(r+'_'+c)){
-            cellDiv.classList.add('dropped');
-          }
-          cellDiv.appendChild(btn);
-        }
-        boardEl.appendChild(cellDiv);
-      }
-    }
-  }
+}
 
-  function spawnFloatText(r, c, text, colorVar){
-    const rect = boardEl.getBoundingClientRect();
-    const cellW = rect.width / COLS;
-    const cellH = rect.height / ROWS;
-    const el = document.createElement('div');
-    el.className = 'float-text';
-    el.textContent = text;
-    el.style.left = (c*cellW + cellW/2) + 'px';
-    el.style.top = (r*cellH + cellH/2) + 'px';
-    el.style.fontSize = '1rem';
-    if(colorVar) el.style.color = colorVar;
-    floatersEl.appendChild(el);
-    setTimeout(()=> el.remove(), 950);
-  }
 
-  function updateHud(){
-    scoreEl.textContent = score.toLocaleString();
-    turnsEl.textContent = turns;
-    turnsEl.classList.toggle('low', turns <= 5);
-    bestEl.textContent = best.toLocaleString();
-  }
+function init(){
 
-  function showToast(msg){
-    toastEl.textContent = msg;
-    toastEl.classList.add('show');
-    setTimeout(()=> toastEl.classList.remove('show'), 1600);
-  }
+for(let r=0;r<rows;r++){
 
-  function applyGravityAndRefill(){
-    const dropped = new Set();
-    for(let c=0;c<COLS;c++){
-      const stack = [];
-      for(let r=ROWS-1;r>=0;r--){
-        if(board[r][c]) stack.push(board[r][c]);
-      }
-      const newCol = new Array(ROWS).fill(null);
-      for(let i=0;i<stack.length;i++){
-        newCol[ROWS-1-i] = stack[i];
-      }
-      const missing = ROWS - stack.length;
-      for(let r=0;r<missing;r++){
-        newCol[r] = randomCellType();
-        dropped.add(r+'_'+c);
-      }
-      for(let r=0;r<ROWS;r++){
-        board[r][c] = newCol[r];
-      }
-    }
-    return dropped;
-  }
+board[r]=[];
 
-  function shuffleArr(a){
-    const arr = a.slice();
-    for(let i=arr.length-1;i>0;i--){
-      const j = Math.floor(Math.random()*(i+1));
-      [arr[i],arr[j]] = [arr[j],arr[i]];
-    }
-    return arr;
-  }
+for(let c=0;c<cols;c++){
 
-  function staggerPopCells(cellsSet, onDone){
-    const arr = shuffleArr(Array.from(cellsSet));
-    const perDelay = 70;
-    const capIndex = 12;
-    arr.forEach((k,i)=>{
-      const d = Math.min(i, capIndex) * perDelay;
-      setTimeout(()=>{
-        const [r,c] = k.split('_').map(Number);
-        const el = boardEl.querySelector('.cell[data-r="'+r+'"][data-c="'+c+'"]');
-        if(el) el.classList.add('popping');
-        playBubblePop();
-      }, d);
-    });
-    const lastDelay = Math.min(arr.length-1, capIndex) * perDelay;
-    setTimeout(onDone, lastDelay + 320);
-  }
+if(r<6){
 
-  function resolveRemoval(mainSet, sourceR, sourceC){
-    if(busy) return;
-    if(mainSet.size === 0) return;
-    busy = true;
+let bubble={
 
-    // find lightning bonus cells
-    const bonusSet = new Set();
-    let multiplierPresent = false;
-    mainSet.forEach(k=>{
-      const [r,c] = k.split('_').map(Number);
-      const cell = board[r][c];
-      if(!cell) return;
-      if(cell.type === 'multiplier') multiplierPresent = true;
-      if(cell.type === 'lightning'){
-        for(let cc=0;cc<COLS;cc++) bonusSet.add(r+'_'+cc);
-        for(let rr=0;rr<ROWS;rr++) bonusSet.add(rr+'_'+c);
-      }
-    });
-    mainSet.forEach(k=> bonusSet.delete(k));
+color:randomColor(),
 
-    const streakMult = 1; // first pop of the turn
-    const mainScore = Math.round(calcScore(mainSet.size, multiplierPresent) * streakMult);
-    const bonusScore = Math.round(bonusSet.size * 8 * streakMult);
-    const totalScore = mainScore + bonusScore;
+special:null
 
-    const label = comboLabel(mainSet.size);
-    spawnFloatText(sourceR, sourceC, '+'+totalScore, multiplierPresent ? '#ff9f7a' : null);
-    if(label){
-      setTimeout(()=> spawnFloatText(sourceR, sourceC, label, '#7fe8c9'), 150);
-    }
+};
 
-    const allCells = new Set([...mainSet, ...bonusSet]);
-    staggerPopCells(allCells, ()=>{
-      allCells.forEach(k=>{
-        const [r,c] = k.split('_').map(Number);
-        board[r][c] = null;
-      });
-      const dropped = applyGravityAndRefill();
-      score += totalScore;
-      turns -= 1;
-      updateHud();
-      render(dropped);
+if(Math.random()<0.05)
+bubble.special="bomb";
 
-      setTimeout(()=> resolveWave(2), 220);
-    });
-  }
+if(Math.random()<0.03)
+bubble.special="rainbow";
 
-  function sleep(ms){
-    return new Promise(resolve=> setTimeout(resolve, ms));
-  }
+if(Math.random()<0.03)
+bubble.special="lightning";
 
-  // Cascades only trigger where a bubble has landed directly on top of a
-  // same-color bubble below it - a straight vertical run of 2+, not a full
-  // flood-filled blob. Keeps chains readable and stops the board from
-  // solving itself sideways.
-  function findVerticalMatches(){
-    const groups = [];
-    for(let c=0;c<COLS;c++){
-      let r = 0;
-      while(r < ROWS){
-        const cell = board[r][c];
-        if(!cell || cell.type === 'bomb' || cell.type === 'rainbow'){
-          r++;
-          continue;
-        }
-        const anchorColor = cell.color;
-        let end = r;
-        while(end+1 < ROWS){
-          const next = board[end+1][c];
-          if(!next || next.type === 'bomb') break;
-          const nextKey = next.type === 'rainbow' ? 'WILD' : next.color;
-          if(nextKey === anchorColor || nextKey === 'WILD'){ end++; } else break;
-        }
-        if(end > r){
-          const group = new Set();
-          for(let rr=r; rr<=end; rr++) group.add(rr+'_'+c);
-          groups.push(group);
-        }
-        r = end + 1;
-      }
-    }
-    return groups;
-  }
+board[r][c]=bubble;
 
-  async function resolveWave(streak){
-    const groups = findVerticalMatches();
-    if(groups.length === 0){
-      finalizeTurn();
-      return;
-    }
+}
+else{
 
-    const streakMult = Math.pow(1.1, streak - 1);
-    const allMain = new Set();
-    const allBonus = new Set();
-    let waveScore = 0;
+board[r][c]=null;
 
-    groups.forEach(group=>{
-      let multiplierPresent = false;
-      const bonus = new Set();
-      group.forEach(k=>{
-        const [r,c] = k.split('_').map(Number);
-        const cell = board[r][c];
-        if(!cell) return;
-        if(cell.type === 'multiplier') multiplierPresent = true;
-        if(cell.type === 'lightning'){
-          for(let cc=0;cc<COLS;cc++) bonus.add(r+'_'+cc);
-          for(let rr=0;rr<ROWS;rr++) bonus.add(rr+'_'+c);
-        }
-      });
-      group.forEach(k=> bonus.delete(k));
+}
 
-      let gScore = calcScore(group.size, multiplierPresent);
-      gScore = Math.round(gScore * streakMult);
-      gScore += Math.round(bonus.size * 8 * streakMult);
-      waveScore += gScore;
+}
 
-      group.forEach(k=> allMain.add(k));
-      bonus.forEach(k=> allBonus.add(k));
+}
 
-      const first = Array.from(group)[0];
-      const [fr, fc] = first.split('_').map(Number);
-      spawnFloatText(fr, fc, '+'+gScore, '#7fe8c9');
-    });
-    allBonus.forEach(k=>{ if(allMain.has(k)) allBonus.delete(k); });
+}
 
-    const chainLabel = 'CHAIN \u00d7' + streakMult.toFixed(2) + '!';
-    const anyCell = Array.from(allMain)[0];
-    const [ar, ac] = anyCell.split('_').map(Number);
-    setTimeout(()=> spawnFloatText(ar, ac, chainLabel, '#ffd166'), 160);
+init();
 
-    const cellsToAnimate = new Set([...allMain, ...allBonus]);
-    staggerPopCells(cellsToAnimate, ()=>{
-      cellsToAnimate.forEach(k=>{
-        const [r,c] = k.split('_').map(Number);
-        board[r][c] = null;
-      });
-      const dropped = applyGravityAndRefill();
-      score += waveScore;
-      updateHud();
-      render(dropped);
 
-      setTimeout(()=> resolveWave(streak + 1), 220);
-    });
-  }
+function draw(){
 
-  function finalizeTurn(){
-    if(!hasValidMoves() && turns > 0){
-      setTimeout(()=>{
-        ensurePlayableBoard();
-        render();
-        showToast('Board reshuffled \u2014 no moves left!');
-        busy = false;
-        if(turns <= 0) endGame();
-      }, 260);
-    } else {
-      busy = false;
-      if(turns <= 0) endGame();
-    }
-  }
+ctx.clearRect(
+0,
+0,
+700,
+800
+);
 
-  function handleRainbowStandalone(r, c){
-    const counts = {};
-    for(let rr=0;rr<ROWS;rr++){
-      for(let cc=0;cc<COLS;cc++){
-        const cell = board[rr][cc];
-        if(cell && cell.color && cell.type !== 'rainbow'){
-          counts[cell.color] = (counts[cell.color]||0) + 1;
-        }
-      }
-    }
-    let bestColor = null, bestCount = 0;
-    for(const col of COLORS){
-      if((counts[col]||0) > bestCount){ bestCount = counts[col]; bestColor = col; }
-    }
-    const set = new Set();
-    set.add(r+'_'+c);
-    if(bestColor){
-      for(let rr=0;rr<ROWS;rr++){
-        for(let cc=0;cc<COLS;cc++){
-          const cell = board[rr][cc];
-          if(cell && cell.color === bestColor){
-            set.add(rr+'_'+cc);
-          }
-        }
-      }
-    }
-    resolveRemoval(set, r, c);
-  }
+for(let r=0;r<rows;r++){
 
-  function handleBombStandalone(r, c){
-    const set = new Set();
-    for(let rr=r-1;rr<=r+1;rr++){
-      for(let cc=c-1;cc<=c+1;cc++){
-        if(rr<0||rr>=ROWS||cc<0||cc>=COLS) continue;
-        if(board[rr][cc]) set.add(rr+'_'+cc);
-      }
-    }
-    resolveRemoval(set, r, c);
-  }
+for(let c=0;c<cols;c++){
 
-  function shakeCell(r,c){
-    const el = boardEl.querySelector('.cell[data-r="'+r+'"][data-c="'+c+'"]');
-    if(el){
-      el.classList.add('shake');
-      setTimeout(()=> el.classList.remove('shake'), 300);
-    }
-  }
+const b=board[r][c];
 
-  boardEl.addEventListener('click', (e)=>{
-    if(busy) return;
-    const cellDiv = e.target.closest('.cell');
-    if(!cellDiv) return;
-    const r = Number(cellDiv.dataset.r);
-    const c = Number(cellDiv.dataset.c);
-    const cell = board[r][c];
-    if(!cell) return;
+if(!b) continue;
 
-    if(cell.type === 'bomb'){
-      handleBombStandalone(r,c);
-      return;
-    }
-    if(cell.type === 'rainbow'){
-      handleRainbowStandalone(r,c);
-      return;
-    }
-    const group = floodFill(r,c);
-    if(group.size >= 2){
-      resolveRemoval(group, r, c);
-    } else {
-      shakeCell(r,c);
-    }
-  });
+let x =
+c*45+40;
 
-  function endGame(){
-    busy = true;
-    setTimeout(async ()=>{
-      finalScoreEl.textContent = score.toLocaleString();
-      const isNew = score > best;
-      if(isNew){
-        best = score;
-        bestLineEl.textContent = 'New best score!';
-        bestLineEl.classList.add('new');
-        await saveHighScore(best);
-        playChime(true);
-      } else {
-        bestLineEl.textContent = 'Best: ' + best.toLocaleString();
-        bestLineEl.classList.remove('new');
-        playChime(false);
-      }
-      modalOverlay.classList.add('show');
-    }, 200);
-  }
+let y =
+r*42+40;
 
-  async function loadHighScore(){
-    try{
-      const result = await window.storage.get(STORAGE_KEY, false);
-      if(result && result.value){
-        const parsed = JSON.parse(result.value);
-        if(typeof parsed === 'number') return parsed;
-      }
-    }catch(err){
-      // key doesn't exist yet or storage unavailable
-    }
-    return 0;
-  }
+ctx.beginPath();
 
-  async function saveHighScore(value){
-    try{
-      await window.storage.set(STORAGE_KEY, JSON.stringify(value), false);
-    }catch(err){
-      console.error('Could not save high score', err);
-    }
-  }
+ctx.arc(
+x,
+y,
+R,
+0,
+Math.PI*2
+);
 
-  document.getElementById('playAgainBtn').addEventListener('click', ()=>{
-    modalOverlay.classList.remove('show');
-    score = 0;
-    turns = MAX_TURNS;
-    busy = false;
-    ensurePlayableBoard();
-    updateHud();
-    render();
-  });
+ctx.fillStyle=
+b.color;
 
-  // touch-friendly legend tooltips
-  document.querySelectorAll('.legend-item').forEach(item=>{
-    item.addEventListener('click', (e)=>{
-      const wasActive = item.classList.contains('tap-active');
-      document.querySelectorAll('.legend-item').forEach(i=> i.classList.remove('tap-active'));
-      if(!wasActive) item.classList.add('tap-active');
-    });
-  });
-  document.addEventListener('click', (e)=>{
-    if(!e.target.closest('.legend-item')){
-      document.querySelectorAll('.legend-item').forEach(i=> i.classList.remove('tap-active'));
-    }
-  });
+ctx.fill();
 
-  const soundToggleBtn = document.getElementById('soundToggle');
-  soundToggleBtn.addEventListener('click', ()=>{
-    soundOn = !soundOn;
-    soundToggleBtn.textContent = soundOn ? '🔊' : '🔇';
-    soundToggleBtn.classList.toggle('muted', !soundOn);
-    if(soundOn) initAudio();
-  });
+if(b.special){
 
-  async function init(){
-    best = await loadHighScore();
-    ensurePlayableBoard();
-    updateHud();
-    render();
-  }
+ctx.fillStyle="white";
 
-  init();
-})();
+ctx.font="16px Arial";
+
+ctx.fillText(
+"*",
+x-4,
+y+5
+);
+
+}
+
+}
+
+}
+
+ctx.beginPath();
+
+ctx.arc(
+
+shooter.x,
+
+shooter.y,
+
+R,
+
+0,
+
+Math.PI*2
+
+);
+
+ctx.fillStyle=
+nextColor;
+
+ctx.fill();
+
+requestAnimationFrame(draw);
+
+}
+
+draw();
+
+
+
+canvas.onclick=e=>{
+
+if(turns<=0)
+return;
+
+let rect=
+canvas.getBoundingClientRect();
+
+let mx=
+e.clientX-
+rect.left;
+
+let col=
+Math.floor(mx/45);
+
+if(col<0) col=0;
+if(col>=cols) col=cols-1;
+
+for(let r=rows-1;r>=0;r--){
+
+if(board[r][col]==null){
+
+board[r][col]={
+
+color:nextColor,
+special:null
+
+};
+
+resolve(r,col);
+
+turns--;
+
+document
+.getElementById(
+"turns"
+).innerText=turns;
+
+nextColor=
+randomColor();
+
+checkEnd();
+
+break;
+
+}
+
+}
+
+};
+
+
+function resolve(r,c){
+
+const target=
+board[r][c];
+
+if(!target) return;
+
+const color=
+target.color;
+
+let stack=
+[[r,c]];
+
+let visited={};
+
+let found=[];
+
+while(stack.length){
+
+const [rr,cc]=
+stack.pop();
+
+const k=
+rr+"_"+cc;
+
+if(visited[k])
+continue;
+
+visited[k]=1;
+
+const b=
+board[rr]?.[cc];
+
+if(!b)
+continue;
+
+if(
+b.color!==color &&
+b.special!=="rainbow"
+)
+continue;
+
+found.push([rr,cc]);
+
+[
+[1,0],
+[-1,0],
+[0,1],
+[0,-1]
+
+]
+
+.forEach(d=>{
+
+stack.push(
+
+[
+rr+d[0],
+cc+d[1]
+
+]
+
+);
+
+});
+
+}
+
+if(found.length>=3){
+
+let mult=1;
+
+for(let i=0;i<found.length;i++){
+
+score +=
+Math.floor(
+10*mult
+);
+
+mult*=1.1;
+
+}
+
+found.forEach(p=>{
+
+let b=
+board[p[0]][p[1]];
+
+if(b.special==="bomb"){
+
+explode(
+p[0],
+p[1]
+);
+
+}
+
+else if(
+b.special==="lightning"
+){
+
+zapRow(
+p[0]
+);
+
+}
+
+board[
+p[0]
+][
+p[1]
+]=null;
+
+});
+
+document
+.getElementById(
+"score"
+)
+.innerText=
+score;
+
+saveHS();
+
+}
+
+}
+
+
+function explode(r,c){
+
+for(let rr=r-1;
+rr<=r+1;
+rr++){
+
+for(let cc=c-1;
+cc<=c+1;
+cc++){
+
+if(
+board[rr]
+)
+
+board[rr][cc]=null;
+
+}
+
+}
+
+}
+
+
+function zapRow(r){
+
+for(let c=0;
+c<cols;
+c++){
+
+board[r][c]=null;
+
+}
+
+}
+
+
+function saveHS(){
+
+let h=
+Number(
+localStorage.getItem(
+"bubbleHS"
+)||0);
+
+if(score>h){
+
+localStorage.setItem(
+"bubbleHS",
+score
+);
+
+document
+.getElementById(
+"highscore"
+)
+.innerText=
+score;
+
+}
+
+}
+
+
+function checkEnd(){
+
+if(turns<=0){
+
+alert(
+
+"Game Over\nScore: "+score
+
+);
+
+}
+
+}
+
 </script>
+
 </body>
+
 </html>
