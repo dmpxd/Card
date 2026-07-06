@@ -3,625 +3,1058 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Meridian — a worldly connections game</title>
+<title>Snodmp</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Nunito:wght@400;600;700;800&family=JetBrains+Mono:wght@600&display=swap" rel="stylesheet">
 <style>
   :root{
-    --ink: #16232B;
-    --ink-2: #1F323C;
-    --ink-3: #294050;
-    --parchment: #EFE6D3;
-    --parchment-2: #E4D8BE;
-    --brass: #C29A5B;
-    --brass-dim: #8C723F;
-    --text-light: #F3ECDD;
-    --text-dark: #1D2A2E;
-    --tier-1: #C1666B; /* coastline - easiest */
-    --tier-2: #7C9885; /* lowland */
-    --tier-3: #4C7C93; /* deepwater */
-    --tier-4: #6B4E71; /* summit - hardest */
+    --navy-deep:#081020;
+    --navy:#0d1b30;
+    --navy-light:#13294a;
+    --glass:rgba(255,255,255,0.055);
+    --glass-border:rgba(255,255,255,0.11);
+    --foam:#eaf6ff;
+    --blue:#4ea8de;
+    --red:#ff6b5b;
+    --yellow:#ffd166;
+    --green:#06d6a0;
+    --ink-soft:#9db4d1;
   }
-
-  *{ box-sizing: border-box; }
-
+  *{box-sizing:border-box;}
+  html,body{height:100%;}
   body{
     margin:0;
     min-height:100vh;
+    font-family:'Nunito',sans-serif;
+    color:var(--foam);
     background:
-      radial-gradient(ellipse 900px 500px at 15% -10%, rgba(194,154,91,0.10), transparent 60%),
-      radial-gradient(ellipse 900px 600px at 110% 10%, rgba(76,124,147,0.14), transparent 60%),
-      var(--ink);
-    color: var(--text-light);
-    font-family: 'Space Grotesk', sans-serif;
+      radial-gradient(ellipse at 20% -10%, #163258 0%, transparent 55%),
+      radial-gradient(ellipse at 90% 10%, #0f2a44 0%, transparent 50%),
+      linear-gradient(180deg, var(--navy-deep) 0%, var(--navy) 55%, #061020 100%);
     display:flex;
     flex-direction:column;
     align-items:center;
-    padding: 32px 16px 60px;
+    padding:22px 14px 40px;
+    overflow-x:hidden;
+    position:relative;
+  }
+  /* ambient caustic shimmer */
+  body::before{
+    content:"";
+    position:fixed;
+    inset:0;
+    pointer-events:none;
+    background:
+      repeating-linear-gradient(115deg, rgba(255,255,255,0.025) 0px, rgba(255,255,255,0.025) 2px, transparent 2px, transparent 140px);
+    animation:driftLight 18s linear infinite;
+    opacity:0.5;
+    z-index:0;
+  }
+  @keyframes driftLight{
+    0%{transform:translate(-40px,-20px);}
+    100%{transform:translate(40px,20px);}
   }
 
-  .meridian-lines{
-    position:fixed; inset:0; pointer-events:none; z-index:0; opacity:0.5;
-  }
+  .wrap{ position:relative; z-index:1; width:100%; max-width:560px; display:flex; flex-direction:column; align-items:center; }
 
-  .wrap{ position:relative; z-index:1; width:100%; max-width:560px; }
-
-  header{ text-align:center; margin-bottom: 22px; }
-  .eyebrow{
-    font-size: 11px; letter-spacing: 0.28em; text-transform: uppercase;
-    color: var(--brass); margin-bottom: 8px; font-weight:600;
+  header{ text-align:center; margin-bottom:14px; position:relative; }
+  #soundToggle{
+    position:absolute;
+    top:2px;
+    right:0;
+    background:var(--glass);
+    border:1px solid var(--glass-border);
+    color:var(--foam);
+    width:34px;
+    height:34px;
+    border-radius:50%;
+    font-size:1rem;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
   }
+  #soundToggle.muted{ opacity:0.45; }
   h1{
-    font-family:'Fraunces', serif; font-optical-sizing:auto;
-    font-weight:600; font-size: clamp(34px, 8vw, 46px);
-    margin: 0 0 6px; letter-spacing: 0.01em;
+    font-family:'Baloo 2', sans-serif;
+    font-weight:800;
+    font-size:clamp(2.1rem, 8vw, 2.9rem);
+    letter-spacing:0.5px;
+    margin:0;
+    background:linear-gradient(180deg, #eaf6ff, #9fd8ff 60%, #4ea8de);
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+    text-shadow:0 2px 18px rgba(78,168,222,0.35);
   }
-  h1 em{ font-style: italic; font-weight:400; color: var(--brass); }
-  .sub{ font-size: 14px; color: rgba(243,236,221,0.65); max-width: 420px; margin: 0 auto; line-height:1.5;}
-
-  .puzzle-title{
-    text-align:center; margin: 18px 0 14px;
-    font-family:'Fraunces', serif; font-size: 16px; color: var(--text-light);
-    display:flex; align-items:center; justify-content:center; gap:10px;
-  }
-  .puzzle-title::before, .puzzle-title::after{
-    content:''; flex:1; height:1px; max-width:70px;
-    background: linear-gradient(90deg, transparent, var(--brass-dim), transparent);
-  }
-
-  .solved-row{
-    display:flex; flex-direction:column; align-items:center; justify-content:center;
-    border-radius: 10px; padding: 14px 10px; margin-bottom: 10px;
-    animation: reveal 0.45s ease;
-    box-shadow: inset 0 0 0 1px rgba(255,255,255,0.08);
-  }
-  @keyframes reveal{
-    from{ transform: scale(0.9) translateY(-6px); opacity:0; }
-    to{ transform: scale(1) translateY(0); opacity:1; }
-  }
-  .solved-row .cat-name{
-    font-family:'Fraunces', serif; font-weight:700; font-size: 15px; letter-spacing:0.03em;
-    text-transform: uppercase; margin-bottom: 3px;
-  }
-  .solved-row .cat-words{ font-size: 13px; letter-spacing:0.02em; opacity:0.92; }
-
-  .tier-1{ background: var(--tier-1); color: #2A1315; }
-  .tier-2{ background: var(--tier-2); color: #16241A; }
-  .tier-3{ background: var(--tier-3); color: #0E1E27; }
-  .tier-4{ background: var(--tier-4); color: #F3ECDD; }
-
-  .grid{
-    display:grid; grid-template-columns: repeat(4, 1fr); gap: 8px;
-    margin-bottom: 18px;
+  header p{
+    margin:4px 0 0;
+    font-size:0.85rem;
+    color:var(--ink-soft);
+    font-weight:600;
+    letter-spacing:0.4px;
   }
 
-  .tile{
-    aspect-ratio: 1.28 / 1;
-    background: var(--parchment);
-    color: var(--text-dark);
-    border: none; border-radius: 8px;
-    font-family:'Space Grotesk', sans-serif;
-    font-weight: 600; font-size: clamp(11.5px, 3.1vw, 14.5px);
-    text-transform: uppercase; letter-spacing: 0.01em;
-    display:flex; align-items:center; justify-content:center; text-align:center;
-    padding: 6px; cursor:pointer; line-height:1.15; overflow-wrap: break-word; hyphens: auto;
-    transition: transform 0.12s ease, background 0.15s ease, box-shadow 0.15s ease;
-    user-select:none;
+  .hud{
+    width:100%;
+    display:grid;
+    grid-template-columns:1fr 1fr 1fr;
+    gap:10px;
+    margin-bottom:16px;
   }
-  .tile:hover{ background: var(--parchment-2); }
-  .tile:active{ transform: scale(0.97); }
-  .tile.selected{
-    background: var(--ink-3); color: var(--text-light);
-    box-shadow: 0 0 0 2px var(--brass) inset;
-    transform: translateY(-2px);
+  .hud-card{
+    background:var(--glass);
+    border:1px solid var(--glass-border);
+    backdrop-filter:blur(8px);
+    border-radius:16px;
+    padding:10px 8px;
+    text-align:center;
   }
-  .tile.shake{ animation: shake 0.4s ease; }
-  @keyframes shake{
-    10%,90%{ transform: translateX(-2px);} 20%,80%{ transform: translateX(4px);}
-    30%,50%,70%{ transform: translateX(-6px);} 40%,60%{ transform: translateX(6px);}
+  .hud-card .label{
+    font-size:0.62rem;
+    text-transform:uppercase;
+    letter-spacing:1.2px;
+    color:var(--ink-soft);
+    font-weight:700;
+    margin-bottom:2px;
   }
-  .tile.pop-out{ animation: popOut 0.35s ease forwards; }
-  @keyframes popOut{ to{ opacity:0; transform: scale(0.4); } }
+  .hud-card .value{
+    font-family:'Baloo 2', sans-serif;
+    font-weight:700;
+    font-size:1.5rem;
+    color:var(--foam);
+  }
+  #turnsValue.low{ color:var(--red); }
+  #scoreValue{ color:var(--yellow); }
+  #bestValue{ color:var(--green); }
 
-  .status-row{
+  .board-frame{
+    position:relative;
+    width:100%;
+    background:linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+    border:1px solid var(--glass-border);
+    border-radius:22px;
+    padding:10px;
+    box-shadow: inset 0 2px 20px rgba(0,0,0,0.35), 0 10px 30px rgba(0,0,0,0.35);
+  }
+  #board{
+    display:grid;
+    grid-template-columns:repeat(9, 1fr);
+    gap:6px;
+    position:relative;
+  }
+  .cell{
+    position:relative;
+    width:100%;
+    aspect-ratio:1/1;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+  .bubble{
+    position:relative;
+    width:88%;
+    height:88%;
+    border-radius:50%;
+    border:none;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:1.1rem;
+    font-weight:800;
+    color:rgba(255,255,255,0.92);
+    box-shadow:
+      inset -4px -6px 10px rgba(0,0,0,0.25),
+      inset 4px 5px 8px rgba(255,255,255,0.35),
+      0 3px 8px rgba(0,0,0,0.3);
+    animation:bob 3.4s ease-in-out infinite;
+    animation-delay:calc(var(--d, 0) * 1s);
+    transition:transform 0.12s ease;
+  }
+  .bubble:active{ transform:scale(0.9); }
+  @keyframes bob{
+    0%,100%{ transform:translateY(0px); }
+    50%{ transform:translateY(-4px); }
+  }
+  .bubble.color-blue{ background:radial-gradient(circle at 35% 28%, #bfe6ff, var(--blue) 60%, #2f7bb0); }
+  .bubble.color-red{ background:radial-gradient(circle at 35% 28%, #ffd0c8, var(--red) 60%, #d1493a); }
+  .bubble.color-yellow{ background:radial-gradient(circle at 35% 28%, #fff3cf, var(--yellow) 60%, #d9a12e); }
+  .bubble.color-green{ background:radial-gradient(circle at 35% 28%, #baffe9, var(--green) 60%, #04a37e); }
+  .bubble.type-bomb{
+    background:radial-gradient(circle at 35% 28%, #6b7b8f, #2a3646 55%, #10151d);
+    box-shadow:
+      inset -4px -6px 10px rgba(0,0,0,0.5),
+      inset 4px 5px 8px rgba(255,255,255,0.15),
+      0 0 12px rgba(255,107,91,0.35);
+  }
+  .bubble.type-rainbow{
+    background:conic-gradient(from 0deg, var(--blue), var(--green), var(--yellow), var(--red), var(--blue));
+    animation:bob 3.4s ease-in-out infinite, spin 6s linear infinite;
+  }
+  @keyframes spin{ from{ filter:hue-rotate(0deg);} to{ filter:hue-rotate(360deg);} }
+  .bubble .badge{
+    position:absolute;
+    font-size:0.85rem;
+    filter:drop-shadow(0 1px 2px rgba(0,0,0,0.5));
+  }
+  .bubble .mult-badge{
+    font-family:'JetBrains Mono', monospace;
+    font-size:0.78rem;
+    font-weight:700;
+    background:rgba(0,0,0,0.28);
+    padding:1px 4px;
+    border-radius:6px;
+  }
+
+  .cell.popping .bubble{
+    animation:none;
+    transform:scale(1.35);
+    opacity:0;
+    transition:all 0.28s cubic-bezier(.4,0,1,1);
+  }
+  .cell.dropped .bubble{
+    animation:dropIn 0.32s ease-out, bob 3.4s ease-in-out infinite 0.32s;
+  }
+  @keyframes dropIn{
+    from{ transform:translateY(-140%); opacity:0.4; }
+    to{ transform:translateY(0); opacity:1; }
+  }
+  .cell.shake{ animation:shakeCell 0.3s ease; }
+  @keyframes shakeCell{
+    0%,100%{ transform:translateX(0); }
+    25%{ transform:translateX(-4px); }
+    75%{ transform:translateX(4px); }
+  }
+
+  .floaters{ position:absolute; inset:0; pointer-events:none; overflow:visible; }
+  .float-text{
+    position:absolute;
+    font-family:'Baloo 2', sans-serif;
+    font-weight:700;
+    color:var(--yellow);
+    text-shadow:0 2px 6px rgba(0,0,0,0.5);
+    animation:floatUp 0.9s ease-out forwards;
+    white-space:nowrap;
+  }
+  @keyframes floatUp{
+    0%{ transform:translateY(0) scale(0.8); opacity:0; }
+    15%{ opacity:1; transform:translateY(-6px) scale(1.05); }
+    100%{ transform:translateY(-46px) scale(1); opacity:0; }
+  }
+
+  .legend{
+    width:100%;
+    margin-top:18px;
+    display:flex;
+    gap:10px;
+    justify-content:center;
+    flex-wrap:wrap;
+  }
+  .legend-item{
+    position:relative;
+    display:flex;
+    align-items:center;
+    gap:6px;
+    background:var(--glass);
+    border:1px solid var(--glass-border);
+    padding:6px 10px 6px 6px;
+    border-radius:999px;
+    cursor:pointer;
+  }
+  .legend-icon{
+    width:26px; height:26px; border-radius:50%;
     display:flex; align-items:center; justify-content:center;
-    gap: 10px; margin-bottom: 16px; min-height: 20px;
-    font-size: 13px; color: rgba(243,236,221,0.75);
+    font-size:0.85rem;
+    flex-shrink:0;
   }
-  .status-row .msg{ font-weight:600; color: var(--brass); }
-
-  .mistakes{ display:flex; align-items:center; gap:14px; justify-content:center; margin-bottom: 20px; }
-  .mistakes .label{ font-size: 12px; letter-spacing:0.06em; text-transform:uppercase; color: rgba(243,236,221,0.55);}
-  .dots{ display:flex; gap:6px; }
-  .dot{ width:10px; height:10px; border-radius:50%; background: var(--brass); transition: opacity 0.2s, transform 0.2s; }
-  .dot.spent{ background: transparent; box-shadow: inset 0 0 0 1.5px rgba(243,236,221,0.35); }
-
-  .controls{ display:flex; gap:10px; justify-content:center; flex-wrap:wrap; }
-  button.pill{
-    font-family:'Space Grotesk', sans-serif; font-weight:600; font-size:13px;
-    letter-spacing: 0.03em; text-transform: uppercase;
-    padding: 10px 20px; border-radius: 999px; cursor:pointer;
-    border: 1.5px solid var(--brass-dim); background: transparent; color: var(--text-light);
-    transition: background 0.15s, border-color 0.15s, opacity 0.15s;
+  .legend-icon.bomb{ background:radial-gradient(circle at 35% 28%, #6b7b8f, #2a3646 60%, #10151d); }
+  .legend-icon.rainbow{ background:conic-gradient(from 0deg, var(--blue), var(--green), var(--yellow), var(--red), var(--blue)); }
+  .legend-icon.lightning{ background:radial-gradient(circle at 35% 28%, #fff3cf, var(--yellow) 60%, #d9a12e); }
+  .legend-icon.mult{ background:radial-gradient(circle at 35% 28%, #ffd0c8, var(--red) 60%, #d1493a); font-family:'JetBrains Mono',monospace; font-size:0.62rem; }
+  .legend-label{ font-size:0.72rem; font-weight:700; color:var(--ink-soft); }
+  .tooltip{
+    position:absolute;
+    bottom:calc(100% + 8px);
+    left:50%;
+    transform:translateX(-50%) translateY(4px);
+    width:190px;
+    background:#0d1b30;
+    border:1px solid var(--glass-border);
+    color:var(--foam);
+    font-size:0.72rem;
+    font-weight:600;
+    line-height:1.35;
+    padding:9px 10px;
+    border-radius:10px;
+    opacity:0;
+    pointer-events:none;
+    transition:opacity 0.15s ease, transform 0.15s ease;
+    z-index:5;
+    box-shadow:0 8px 20px rgba(0,0,0,0.4);
   }
-  button.pill:hover{ background: rgba(194,154,91,0.12); border-color: var(--brass); }
-  button.pill:disabled{ opacity:0.35; cursor:not-allowed; }
-  button.pill.primary{ background: var(--brass); color: var(--ink); border-color: var(--brass); }
-  button.pill.primary:hover{ background: #d3ab6c; }
-
-  .footer-row{ display:flex; justify-content:center; margin-top: 22px; }
-  .new-game-link{
-    font-size: 12px; color: rgba(243,236,221,0.5); text-decoration:underline;
-    text-underline-offset:3px; cursor:pointer; background:none; border:none; font-family:inherit;
+  .legend-item:hover .tooltip, .legend-item.tap-active .tooltip{
+    opacity:1;
+    transform:translateX(-50%) translateY(0);
   }
-  .new-game-link:hover{ color: var(--brass); }
 
-  .overlay{
-    position:fixed; inset:0; background: rgba(10,16,20,0.72); backdrop-filter: blur(3px);
-    display:flex; align-items:center; justify-content:center; z-index: 10;
-    opacity:0; pointer-events:none; transition: opacity 0.25s;
+  .modal-overlay{
+    position:fixed; inset:0;
+    background:rgba(4,9,18,0.72);
+    backdrop-filter:blur(3px);
+    display:flex; align-items:center; justify-content:center;
+    z-index:50;
+    opacity:0; pointer-events:none;
+    transition:opacity 0.25s ease;
   }
-  .overlay.show{ opacity:1; pointer-events:auto; }
+  .modal-overlay.show{ opacity:1; pointer-events:auto; }
   .modal{
-    background: var(--ink-2); border: 1px solid var(--brass-dim); border-radius: 14px;
-    padding: 30px 26px; max-width: 380px; width: calc(100% - 40px); text-align:center;
-    transform: translateY(8px); transition: transform 0.25s;
+    background:linear-gradient(180deg, #14284a, #0c1a30);
+    border:1px solid var(--glass-border);
+    border-radius:20px;
+    padding:28px 26px;
+    text-align:center;
+    width:min(340px, 86vw);
+    box-shadow:0 20px 60px rgba(0,0,0,0.5);
+    transform:scale(0.92);
+    transition:transform 0.25s ease;
   }
-  .overlay.show .modal{ transform: translateY(0); }
-  .modal h2{ font-family:'Fraunces', serif; font-size: 24px; margin: 0 0 8px; }
-  .modal p{ font-size: 13.5px; color: rgba(243,236,221,0.7); line-height:1.5; margin: 0 0 18px; }
-  .modal .modal-buttons{ display:flex; gap:10px; justify-content:center; flex-wrap:wrap; }
+  .modal-overlay.show .modal{ transform:scale(1); }
+  .modal h2{
+    font-family:'Baloo 2', sans-serif;
+    margin:0 0 6px;
+    font-size:1.6rem;
+    color:var(--foam);
+  }
+  .modal .final-score{
+    font-family:'Baloo 2', sans-serif;
+    font-size:2.6rem;
+    font-weight:800;
+    color:var(--yellow);
+    margin:6px 0;
+  }
+  .modal .best-line{ font-size:0.85rem; color:var(--ink-soft); font-weight:700; margin-bottom:18px; }
+  .modal .best-line.new{ color:var(--green); }
+  button.primary{
+    font-family:'Nunito',sans-serif;
+    font-weight:800;
+    font-size:0.95rem;
+    color:#0b1424;
+    background:linear-gradient(180deg, #7fd8ff, #4ea8de);
+    border:none;
+    padding:12px 26px;
+    border-radius:999px;
+    cursor:pointer;
+    box-shadow:0 6px 18px rgba(78,168,222,0.35);
+  }
+  button.primary:active{ transform:translateY(1px); }
 
-  @media (max-width: 380px){
-    .tile{ font-size: 10.5px; }
+  .toast{
+    position:fixed;
+    top:16px; left:50%;
+    transform:translateX(-50%) translateY(-140%);
+    background:#0d1b30;
+    border:1px solid var(--glass-border);
+    padding:8px 16px;
+    border-radius:999px;
+    font-size:0.78rem;
+    font-weight:700;
+    color:var(--ink-soft);
+    z-index:60;
+    transition:transform 0.3s ease;
+  }
+  .toast.show{ transform:translateX(-50%) translateY(0); }
+
+  @media (max-width:380px){
+    .hud-card .value{ font-size:1.2rem; }
+    .legend-label{ display:none; }
+    .legend-item{ padding:6px; }
   }
 </style>
 </head>
 <body>
+  <div class="wrap">
+    <header>
+      <button id="soundToggle" aria-label="Toggle sound">🔊</button>
+      <h1>Snodmp</h1>
+      <p>Pop clusters. Chase the combo. 30 turns to your best tide.</p>
+    </header>
 
-<svg class="meridian-lines" viewBox="0 0 800 800" preserveAspectRatio="xMidYMid slice">
-  <g fill="none" stroke="#C29A5B" stroke-width="0.6">
-    <ellipse cx="400" cy="400" rx="80" ry="380" />
-    <ellipse cx="400" cy="400" rx="220" ry="380" />
-    <ellipse cx="400" cy="400" rx="360" ry="380" />
-    <ellipse cx="400" cy="400" rx="380" ry="150" />
-    <ellipse cx="400" cy="400" rx="380" ry="290" />
-  </g>
-</svg>
+    <div class="hud">
+      <div class="hud-card">
+        <div class="label">Score</div>
+        <div class="value" id="scoreValue">0</div>
+      </div>
+      <div class="hud-card">
+        <div class="label">Turns</div>
+        <div class="value" id="turnsValue">30</div>
+      </div>
+      <div class="hud-card">
+        <div class="label">Best</div>
+        <div class="value" id="bestValue">0</div>
+      </div>
+    </div>
 
-<div class="wrap">
-  <header>
-    <div class="eyebrow">A Connections‑style puzzle</div>
-    <h1>Merid<em>ian</em></h1>
-    <p class="sub">Find four groups of four. Sixteen words from six continents — reshuffled every round, so there's always another puzzle to try.</p>
-  </header>
+    <div class="board-frame">
+      <div id="board"></div>
+      <div class="floaters" id="floaters"></div>
+    </div>
 
-  <div class="puzzle-title" id="puzzleTitle">Today's board</div>
-
-  <div id="solvedContainer"></div>
-  <div class="grid" id="grid"></div>
-
-  <div class="status-row" id="statusRow">&nbsp;</div>
-
-  <div class="mistakes">
-    <span class="label">Mistakes remaining</span>
-    <span class="dots" id="dots"></span>
-  </div>
-
-  <div class="controls">
-    <button class="pill" id="shuffleBtn">Shuffle</button>
-    <button class="pill" id="deselectBtn">Deselect</button>
-    <button class="pill" id="submitBtn">Submit</button>
-  </div>
-
-  <div class="footer-row">
-    <button class="new-game-link" id="newPuzzleBtn">Start a different puzzle →</button>
-  </div>
-</div>
-
-<div class="overlay" id="overlay">
-  <div class="modal">
-    <h2 id="modalTitle">Solved it!</h2>
-    <p id="modalText">You found every group. Nicely done.</p>
-    <div class="modal-buttons">
-      <button class="pill" id="modalReplay">Replay this board</button>
-      <button class="pill primary" id="modalNew">New puzzle</button>
+    <div class="legend">
+      <div class="legend-item" tabindex="0">
+        <div class="legend-icon bomb">💣</div>
+        <div class="legend-label">Bomb</div>
+        <div class="tooltip">Tap it directly to blast a 3×3 patch around it, any colors.</div>
+      </div>
+      <div class="legend-item" tabindex="0">
+        <div class="legend-icon rainbow">🌈</div>
+        <div class="legend-label">Rainbow</div>
+        <div class="tooltip">Bridges any group it touches. Tap it alone to clear every bubble of the board's most common color.</div>
+      </div>
+      <div class="legend-item" tabindex="0">
+        <div class="legend-icon lightning">⚡</div>
+        <div class="legend-label">Bolt</div>
+        <div class="tooltip">Pop it inside a group and its whole row + column clear too.</div>
+      </div>
+      <div class="legend-item" tabindex="0">
+        <div class="legend-icon mult">x2</div>
+        <div class="legend-label">x2</div>
+        <div class="tooltip">Pop it inside a group to double that pop's score.</div>
+      </div>
     </div>
   </div>
-</div>
+
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal">
+      <h2>Tide's out</h2>
+      <div class="final-score" id="finalScore">0</div>
+      <div class="best-line" id="bestLine">Best: 0</div>
+      <button class="primary" id="playAgainBtn">Play again</button>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
 
 <script>
-// ---------- Puzzle bank ----------
-const PUZZLES = [
-  { title: "Around the table", categories: [
-    { name: "Tea varieties", tier: 1, words: ["MATCHA","ROOIBOS","OOLONG","CHAI"] },
-    { name: "Rice dishes", tier: 2, words: ["PAELLA","BIRYANI","RISOTTO","JOLLOF"] },
-    { name: "Street snacks", tier: 3, words: ["SATAY","FALAFEL","EMPANADA","SAMOSA"] },
-    { name: "Spices", tier: 4, words: ["SAFFRON","SUMAC","CARDAMOM","TURMERIC"] },
-  ]},
-  { title: "The physical world", categories: [
-    { name: "Deserts", tier: 1, words: ["SAHARA","GOBI","ATACAMA","KALAHARI"] },
-    { name: "Mountain ranges", tier: 2, words: ["ANDES","ATLAS","URAL","HIMALAYA"] },
-    { name: "Rivers", tier: 3, words: ["MEKONG","DANUBE","ZAMBEZI","YANGTZE"] },
-    { name: "___ Sea", tier: 4, words: ["ARAL","CORAL","TASMAN","ADRIATIC"] },
-  ]},
-  { title: "Sound & movement", categories: [
-    { name: "String instruments", tier: 1, words: ["SITAR","BALALAIKA","KORA","OUD"] },
-    { name: "Dance styles", tier: 2, words: ["FLAMENCO","TANGO","KATHAK","CAPOEIRA"] },
-    { name: "Hand drums", tier: 3, words: ["DJEMBE","TABLA","CAJON","TAIKO"] },
-    { name: "Music genres, globally", tier: 4, words: ["AFROBEAT","REGGAETON","FADO","KPOP"] },
-  ]},
-  { title: "Legends & lore", categories: [
-    { name: "Trickster figures", tier: 1, words: ["ANANSI","KITSUNE","LOKI","COYOTE"] },
-    { name: "Legendary creatures", tier: 2, words: ["KRAKEN","CHUPACABRA","YETI","ROC"] },
-    { name: "Underworld realms", tier: 3, words: ["HADES","DUAT","NARAKA","SHEOL"] },
-    { name: "Deities across cultures", tier: 4, words: ["QUETZALCOATL","RA","SHIVA","ZEUS"] },
-  ]},
-  { title: "The written word", categories: [
-    { name: "Writing systems", tier: 1, words: ["CYRILLIC","HANGUL","DEVANAGARI","HIRAGANA"] },
-    { name: "Epics, for short", tier: 2, words: ["ILIAD","MAHABHARATA","KALEVALA","GILGAMESH"] },
-    { name: "Nobel literature laureates", tier: 3, words: ["TAGORE","NERUDA","MISTRAL","MORRISON"] },
-    { name: "Poetic forms", tier: 4, words: ["HAIKU","GHAZAL","SONNET","SAGA"] },
-  ]},
-  { title: "Money & measure", categories: [
-    { name: "Currencies", tier: 1, words: ["RUPEE","DINAR","YEN","PESO"] },
-    { name: "Historic units of length", tier: 2, words: ["CUBIT","VERST","LEAGUE","LI"] },
-    { name: "Tile & board games", tier: 3, words: ["MANCALA","SHOGI","XIANGQI","GO"] },
-    { name: "Textile techniques", tier: 4, words: ["BATIK","IKAT","MACRAME","KILIM"] },
-  ]},
-  { title: "Sky & season", categories: [
-    { name: "New Year festivals", tier: 1, words: ["NOWRUZ","HOGMANAY","SONGKRAN","DIWALI"] },
-    { name: "Constellations", tier: 2, words: ["ORION","CENTAURUS","PHOENIX","CRUX"] },
-    { name: "Named local winds", tier: 3, words: ["MISTRAL","SIROCCO","CHINOOK","HARMATTAN"] },
-    { name: "Weather extremes", tier: 4, words: ["MONSOON","HABOOB","TYPHOON","BLIZZARD"] },
-  ]},
-  { title: "Games people play", categories: [
-    { name: "Sports born abroad", tier: 1, words: ["CRICKET","RUGBY","SNOOKER","HURLING"] },
-    { name: "Olympic combat sports", tier: 2, words: ["JUDO","TAEKWONDO","SAMBO","SUMO"] },
-    { name: "Playground games worldwide", tier: 3, words: ["HOPSCOTCH","KABADDI","MARBLES","TAG"] },
-    { name: "Trick-taking card games", tier: 4, words: ["BRIDGE","WHIST","CANASTA","SKAT"] },
-  ]},
-  { title: "Stage & screen", categories: [
-    { name: "Shakespeare plays", tier: 1, words: ["HAMLET","MACBETH","OTHELLO","TEMPEST"] },
-    { name: "Broadway musicals", tier: 2, words: ["HAMILTON","WICKED","CHICAGO","RENT"] },
-    { name: "Renaissance painters", tier: 3, words: ["TITIAN","RAPHAEL","BOTTICELLI","CARAVAGGIO"] },
-    { name: "French New Wave directors", tier: 4, words: ["GODARD","TRUFFAUT","VARDA","ROHMER"] },
-  ]},
-  { title: "Stars, stripes & shires", categories: [
-    { name: "___ State (US nicknames)", tier: 1, words: ["EMPIRE","SUNSHINE","GOLDEN","SILVER"] },
-    { name: "British royal houses", tier: 2, words: ["TUDOR","STUART","HANOVER","WINDSOR"] },
-    { name: "American diner staples", tier: 3, words: ["MILKSHAKE","PANCAKE","BURGER","MEATLOAF"] },
-    { name: "Ivy League schools", tier: 4, words: ["YALE","BROWN","CORNELL","COLUMBIA"] },
-  ]},
-  { title: "Colors & gems", categories: [
-    { name: "Gemstones", tier: 1, words: ["JADE","OPAL","AMBER","TURQUOISE"] },
-    { name: "Shades of blue", tier: 2, words: ["INDIGO","COBALT","CERULEAN","AZURE"] },
-    { name: "Sky phenomena", tier: 3, words: ["AURORA","MIRAGE","HALO","RAINBOW"] },
-    { name: "Historic dyes & pigments", tier: 4, words: ["TYRIAN PURPLE","WOAD","HENNA","OCHRE"] },
-  ]},
-  { title: "Lay of the land", categories: [
-    { name: "Landlocked countries", tier: 1, words: ["BOLIVIA","MONGOLIA","CHAD","NEPAL"] },
-    { name: "Peninsulas", tier: 2, words: ["IBERIA","BALKAN","KOREA","ARABIA"] },
-    { name: "Island nations", tier: 3, words: ["PHILIPPINES","INDONESIA","MALDIVES","MADAGASCAR"] },
-    { name: "Straits", tier: 4, words: ["GIBRALTAR","BOSPHORUS","MALACCA","HORMUZ"] },
-  ]},
-  { title: "Shelter & structure", categories: [
-    { name: "Traditional dwellings", tier: 1, words: ["YURT","IGLOO","HOGAN","RONDAVEL"] },
-    { name: "Marketplaces", tier: 2, words: ["SOUK","BAZAAR","AGORA","MERCADO"] },
-    { name: "Sacred structures", tier: 3, words: ["PAGODA","STUPA","ZIGGURAT","MINARET"] },
-    { name: "Fortifications", tier: 4, words: ["CITADEL","KASBAH","ALCAZAR","BASTION"] },
-  ]},
-  { title: "Word origins", categories: [
-    { name: "English loanwords", tier: 1, words: ["KARAOKE","SAFARI","TYCOON","ROBOT"] },
-    { name: "Greetings borrowed into English", tier: 2, words: ["ALOHA","SHALOM","NAMASTE","CIAO"] },
-    { name: "Words for specific quantities", tier: 3, words: ["DOZEN","SCORE","GROSS","MYRIAD"] },
-    { name: "Uncommon units of time", tier: 4, words: ["FORTNIGHT","DECADE","LUSTRUM","EON"] },
-  ]},
-  { title: "Feast & fast", categories: [
-    { name: "Asian noodles", tier: 1, words: ["RAMEN","PHO","UDON","SOBA"] },
-    { name: "Cheeses of the world", tier: 2, words: ["BRIE","GOUDA","FETA","HALLOUMI"] },
-    { name: "Sweet pastries", tier: 3, words: ["BAKLAVA","STRUDEL","CANNOLI","CROISSANT"] },
-    { name: "Fermented foods", tier: 4, words: ["KIMCHI","KEFIR","MISO","SAUERKRAUT"] },
-  ]},
-  { title: "Martial arts & sport", categories: [
-    { name: "Racquet sports", tier: 1, words: ["SQUASH","PADEL","BADMINTON","PICKLEBALL"] },
-    { name: "Winter sports", tier: 2, words: ["LUGE","BIATHLON","CURLING","SKELETON"] },
-    { name: "Martial arts", tier: 3, words: ["KARATE","AIKIDO","SILAT","MUAY THAI"] },
-    { name: "Athletics field events", tier: 4, words: ["DISCUS","JAVELIN","HAMMER","POLE VAULT"] },
-  ]},
-  { title: "Royals & rulers", categories: [
-    { name: "Titles of nobility", tier: 1, words: ["DUKE","BARON","VISCOUNT","MARQUESS"] },
-    { name: "Historic queens & empresses", tier: 2, words: ["CLEOPATRA","NEFERTITI","CATHERINE","VICTORIA"] },
-    { name: "Historic empires", tier: 3, words: ["OTTOMAN","MUGHAL","BYZANTINE","INCA"] },
-    { name: "Ancient Egyptian terms", tier: 4, words: ["PHARAOH","SPHINX","PAPYRUS","HIEROGLYPH"] },
-  ]},
-  { title: "Space & science", categories: [
-    { name: "Moons of the solar system", tier: 1, words: ["EUROPA","TITAN","TRITON","CHARON"] },
-    { name: "Space missions & probes", tier: 2, words: ["VOYAGER","SPUTNIK","CHANDRAYAAN","ARTEMIS"] },
-    { name: "Units in physics", tier: 3, words: ["JOULE","NEWTON","PASCAL","TESLA"] },
-    { name: "Nobel science laureates", tier: 4, words: ["CURIE","BOHR","FEYNMAN","RAMAN"] },
-  ]},
-  { title: "Waterways", categories: [
-    { name: "Waterfalls", tier: 1, words: ["NIAGARA","VICTORIA","ANGEL","IGUAZU"] },
-    { name: "Canals", tier: 2, words: ["SUEZ","PANAMA","CORINTH","KIEL"] },
-    { name: "Coastal landforms", tier: 3, words: ["FJORD","LAGOON","ATOLL","ESTUARY"] },
-    { name: "Great lakes of the world", tier: 4, words: ["BAIKAL","TITICACA","TANGANYIKA","ERIE"] },
-  ]},
-  { title: "Celebrations around the world", categories: [
-    { name: "Harvest festivals", tier: 1, words: ["THANKSGIVING","ONAM","PONGAL","SUKKOT"] },
-    { name: "Carnival celebrations", tier: 2, words: ["CARNIVAL","MARDI GRAS","JUNKANOO","FASTNACHT"] },
-    { name: "Festivals of light", tier: 3, words: ["HANUKKAH","DIWALI","YALDA","ST LUCIA"] },
-    { name: "Ancestor & remembrance festivals", tier: 4, words: ["OBON","SAMHAIN","CHUSEOK","DIA DE MUERTOS"] },
-  ]},
-  { title: "Language & code", categories: [
-    { name: "NATO phonetic alphabet words", tier: 1, words: ["ALPHA","BRAVO","TANGO","ZULU"] },
-    { name: "Communication systems", tier: 2, words: ["BRAILLE","MORSE CODE","SEMAPHORE","SIGN LANGUAGE"] },
-    { name: "Classical languages", tier: 3, words: ["LATIN","SANSKRIT","SUMERIAN","COPTIC"] },
-    { name: "Constructed languages", tier: 4, words: ["ESPERANTO","KLINGON","DOTHRAKI","VOLAPUK"] },
-  ]},
-  { title: "Art & architecture", categories: [
-    { name: "Art movements", tier: 1, words: ["CUBISM","SURREALISM","IMPRESSIONISM","BAUHAUS"] },
-    { name: "Architectural styles", tier: 2, words: ["GOTHIC","BAROQUE","BRUTALIST","ART DECO"] },
-    { name: "Famous museums", tier: 3, words: ["LOUVRE","PRADO","HERMITAGE","UFFIZI"] },
-    { name: "Sculptors", tier: 4, words: ["RODIN","BERNINI","MOORE","GIACOMETTI"] },
-  ]},
-  { title: "Body of knowledge", categories: [
-    { name: "Branches of mathematics", tier: 1, words: ["ALGEBRA","TOPOLOGY","CALCULUS","TRIGONOMETRY"] },
-    { name: "Schools of philosophy", tier: 2, words: ["STOICISM","CONFUCIANISM","EXISTENTIALISM","UTILITARIANISM"] },
-    { name: "Ancient philosophers", tier: 3, words: ["CONFUCIUS","SOCRATES","IBN SINA","LAOZI"] },
-    { name: "Elements named after scientists", tier: 4, words: ["CURIUM","EINSTEINIUM","NOBELIUM","MENDELEVIUM"] },
-  ]},
-  { title: "Cinema of the world", categories: [
-    { name: "Film genres", tier: 1, words: ["NOIR","WESTERN","GIALLO","WUXIA"] },
-    { name: "Film awards", tier: 2, words: ["OSCAR","PALME D'OR","GOLDEN BEAR","GOLDEN LION"] },
-    { name: "National cinema movements", tier: 3, words: ["NEOREALISM","BOLLYWOOD","NOLLYWOOD","DOGME 95"] },
-    { name: "Iconic directors", tier: 4, words: ["KUROSAWA","FELLINI","ALMODOVAR","WONG KAR-WAI"] },
-  ]},
-  { title: "Currency & commerce", categories: [
-    { name: "Stock market indices", tier: 1, words: ["NASDAQ","NIKKEI","FTSE","SENSEX"] },
-    { name: "Economic terms", tier: 2, words: ["INFLATION","GDP","TARIFF","RECESSION"] },
-    { name: "Historic trade routes", tier: 3, words: ["SILK ROAD","AMBER ROAD","INCENSE ROUTE","SPICE ROUTE"] },
-    { name: "Ancient & alternative currencies", tier: 4, words: ["COWRIE SHELLS","WAMPUM","RAI STONES","SALT"] },
-  ]},
-];
+(function(){
+  const ROWS = 8, COLS = 9;
+  const COLORS = ['blue','red','yellow','green'];
+  const MAX_TURNS = 30;
+  const STORAGE_KEY = 'tidepop_highscore';
 
-const TIER_CLASS = { 1: "tier-1", 2: "tier-2", 3: "tier-3", 4: "tier-4" };
-const MAX_MISTAKES = 4;
+  let board = [];
+  let score = 0;
+  let turns = MAX_TURNS;
+  let best = 0;
+  let busy = false;
+  let soundOn = true;
+  let audioCtx = null;
 
-// ---------- State ----------
-let state = {
-  puzzleIndex: null,
-  tiles: [],        // array of {word, tier}
-  selected: [],      // array of word strings
-  solvedTiers: [],   // tiers already solved
-  mistakesLeft: MAX_MISTAKES,
-  wrongGuesses: [],  // stringified sorted combos already tried
-  gameOver: false,
-};
-
-let lastPuzzleIndex = -1;
-
-function pickPuzzleIndex(){
-  if (PUZZLES.length === 1) return 0;
-  let idx;
-  do { idx = Math.floor(Math.random() * PUZZLES.length); } while (idx === lastPuzzleIndex);
-  lastPuzzleIndex = idx;
-  return idx;
-}
-
-function shuffleArray(arr){
-  const a = arr.slice();
-  for (let i = a.length - 1; i > 0; i--){
-    const j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
-  }
-  return a;
-}
-
-function startPuzzle(index){
-  const puzzle = PUZZLES[index];
-  const tiles = [];
-  puzzle.categories.forEach(cat => {
-    cat.words.forEach(w => tiles.push({ word: w, tier: cat.tier }));
-  });
-  state = {
-    puzzleIndex: index,
-    tiles: shuffleArray(tiles),
-    selected: [],
-    solvedTiers: [],
-    mistakesLeft: MAX_MISTAKES,
-    wrongGuesses: [],
-    gameOver: false,
-  };
-  document.getElementById('puzzleTitle').textContent = puzzle.title;
-  hideOverlay();
-  setStatus('');
-  render();
-}
-
-function newRandomPuzzle(){ startPuzzle(pickPuzzleIndex()); }
-function replaySamePuzzle(){ startPuzzle(state.puzzleIndex); }
-
-// ---------- Rendering ----------
-function render(){
-  renderSolved();
-  renderGrid();
-  renderDots();
-  updateButtons();
-}
-
-function renderSolved(){
-  const container = document.getElementById('solvedContainer');
-  container.innerHTML = '';
-  const puzzle = PUZZLES[state.puzzleIndex];
-  state.solvedTiers.forEach(tier => {
-    const cat = puzzle.categories.find(c => c.tier === tier);
-    const row = document.createElement('div');
-    row.className = `solved-row ${TIER_CLASS[tier]}`;
-    row.innerHTML = `<div class="cat-name">${cat.name}</div><div class="cat-words">${cat.words.join(' · ')}</div>`;
-    container.appendChild(row);
-  });
-}
-
-function renderGrid(){
-  const grid = document.getElementById('grid');
-  grid.innerHTML = '';
-  const remaining = state.tiles.filter(t => !state.solvedTiers.includes(t.tier));
-  remaining.forEach(t => {
-    const btn = document.createElement('button');
-    btn.className = 'tile';
-    btn.textContent = t.word;
-    if (state.selected.includes(t.word)) btn.classList.add('selected');
-    btn.disabled = state.gameOver;
-    btn.addEventListener('click', () => toggleTile(t.word));
-    grid.appendChild(btn);
-  });
-}
-
-function renderDots(){
-  const dotsEl = document.getElementById('dots');
-  dotsEl.innerHTML = '';
-  for (let i = 0; i < MAX_MISTAKES; i++){
-    const d = document.createElement('span');
-    d.className = 'dot' + (i >= state.mistakesLeft ? ' spent' : '');
-    dotsEl.appendChild(d);
-  }
-}
-
-function updateButtons(){
-  document.getElementById('submitBtn').disabled = state.selected.length !== 4 || state.gameOver;
-  document.getElementById('deselectBtn').disabled = state.selected.length === 0 || state.gameOver;
-  document.getElementById('shuffleBtn').disabled = state.gameOver;
-}
-
-function setStatus(msg){
-  const row = document.getElementById('statusRow');
-  row.innerHTML = msg ? `<span class="msg">${msg}</span>` : '&nbsp;';
-}
-
-// ---------- Interaction ----------
-function toggleTile(word){
-  if (state.gameOver) return;
-  const idx = state.selected.indexOf(word);
-  if (idx > -1){
-    state.selected.splice(idx, 1);
-  } else {
-    if (state.selected.length >= 4) return;
-    state.selected.push(word);
-  }
-  setStatus('');
-  render();
-}
-
-function shuffleRemaining(){
-  const remainingWords = state.tiles.filter(t => !state.solvedTiers.includes(t.tier));
-  const solvedWords = state.tiles.filter(t => state.solvedTiers.includes(t.tier));
-  state.tiles = solvedWords.concat(shuffleArray(remainingWords));
-  render();
-}
-
-function deselectAll(){
-  state.selected = [];
-  render();
-}
-
-function submitGuess(){
-  if (state.selected.length !== 4 || state.gameOver) return;
-  const puzzle = PUZZLES[state.puzzleIndex];
-  const guessedTiles = state.selected.map(w => state.tiles.find(t => t.word === w));
-  const tiers = guessedTiles.map(t => t.tier);
-  const uniqueTiers = new Set(tiers);
-  const comboKey = state.selected.slice().sort().join('|');
-
-  if (state.wrongGuesses.includes(comboKey)){
-    setStatus('Already tried that combination');
-    return;
-  }
-
-  if (uniqueTiers.size === 1){
-    // correct
-    const tier = tiers[0];
-    state.solvedTiers.push(tier);
-    state.selected = [];
-    setStatus('');
-    render();
-    if (state.solvedTiers.length === puzzle.categories.length){
-      state.gameOver = true;
-      setTimeout(() => showEndModal(true), 400);
+  function initAudio(){
+    if(!audioCtx){
+      try{
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }catch(e){ audioCtx = null; }
     }
-    return;
+    if(audioCtx && audioCtx.state === 'suspended'){
+      audioCtx.resume();
+    }
   }
 
-  // wrong guess
-  state.wrongGuesses.push(comboKey);
-  state.mistakesLeft -= 1;
+  function playBubblePop(){
+    if(!soundOn) return;
+    initAudio();
+    if(!audioCtx) return;
+    const t = audioCtx.currentTime;
+    const randSemi = (Math.random()*3 - 1.5);
+    const startFreq = 620 * Math.pow(2, randSemi/12);
+    const endFreq = 190 * Math.pow(2, randSemi/12);
 
-  const oneAway = tierCountsHasThreeMatch(tiers);
-  shakeSelected();
+    // the "gum snap" - soft rounded pitch drop, low-passed for a muffled, plush tone
+    const osc = audioCtx.createOscillator();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(startFreq, t);
+    osc.frequency.exponentialRampToValueAtTime(endFreq, t+0.13);
+    const oscFilter = audioCtx.createBiquadFilter();
+    oscFilter.type = 'lowpass';
+    oscFilter.frequency.value = 1400;
+    oscFilter.Q.value = 0.4;
+    const gain = audioCtx.createGain();
+    gain.gain.setValueAtTime(0.0001, t);
+    gain.gain.exponentialRampToValueAtTime(0.38, t+0.018);
+    gain.gain.exponentialRampToValueAtTime(0.0001, t+0.16);
+    osc.connect(oscFilter).connect(gain).connect(audioCtx.destination);
+    osc.start(t);
+    osc.stop(t+0.18);
 
-  setTimeout(() => {
-    state.selected = [];
-    if (state.mistakesLeft <= 0){
-      state.gameOver = true;
-      render();
-      setStatus('');
-      setTimeout(() => showEndModal(false), 300);
-    } else {
-      render();
-      setStatus(oneAway ? 'One away…' : 'Not quite — try again');
+    // a whisper of low-passed noise for body, no harsh click
+    const bufferSize = Math.floor(audioCtx.sampleRate * 0.03);
+    const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+    const data = buffer.getChannelData(0);
+    for(let i=0;i<bufferSize;i++){
+      data[i] = (Math.random()*2 - 1) * (1 - i/bufferSize);
     }
-  }, 420);
-}
+    const noise = audioCtx.createBufferSource();
+    noise.buffer = buffer;
+    const filter = audioCtx.createBiquadFilter();
+    filter.type = 'lowpass';
+    filter.frequency.value = 900;
+    const nGain = audioCtx.createGain();
+    nGain.gain.setValueAtTime(0.1, t);
+    nGain.gain.exponentialRampToValueAtTime(0.001, t+0.045);
+    noise.connect(filter).connect(nGain).connect(audioCtx.destination);
+    noise.start(t);
+  }
 
-function tierCountsHasThreeMatch(tiers){
-  const counts = {};
-  tiers.forEach(t => counts[t] = (counts[t] || 0) + 1);
-  return Object.values(counts).some(c => c === 3);
-}
-
-function shakeSelected(){
-  const grid = document.getElementById('grid');
-  [...grid.children].forEach(btn => {
-    if (state.selected.includes(btn.textContent)) btn.classList.add('shake');
-  });
-}
-
-function showEndModal(won){
-  const puzzle = PUZZLES[state.puzzleIndex];
-  const overlay = document.getElementById('overlay');
-  const title = document.getElementById('modalTitle');
-  const text = document.getElementById('modalText');
-  if (won){
-    title.textContent = 'Solved it!';
-    const missed = MAX_MISTAKES - state.mistakesLeft;
-    text.textContent = missed === 0
-      ? `Perfect run through "${puzzle.title}" — no mistakes.`
-      : `You cleared "${puzzle.title}" with ${missed} mistake${missed === 1 ? '' : 's'}.`;
-  } else {
-    title.textContent = 'Out of guesses';
-    text.textContent = `That was "${puzzle.title}." Here's how the board breaks down:`;
-    // reveal remaining categories
-    puzzle.categories.forEach(c => {
-      if (!state.solvedTiers.includes(c.tier)) state.solvedTiers.push(c.tier);
+  function playChime(rising){
+    if(!soundOn) return;
+    initAudio();
+    if(!audioCtx) return;
+    const t = audioCtx.currentTime;
+    const notes = rising ? [523,659,784,988] : [392,330];
+    notes.forEach((freq, i)=>{
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'triangle';
+      osc.frequency.value = freq;
+      const start = t + i*0.09;
+      gain.gain.setValueAtTime(0.0001, start);
+      gain.gain.exponentialRampToValueAtTime(0.25, start+0.01);
+      gain.gain.exponentialRampToValueAtTime(0.0001, start+0.28);
+      osc.connect(gain).connect(audioCtx.destination);
+      osc.start(start);
+      osc.stop(start+0.3);
     });
+  }
+
+  const boardEl = document.getElementById('board');
+  const floatersEl = document.getElementById('floaters');
+  const scoreEl = document.getElementById('scoreValue');
+  const turnsEl = document.getElementById('turnsValue');
+  const bestEl = document.getElementById('bestValue');
+  const modalOverlay = document.getElementById('modalOverlay');
+  const finalScoreEl = document.getElementById('finalScore');
+  const bestLineEl = document.getElementById('bestLine');
+  const toastEl = document.getElementById('toast');
+
+  function randomCellType(){
+    const r = Math.random();
+    if(r < 0.045) return {type:'bomb', color:null};
+    if(r < 0.09) return {type:'rainbow', color:null};
+    if(r < 0.135) return {type:'lightning', color: COLORS[Math.floor(Math.random()*COLORS.length)]};
+    if(r < 0.18) return {type:'multiplier', color: COLORS[Math.floor(Math.random()*COLORS.length)]};
+    return {type:'normal', color: COLORS[Math.floor(Math.random()*COLORS.length)]};
+  }
+
+  function generateBoard(){
+    const b = [];
+    for(let r=0;r<ROWS;r++){
+      const row = [];
+      for(let c=0;c<COLS;c++){
+        row.push(randomCellType());
+      }
+      b.push(row);
+    }
+    return b;
+  }
+
+  function getMatchKey(cell){
+    if(!cell) return null;
+    if(cell.type === 'rainbow') return 'WILD';
+    return cell.color;
+  }
+
+  function floodFill(startR, startC){
+    const target = getMatchKey(board[startR][startC]);
+    if(target === null || target === 'WILD') return new Set();
+    const seen = new Set();
+    const stack = [[startR,startC]];
+    const key = (r,c)=>r+'_'+c;
+    seen.add(key(startR,startC));
+    while(stack.length){
+      const [r,c] = stack.pop();
+      const neighbors = [[r-1,c],[r+1,c],[r,c-1],[r,c+1]];
+      for(const [nr,nc] of neighbors){
+        if(nr<0||nr>=ROWS||nc<0||nc>=COLS) continue;
+        const k = key(nr,nc);
+        if(seen.has(k)) continue;
+        const cell = board[nr][nc];
+        if(!cell) continue;
+        const mk = getMatchKey(cell);
+        if(mk === target || mk === 'WILD'){
+          seen.add(k);
+          stack.push([nr,nc]);
+        }
+      }
+    }
+    return seen;
+  }
+
+  function hasValidMoves(){
+    for(let r=0;r<ROWS;r++){
+      for(let c=0;c<COLS;c++){
+        const cell = board[r][c];
+        if(!cell) continue;
+        if(cell.type === 'bomb' || cell.type === 'rainbow') return true;
+        const group = floodFill(r,c);
+        if(group.size >= 2) return true;
+      }
+    }
+    return false;
+  }
+
+  function ensurePlayableBoard(){
+    let tries = 0;
+    board = generateBoard();
+    while(!hasValidMoves() && tries < 12){
+      board = generateBoard();
+      tries++;
+    }
+  }
+
+  function calcScore(n, doubled){
+    let s = Math.round(5 * n * n);
+    if(doubled) s *= 2;
+    return s;
+  }
+
+  function comboLabel(n){
+    if(n >= 14) return 'JACKPOT!';
+    if(n >= 9) return 'AMAZING!';
+    if(n >= 6) return 'GREAT!';
+    if(n >= 4) return 'NICE!';
+    return null;
+  }
+
+  function render(newlyDropped){
+    boardEl.innerHTML = '';
+    for(let r=0;r<ROWS;r++){
+      for(let c=0;c<COLS;c++){
+        const cellDiv = document.createElement('div');
+        cellDiv.className = 'cell';
+        cellDiv.dataset.r = r;
+        cellDiv.dataset.c = c;
+        const cell = board[r][c];
+        if(cell){
+          const btn = document.createElement('button');
+          btn.className = 'bubble';
+          if(cell.type === 'normal'){
+            btn.classList.add('color-'+cell.color);
+          } else if(cell.type === 'bomb'){
+            btn.classList.add('type-bomb');
+            btn.innerHTML = '<span class="badge">💣</span>';
+          } else if(cell.type === 'rainbow'){
+            btn.classList.add('type-rainbow');
+          } else if(cell.type === 'lightning'){
+            btn.classList.add('color-'+cell.color);
+            btn.innerHTML = '<span class="badge">⚡</span>';
+          } else if(cell.type === 'multiplier'){
+            btn.classList.add('color-'+cell.color);
+            btn.innerHTML = '<span class="mult-badge">x2</span>';
+          }
+          btn.style.setProperty('--d', (Math.random()*3).toFixed(2));
+          if(newlyDropped && newlyDropped.has(r+'_'+c)){
+            cellDiv.classList.add('dropped');
+          }
+          cellDiv.appendChild(btn);
+        }
+        boardEl.appendChild(cellDiv);
+      }
+    }
+  }
+
+  function spawnFloatText(r, c, text, colorVar){
+    const rect = boardEl.getBoundingClientRect();
+    const cellW = rect.width / COLS;
+    const cellH = rect.height / ROWS;
+    const el = document.createElement('div');
+    el.className = 'float-text';
+    el.textContent = text;
+    el.style.left = (c*cellW + cellW/2) + 'px';
+    el.style.top = (r*cellH + cellH/2) + 'px';
+    el.style.fontSize = '1rem';
+    if(colorVar) el.style.color = colorVar;
+    floatersEl.appendChild(el);
+    setTimeout(()=> el.remove(), 950);
+  }
+
+  function updateHud(){
+    scoreEl.textContent = score.toLocaleString();
+    turnsEl.textContent = turns;
+    turnsEl.classList.toggle('low', turns <= 5);
+    bestEl.textContent = best.toLocaleString();
+  }
+
+  function showToast(msg){
+    toastEl.textContent = msg;
+    toastEl.classList.add('show');
+    setTimeout(()=> toastEl.classList.remove('show'), 1600);
+  }
+
+  function applyGravityAndRefill(){
+    const dropped = new Set();
+    for(let c=0;c<COLS;c++){
+      const stack = [];
+      for(let r=ROWS-1;r>=0;r--){
+        if(board[r][c]) stack.push(board[r][c]);
+      }
+      const newCol = new Array(ROWS).fill(null);
+      for(let i=0;i<stack.length;i++){
+        newCol[ROWS-1-i] = stack[i];
+      }
+      const missing = ROWS - stack.length;
+      for(let r=0;r<missing;r++){
+        newCol[r] = randomCellType();
+        dropped.add(r+'_'+c);
+      }
+      for(let r=0;r<ROWS;r++){
+        board[r][c] = newCol[r];
+      }
+    }
+    return dropped;
+  }
+
+  function shuffleArr(a){
+    const arr = a.slice();
+    for(let i=arr.length-1;i>0;i--){
+      const j = Math.floor(Math.random()*(i+1));
+      [arr[i],arr[j]] = [arr[j],arr[i]];
+    }
+    return arr;
+  }
+
+  function staggerPopCells(cellsSet, onDone){
+    const arr = shuffleArr(Array.from(cellsSet));
+    const perDelay = 70;
+    const capIndex = 12;
+    arr.forEach((k,i)=>{
+      const d = Math.min(i, capIndex) * perDelay;
+      setTimeout(()=>{
+        const [r,c] = k.split('_').map(Number);
+        const el = boardEl.querySelector('.cell[data-r="'+r+'"][data-c="'+c+'"]');
+        if(el) el.classList.add('popping');
+        playBubblePop();
+      }, d);
+    });
+    const lastDelay = Math.min(arr.length-1, capIndex) * perDelay;
+    setTimeout(onDone, lastDelay + 320);
+  }
+
+  function resolveRemoval(mainSet, sourceR, sourceC){
+    if(busy) return;
+    if(mainSet.size === 0) return;
+    busy = true;
+
+    // find lightning bonus cells
+    const bonusSet = new Set();
+    let multiplierPresent = false;
+    mainSet.forEach(k=>{
+      const [r,c] = k.split('_').map(Number);
+      const cell = board[r][c];
+      if(!cell) return;
+      if(cell.type === 'multiplier') multiplierPresent = true;
+      if(cell.type === 'lightning'){
+        for(let cc=0;cc<COLS;cc++) bonusSet.add(r+'_'+cc);
+        for(let rr=0;rr<ROWS;rr++) bonusSet.add(rr+'_'+c);
+      }
+    });
+    mainSet.forEach(k=> bonusSet.delete(k));
+
+    const streakMult = 1; // first pop of the turn
+    const mainScore = Math.round(calcScore(mainSet.size, multiplierPresent) * streakMult);
+    const bonusScore = Math.round(bonusSet.size * 8 * streakMult);
+    const totalScore = mainScore + bonusScore;
+
+    const label = comboLabel(mainSet.size);
+    spawnFloatText(sourceR, sourceC, '+'+totalScore, multiplierPresent ? '#ff9f7a' : null);
+    if(label){
+      setTimeout(()=> spawnFloatText(sourceR, sourceC, label, '#7fe8c9'), 150);
+    }
+
+    const allCells = new Set([...mainSet, ...bonusSet]);
+    staggerPopCells(allCells, ()=>{
+      allCells.forEach(k=>{
+        const [r,c] = k.split('_').map(Number);
+        board[r][c] = null;
+      });
+      const dropped = applyGravityAndRefill();
+      score += totalScore;
+      turns -= 1;
+      updateHud();
+      render(dropped);
+
+      setTimeout(()=> resolveWave(2), 220);
+    });
+  }
+
+  function sleep(ms){
+    return new Promise(resolve=> setTimeout(resolve, ms));
+  }
+
+  // Cascades only trigger where a bubble has landed directly on top of a
+  // same-color bubble below it - a straight vertical run of 2+, not a full
+  // flood-filled blob. Keeps chains readable and stops the board from
+  // solving itself sideways.
+  function findVerticalMatches(){
+    const groups = [];
+    for(let c=0;c<COLS;c++){
+      let r = 0;
+      while(r < ROWS){
+        const cell = board[r][c];
+        if(!cell || cell.type === 'bomb' || cell.type === 'rainbow'){
+          r++;
+          continue;
+        }
+        const anchorColor = cell.color;
+        let end = r;
+        while(end+1 < ROWS){
+          const next = board[end+1][c];
+          if(!next || next.type === 'bomb') break;
+          const nextKey = next.type === 'rainbow' ? 'WILD' : next.color;
+          if(nextKey === anchorColor || nextKey === 'WILD'){ end++; } else break;
+        }
+        if(end > r){
+          const group = new Set();
+          for(let rr=r; rr<=end; rr++) group.add(rr+'_'+c);
+          groups.push(group);
+        }
+        r = end + 1;
+      }
+    }
+    return groups;
+  }
+
+  async function resolveWave(streak){
+    const groups = findVerticalMatches();
+    if(groups.length === 0){
+      finalizeTurn();
+      return;
+    }
+
+    const streakMult = Math.pow(1.1, streak - 1);
+    const allMain = new Set();
+    const allBonus = new Set();
+    let waveScore = 0;
+
+    groups.forEach(group=>{
+      let multiplierPresent = false;
+      const bonus = new Set();
+      group.forEach(k=>{
+        const [r,c] = k.split('_').map(Number);
+        const cell = board[r][c];
+        if(!cell) return;
+        if(cell.type === 'multiplier') multiplierPresent = true;
+        if(cell.type === 'lightning'){
+          for(let cc=0;cc<COLS;cc++) bonus.add(r+'_'+cc);
+          for(let rr=0;rr<ROWS;rr++) bonus.add(rr+'_'+c);
+        }
+      });
+      group.forEach(k=> bonus.delete(k));
+
+      let gScore = calcScore(group.size, multiplierPresent);
+      gScore = Math.round(gScore * streakMult);
+      gScore += Math.round(bonus.size * 8 * streakMult);
+      waveScore += gScore;
+
+      group.forEach(k=> allMain.add(k));
+      bonus.forEach(k=> allBonus.add(k));
+
+      const first = Array.from(group)[0];
+      const [fr, fc] = first.split('_').map(Number);
+      spawnFloatText(fr, fc, '+'+gScore, '#7fe8c9');
+    });
+    allBonus.forEach(k=>{ if(allMain.has(k)) allBonus.delete(k); });
+
+    const chainLabel = 'CHAIN \u00d7' + streakMult.toFixed(2) + '!';
+    const anyCell = Array.from(allMain)[0];
+    const [ar, ac] = anyCell.split('_').map(Number);
+    setTimeout(()=> spawnFloatText(ar, ac, chainLabel, '#ffd166'), 160);
+
+    const cellsToAnimate = new Set([...allMain, ...allBonus]);
+    staggerPopCells(cellsToAnimate, ()=>{
+      cellsToAnimate.forEach(k=>{
+        const [r,c] = k.split('_').map(Number);
+        board[r][c] = null;
+      });
+      const dropped = applyGravityAndRefill();
+      score += waveScore;
+      updateHud();
+      render(dropped);
+
+      setTimeout(()=> resolveWave(streak + 1), 220);
+    });
+  }
+
+  function finalizeTurn(){
+    if(!hasValidMoves() && turns > 0){
+      setTimeout(()=>{
+        ensurePlayableBoard();
+        render();
+        showToast('Board reshuffled \u2014 no moves left!');
+        busy = false;
+        if(turns <= 0) endGame();
+      }, 260);
+    } else {
+      busy = false;
+      if(turns <= 0) endGame();
+    }
+  }
+
+  function handleRainbowStandalone(r, c){
+    const counts = {};
+    for(let rr=0;rr<ROWS;rr++){
+      for(let cc=0;cc<COLS;cc++){
+        const cell = board[rr][cc];
+        if(cell && cell.color && cell.type !== 'rainbow'){
+          counts[cell.color] = (counts[cell.color]||0) + 1;
+        }
+      }
+    }
+    let bestColor = null, bestCount = 0;
+    for(const col of COLORS){
+      if((counts[col]||0) > bestCount){ bestCount = counts[col]; bestColor = col; }
+    }
+    const set = new Set();
+    set.add(r+'_'+c);
+    if(bestColor){
+      for(let rr=0;rr<ROWS;rr++){
+        for(let cc=0;cc<COLS;cc++){
+          const cell = board[rr][cc];
+          if(cell && cell.color === bestColor){
+            set.add(rr+'_'+cc);
+          }
+        }
+      }
+    }
+    resolveRemoval(set, r, c);
+  }
+
+  function handleBombStandalone(r, c){
+    const set = new Set();
+    for(let rr=r-1;rr<=r+1;rr++){
+      for(let cc=c-1;cc<=c+1;cc++){
+        if(rr<0||rr>=ROWS||cc<0||cc>=COLS) continue;
+        if(board[rr][cc]) set.add(rr+'_'+cc);
+      }
+    }
+    resolveRemoval(set, r, c);
+  }
+
+  function shakeCell(r,c){
+    const el = boardEl.querySelector('.cell[data-r="'+r+'"][data-c="'+c+'"]');
+    if(el){
+      el.classList.add('shake');
+      setTimeout(()=> el.classList.remove('shake'), 300);
+    }
+  }
+
+  boardEl.addEventListener('click', (e)=>{
+    if(busy) return;
+    const cellDiv = e.target.closest('.cell');
+    if(!cellDiv) return;
+    const r = Number(cellDiv.dataset.r);
+    const c = Number(cellDiv.dataset.c);
+    const cell = board[r][c];
+    if(!cell) return;
+
+    if(cell.type === 'bomb'){
+      handleBombStandalone(r,c);
+      return;
+    }
+    if(cell.type === 'rainbow'){
+      handleRainbowStandalone(r,c);
+      return;
+    }
+    const group = floodFill(r,c);
+    if(group.size >= 2){
+      resolveRemoval(group, r, c);
+    } else {
+      shakeCell(r,c);
+    }
+  });
+
+  function endGame(){
+    busy = true;
+    setTimeout(async ()=>{
+      finalScoreEl.textContent = score.toLocaleString();
+      const isNew = score > best;
+      if(isNew){
+        best = score;
+        bestLineEl.textContent = 'New best score!';
+        bestLineEl.classList.add('new');
+        await saveHighScore(best);
+        playChime(true);
+      } else {
+        bestLineEl.textContent = 'Best: ' + best.toLocaleString();
+        bestLineEl.classList.remove('new');
+        playChime(false);
+      }
+      modalOverlay.classList.add('show');
+    }, 200);
+  }
+
+  async function loadHighScore(){
+    try{
+      const result = await window.storage.get(STORAGE_KEY, false);
+      if(result && result.value){
+        const parsed = JSON.parse(result.value);
+        if(typeof parsed === 'number') return parsed;
+      }
+    }catch(err){
+      // key doesn't exist yet or storage unavailable
+    }
+    return 0;
+  }
+
+  async function saveHighScore(value){
+    try{
+      await window.storage.set(STORAGE_KEY, JSON.stringify(value), false);
+    }catch(err){
+      console.error('Could not save high score', err);
+    }
+  }
+
+  document.getElementById('playAgainBtn').addEventListener('click', ()=>{
+    modalOverlay.classList.remove('show');
+    score = 0;
+    turns = MAX_TURNS;
+    busy = false;
+    ensurePlayableBoard();
+    updateHud();
+    render();
+  });
+
+  // touch-friendly legend tooltips
+  document.querySelectorAll('.legend-item').forEach(item=>{
+    item.addEventListener('click', (e)=>{
+      const wasActive = item.classList.contains('tap-active');
+      document.querySelectorAll('.legend-item').forEach(i=> i.classList.remove('tap-active'));
+      if(!wasActive) item.classList.add('tap-active');
+    });
+  });
+  document.addEventListener('click', (e)=>{
+    if(!e.target.closest('.legend-item')){
+      document.querySelectorAll('.legend-item').forEach(i=> i.classList.remove('tap-active'));
+    }
+  });
+
+  const soundToggleBtn = document.getElementById('soundToggle');
+  soundToggleBtn.addEventListener('click', ()=>{
+    soundOn = !soundOn;
+    soundToggleBtn.textContent = soundOn ? '🔊' : '🔇';
+    soundToggleBtn.classList.toggle('muted', !soundOn);
+    if(soundOn) initAudio();
+  });
+
+  async function init(){
+    best = await loadHighScore();
+    ensurePlayableBoard();
+    updateHud();
     render();
   }
-  overlay.classList.add('show');
-}
 
-function hideOverlay(){
-  document.getElementById('overlay').classList.remove('show');
-}
-
-// ---------- Wire up ----------
-document.getElementById('shuffleBtn').addEventListener('click', shuffleRemaining);
-document.getElementById('deselectBtn').addEventListener('click', deselectAll);
-document.getElementById('submitBtn').addEventListener('click', submitGuess);
-document.getElementById('newPuzzleBtn').addEventListener('click', newRandomPuzzle);
-document.getElementById('modalReplay').addEventListener('click', replaySamePuzzle);
-document.getElementById('modalNew').addEventListener('click', newRandomPuzzle);
-
-newRandomPuzzle();
+  init();
+})();
 </script>
 </body>
 </html>
