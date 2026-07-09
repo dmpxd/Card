@@ -303,6 +303,38 @@
   }
   .secondary-blurb b{ color: var(--gold-soft); font-weight: 500; }
 
+  .browse-list{ display:flex; flex-direction:column; gap:10px; }
+  .browse-item{
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: rgba(0,0,0,0.15);
+    overflow: hidden;
+  }
+  .browse-item summary{
+    list-style: none;
+    cursor: pointer;
+    padding: 14px 16px;
+    display:flex;
+    align-items:center;
+    gap: 14px;
+  }
+  .browse-item summary::-webkit-details-marker{ display:none; }
+  .browse-item summary:hover{ background: rgba(201,162,75,0.06); }
+  .browse-item summary:focus-visible{ outline: 2px solid var(--teal); outline-offset: -2px; }
+  .browse-sigil{ flex-shrink:0; width:36px; height:36px; color: var(--gold-soft); }
+  .browse-sigil svg{ width:100%; height:100%; }
+  .browse-summary-text{ display:flex; flex-direction:column; gap:2px; }
+  .browse-name{ font-family: var(--font-display); font-weight:500; font-size:1.05rem; color: var(--ink); }
+  .browse-tagline{ font-family: var(--font-display); font-style: italic; font-size: 0.82rem; color: var(--ink-dim); }
+  .browse-item[open] summary{ border-bottom: 1px solid var(--line); }
+  .browse-item[open] summary .browse-sigil{ color: var(--teal); }
+  .browse-desc{ padding: 16px 18px 18px 66px; }
+  .browse-desc p{ font-size: 0.9rem; line-height: 1.65; color: var(--ink-dim); margin: 0 0 12px; }
+  .browse-desc p:last-child{ margin-bottom:0; }
+  @media (max-width: 480px){
+    .browse-desc{ padding-left: 18px; }
+  }
+
   footer.mirror-footer{
     text-align:center;
     color: rgba(179,167,207,0.4);
@@ -343,8 +375,8 @@
 
 <div class="toast-overlay" id="toastOverlay">
   <div>
-    <h2>Just kidding&nbsp;😂</h2>
-    <p>We don't need your email. Nobody actually does. Here's what the mirror already saw&nbsp;&mdash;</p>
+    <h2>Joke lol</h2>
+    <button class="btn" id="toastDismissBtn" style="margin-top:8px;">See my results</button>
   </div>
 </div>
 
@@ -578,11 +610,11 @@
   function showToastThenResults(){
     const overlay = document.getElementById('toastOverlay');
     overlay.classList.add('show');
-    setTimeout(() => {
+    document.getElementById('toastDismissBtn').addEventListener('click', () => {
       overlay.classList.remove('show');
       idx = QUESTIONS.length + 1;
       render();
-    }, 1500);
+    }, { once: true });
   }
 
   function computeResult(){
@@ -615,8 +647,9 @@
         <div class="secondary-blurb">
           There's also a strong current of <b>${s.name}</b> running underneath &mdash; ${s.tagline}
         </div>
-        <div class="btn-row" style="justify-content:center; margin-top:28px;">
+        <div class="btn-row" style="justify-content:center; margin-top:28px; flex-direction:column; align-items:center; gap:10px;">
           <button class="btn btn-ghost" id="retakeBtn">Take it again</button>
+          <button class="back-link" id="browseBtn">Browse all eight types &rarr;</button>
         </div>
       </div>
     `;
@@ -625,10 +658,47 @@
       Object.keys(answers).forEach(k => delete answers[k]);
       render();
     });
+    document.getElementById('browseBtn').addEventListener('click', () => { idx = 'browse'; render(); });
+  }
+
+  function renderBrowse(){
+    skypath.style.display = 'none';
+    progressLabel.textContent = '';
+    main.innerHTML = `
+      <div class="card">
+        <p class="eyebrow">The full cast</p>
+        <h1>All eight types.</h1>
+        <p class="lede">Click a type to expand its reading. None of them are better than the others &mdash; they're just different weather.</p>
+        <div class="browse-list">
+          ${TYPES_ORDER.map(key => {
+            const t = TYPES[key];
+            return `
+              <details class="browse-item">
+                <summary>
+                  <span class="browse-sigil">${t.sigil}</span>
+                  <span class="browse-summary-text">
+                    <span class="browse-name">${t.name}</span>
+                    <span class="browse-tagline">${t.tagline}</span>
+                  </span>
+                </summary>
+                <div class="browse-desc">
+                  ${t.desc.map(p => `<p>${p}</p>`).join('')}
+                </div>
+              </details>
+            `;
+          }).join('')}
+        </div>
+        <div class="btn-row" style="margin-top:26px;">
+          <button class="back-link" id="browseBackBtn">&larr; back to your results</button>
+        </div>
+      </div>
+    `;
+    document.getElementById('browseBackBtn').addEventListener('click', () => { idx = QUESTIONS.length + 1; render(); });
   }
 
   function render(){
-    if(idx === -1) renderIntro();
+    if(idx === 'browse') renderBrowse();
+    else if(idx === -1) renderIntro();
     else if(idx >= 0 && idx < QUESTIONS.length) renderQuestion();
     else if(idx === QUESTIONS.length) renderGate();
     else renderResults();
