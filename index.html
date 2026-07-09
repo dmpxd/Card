@@ -41,7 +41,7 @@
     align-items:center;
     padding: 14px 10px 20px;
     width:100%;
-    max-width:460px;
+    max-width:740px;
   }
 
   h1{
@@ -273,7 +273,7 @@
   </div>
 
   <div id="board-wrap">
-    <canvas id="game" width="380" height="560"></canvas>
+    <canvas id="game" width="684" height="626"></canvas>
     <div class="next-preview">
       <div>Next</div>
       <div class="next-dot" id="nextDot"></div>
@@ -298,18 +298,18 @@
 (function(){
   // ---------- Config ----------
   const R = 19;
-  const COLS_EVEN = 8;
+  const COLS_EVEN = 16;
   const BOARD_LEFT = 20;
   const TOP_Y = 30;
   const ROW_H = R * Math.sqrt(3);
-  const MAX_ROWS = 13;
-  const DANGER_ROW = 11;
+  const MAX_ROWS = 15;
+  const DANGER_ROW = 13;
   const TOTAL_TURNS = 30;
   const NEW_ROW_EVERY = 4;
   const BASE_POINTS = 10;
   const COMBO_GROWTH = 1.1;
-  const SHOOTER_Y = 520;
-  const SHOOTER_X = 190;
+  const SHOOTER_Y = 520 + 2 * (R * Math.sqrt(3));
+  const SHOOTER_X = BOARD_LEFT + (COLS_EVEN * 2 * R) / 2;
   const BUBBLE_SPEED = 9.5;
 
   const COLORS = {
@@ -439,7 +439,7 @@
 
   function initGame(){
     grid = makeEmptyGrid();
-    fillInitialRows(6);
+    fillInitialRows(8);
     turnsLeft = TOTAL_TURNS;
     shotsFired = 0;
     score = 0;
