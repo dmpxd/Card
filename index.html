@@ -559,18 +559,17 @@
         <p class="eyebrow">Last step</p>
         <h1>Where should we send your results?</h1>
         <p class="lede">Enter your email to unlock your full personality reading.</p>
-        <form class="gate" id="gateForm">
-          <input type="email" id="emailInput" placeholder="you@example.com" autocomplete="email">
+        <div class="gate" id="gateForm">
+          <input type="text" inputmode="email" id="emailInput" placeholder="you@example.com" autocomplete="email">
           <div class="btn-row">
-            <button type="submit" class="btn">Reveal My Results</button>
+            <button type="button" class="btn" id="revealBtn">Reveal My Results</button>
             <button type="button" class="back-link" id="gateBackBtn">&larr; back</button>
           </div>
           <p class="fine-print">We'll send your results, plus the occasional follow-up reading, to this address.</p>
-        </form>
+        </div>
       </div>
     `;
-    document.getElementById('gateForm').addEventListener('submit', (e) => {
-      e.preventDefault();
+    document.getElementById('revealBtn').addEventListener('click', () => {
       showToastThenResults();
     });
     document.getElementById('gateBackBtn').addEventListener('click', () => { idx = QUESTIONS.length - 1; render(); });
