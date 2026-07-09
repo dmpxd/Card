@@ -2,935 +2,640 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Pop Streak — Bubble Shooter</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Mirror Test</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Nunito:wght@400;600;700;800&display=swap');
-
   :root{
-    --bg-deep: #0c0f21;
-    --bg-mid: #171b38;
-    --panel: #1c2145;
-    --panel-line: #2c3266;
-    --gold: #F5B700;
-    --gold-soft: #FFD866;
-    --lavender: #C7CEEA;
-    --lavender-dim: #8892c2;
+    --bg: #130d24;
+    --bg-panel: #1d1536;
+    --bg-panel-2: #271d45;
+    --gold: #c9a24b;
+    --gold-soft: #e6cd8b;
+    --teal: #4fb8a8;
+    --ink: #f2ecdf;
+    --ink-dim: #b3a7cf;
+    --line: rgba(201,162,75,0.22);
+    --danger: #d97a86;
+    --font-display: 'Fraunces', serif;
+    --font-body: 'Space Grotesk', sans-serif;
+    --radius: 14px;
   }
 
   *{box-sizing:border-box;}
-
-  html,body{
-    margin:0; padding:0; min-height:100%;
-    background:
-      radial-gradient(ellipse at 50% -10%, #2a2f66 0%, transparent 60%),
-      linear-gradient(180deg, var(--bg-deep) 0%, var(--bg-mid) 100%);
-    font-family:'Nunito', sans-serif;
-    color: var(--lavender);
-    display:flex;
-    align-items:flex-start;
-    justify-content:center;
-    overflow-x:hidden;
-    -webkit-tap-highlight-color: transparent;
-    user-select:none;
+  html,body{margin:0;padding:0;}
+  body{
+    background: radial-gradient(ellipse at 20% -10%, #23184a 0%, var(--bg) 55%) fixed;
+    color: var(--ink);
+    font-family: var(--font-body);
+    min-height: 100vh;
+    position: relative;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
   }
 
+  .stars{
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    background-image:
+      radial-gradient(1.5px 1.5px at 10% 20%, rgba(230,205,139,0.5), transparent),
+      radial-gradient(1.5px 1.5px at 80% 10%, rgba(230,205,139,0.4), transparent),
+      radial-gradient(1px 1px at 60% 70%, rgba(230,205,139,0.35), transparent),
+      radial-gradient(1.5px 1.5px at 30% 85%, rgba(230,205,139,0.4), transparent),
+      radial-gradient(1px 1px at 90% 60%, rgba(230,205,139,0.3), transparent),
+      radial-gradient(1.5px 1.5px at 45% 40%, rgba(230,205,139,0.35), transparent);
+    background-repeat: no-repeat;
+    animation: drift 60s linear infinite alternate;
+  }
+  @keyframes drift{ from{ transform: translateY(0);} to{ transform: translateY(-20px);} }
+
   #app{
+    position: relative;
+    z-index: 1;
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 28px 20px 80px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .topbar{
     display:flex;
-    flex-direction:column;
     align-items:center;
-    padding: 14px 10px 20px;
-    width:100%;
-    max-width:740px;
+    justify-content:space-between;
+    padding-bottom: 18px;
+    margin-bottom: 8px;
+  }
+  .brand{
+    font-family: var(--font-display);
+    font-style: italic;
+    font-weight: 500;
+    font-size: 1.15rem;
+    letter-spacing: 0.02em;
+    color: var(--gold-soft);
+  }
+  .progress-label{
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-dim);
+  }
+
+  .skypath{
+    position: relative;
+    height: 3px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 3px;
+    margin-bottom: 34px;
+    overflow: visible;
+  }
+  .skypath-fill{
+    position:absolute;
+    left:0; top:0; bottom:0;
+    width: 0%;
+    background: linear-gradient(90deg, var(--teal), var(--gold-soft));
+    border-radius: 3px;
+    transition: width 0.5s cubic-bezier(.4,0,.2,1);
+  }
+  .skypath-dot{
+    position:absolute;
+    top: 50%;
+    width: 9px; height: 9px;
+    background: var(--gold-soft);
+    border-radius: 50%;
+    box-shadow: 0 0 10px 2px rgba(230,205,139,0.7);
+    transform: translate(-50%,-50%);
+    transition: left 0.5s cubic-bezier(.4,0,.2,1);
+  }
+
+  main{ flex: 1; display:flex; flex-direction:column; justify-content:center; }
+
+  .card{
+    background: linear-gradient(160deg, var(--bg-panel), var(--bg-panel-2));
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 36px 30px;
+    box-shadow: 0 20px 60px -20px rgba(0,0,0,0.6);
+  }
+
+  .eyebrow{
+    font-size: 0.72rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--teal);
+    margin: 0 0 14px;
+    font-weight: 500;
   }
 
   h1{
-    font-family:'Baloo 2', sans-serif;
-    font-weight:800;
-    font-size:26px;
-    letter-spacing:0.5px;
-    margin:2px 0 10px;
-    background: linear-gradient(180deg, var(--gold-soft), var(--gold));
-    -webkit-background-clip:text;
-    background-clip:text;
-    color:transparent;
-    text-shadow: 0 2px 12px rgba(245,183,0,0.25);
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 2.1rem;
+    line-height: 1.15;
+    margin: 0 0 16px;
+    color: var(--ink);
+  }
+  h1 em{ color: var(--gold-soft); font-style: italic; }
+
+  .lede{
+    font-size: 1rem;
+    line-height: 1.65;
+    color: var(--ink-dim);
+    margin: 0 0 26px;
   }
 
-  .hud{
-    width:100%;
+  .btn{
+    appearance: none;
+    border: none;
+    cursor: pointer;
+    font-family: var(--font-body);
+    font-weight: 500;
+    font-size: 0.95rem;
+    letter-spacing: 0.01em;
+    border-radius: 999px;
+    padding: 14px 30px;
+    background: var(--gold-soft);
+    color: #241a10;
+    transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+  }
+  .btn:hover{ transform: translateY(-1px); box-shadow: 0 8px 20px -8px rgba(230,205,139,0.6); }
+  .btn:active{ transform: translateY(0); }
+  .btn:focus-visible{ outline: 2px solid var(--teal); outline-offset: 3px; }
+  .btn-ghost{
+    background: transparent;
+    border: 1px solid var(--line);
+    color: var(--ink-dim);
+  }
+  .btn-ghost:hover{ color: var(--ink); border-color: var(--gold); box-shadow:none; }
+  .btn-row{ display:flex; align-items:center; gap: 14px; margin-top: 8px; flex-wrap: wrap;}
+
+  .question-text{
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    line-height: 1.4;
+    font-weight: 500;
+    color: var(--ink);
+    margin: 0 0 30px;
+  }
+
+  .likert{
     display:flex;
-    justify-content:space-between;
-    align-items:center;
-    background: var(--panel);
-    border:1px solid var(--panel-line);
-    border-radius:14px;
-    padding:10px 16px;
-    margin-bottom:10px;
-    box-shadow: 0 6px 18px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.04);
+    justify-content: space-between;
+    gap: 8px;
   }
-
-  .hud-block{ text-align:center; }
-  .hud-label{
-    font-size:10px;
-    text-transform:uppercase;
-    letter-spacing:1.2px;
-    color: var(--lavender-dim);
-    font-weight:700;
-  }
-  .hud-value{
-    font-family:'Baloo 2', sans-serif;
-    font-size:22px;
-    font-weight:700;
-    color: var(--lavender);
-    line-height:1.1;
-  }
-  .hud-value.gold{ color: var(--gold-soft); }
-  .hud-value.turns-low{ color: #F4475E; animation: pulse-turn 0.9s infinite; }
-
-  @keyframes pulse-turn{
-    0%,100%{ transform:scale(1); }
-    50%{ transform:scale(1.12); }
-  }
-
-  #board-wrap{
-    position:relative;
-    border-radius:18px;
-    overflow:hidden;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5), inset 0 0 0 1px var(--panel-line);
-    background: radial-gradient(ellipse at 50% 0%, #232a56 0%, #10132a 75%);
-  }
-
-  canvas{ display:block; touch-action:none; }
-
-  .next-preview{
-    position:absolute;
-    top:8px; right:8px;
+  .likert-opt{
+    flex: 1;
     display:flex;
-    flex-direction:column;
-    align-items:center;
-    gap:2px;
-    background:rgba(12,15,33,0.55);
-    border:1px solid var(--panel-line);
-    border-radius:10px;
-    padding:5px 7px;
-    font-size:9px;
-    color:var(--lavender-dim);
-    text-transform:uppercase;
-    letter-spacing:1px;
-    font-weight:700;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    background: transparent;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 14px 4px 10px;
+    cursor: pointer;
+    color: var(--ink-dim);
+    transition: border-color 0.15s ease, background 0.15s ease, transform 0.1s ease;
   }
-  .next-dot{
-    width:16px; height:16px; border-radius:50%;
-    box-shadow: inset -2px -2px 4px rgba(0,0,0,0.35), inset 2px 2px 3px rgba(255,255,255,0.4);
+  .likert-opt .dot{
+    width: 14px; height:14px;
+    border-radius: 50%;
+    border: 2px solid var(--ink-dim);
+    transition: all 0.15s ease;
   }
-
-  .legend{
-    display:flex;
-    gap:10px;
-    margin-top:10px;
-    justify-content:center;
-    flex-wrap:wrap;
-  }
-  .legend-item{
-    position:relative;
-    display:flex;
-    align-items:center;
-    gap:6px;
-    background:var(--panel);
-    border:1px solid var(--panel-line);
-    border-radius:20px;
-    padding:5px 10px 5px 6px;
-    font-size:11px;
-    font-weight:700;
-    color:var(--lavender-dim);
-    cursor:help;
-  }
-  .legend-orb{
-    width:20px;height:20px;border-radius:50%;
-    display:flex; align-items:center; justify-content:center;
-    font-size:11px;
-    flex-shrink:0;
-    box-shadow: inset -2px -2px 4px rgba(0,0,0,0.4), inset 2px 2px 3px rgba(255,255,255,0.5);
-  }
-  .tooltip{
-    position:absolute;
-    bottom:130%;
-    left:50%;
-    transform:translateX(-50%) translateY(6px);
-    width:180px;
-    background:#0c0f21;
-    border:1px solid var(--panel-line);
-    border-radius:10px;
-    padding:8px 10px;
-    font-size:11px;
-    font-weight:600;
-    line-height:1.4;
-    color:var(--lavender);
-    opacity:0;
-    pointer-events:none;
-    transition:opacity 0.15s ease, transform 0.15s ease;
-    box-shadow:0 8px 20px rgba(0,0,0,0.5);
-    z-index:20;
-    text-transform:none;
-    letter-spacing:0;
-  }
-  .legend-item:hover .tooltip, .legend-item.tap-active .tooltip{
-    opacity:1;
-    transform:translateX(-50%) translateY(0);
-  }
-
-  .footer-row{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    width:100%;
-    margin-top:12px;
-    font-size:11px;
-    color:var(--lavender-dim);
-  }
-  #resetBtn{
-    background:none;
-    border:1px solid var(--panel-line);
-    color:var(--lavender-dim);
-    border-radius:8px;
-    padding:5px 10px;
-    font-size:11px;
-    font-weight:700;
-    cursor:pointer;
-    font-family:'Nunito',sans-serif;
-  }
-  #resetBtn:hover{ color:var(--lavender); border-color:var(--lavender-dim); }
-
-  #overlay{
-    position:absolute;
-    inset:0;
-    background:rgba(8,10,22,0.88);
-    display:none;
-    align-items:center;
-    justify-content:center;
-    flex-direction:column;
+  .likert-opt span.lbl{
+    font-size: 0.66rem;
+    line-height: 1.2;
     text-align:center;
-    padding:20px;
-    backdrop-filter: blur(2px);
-    z-index:30;
+    letter-spacing: 0.01em;
   }
-  #overlay.show{ display:flex; }
-  #overlay h2{
-    font-family:'Baloo 2', sans-serif;
-    font-size:26px;
+  .likert-opt:hover{ border-color: var(--gold); background: rgba(201,162,75,0.06); }
+  .likert-opt:focus-visible{ outline: 2px solid var(--teal); outline-offset: 2px; }
+  .likert-opt.selected{ border-color: var(--gold-soft); background: rgba(201,162,75,0.14); color: var(--ink); }
+  .likert-opt.selected .dot{ background: var(--gold-soft); border-color: var(--gold-soft); transform: scale(1.1); }
+
+  .back-link{
+    background:none; border:none; color: var(--ink-dim); cursor:pointer;
+    font-family: var(--font-body); font-size: 0.85rem; padding: 6px 0;
+    display:inline-flex; align-items:center; gap:6px;
+  }
+  .back-link:hover{ color: var(--gold-soft); }
+
+  form.gate{ display:flex; flex-direction: column; gap: 14px; }
+  input[type="email"], input[type="text"]{
+    background: rgba(0,0,0,0.2);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 14px 16px;
+    color: var(--ink);
+    font-family: var(--font-body);
+    font-size: 0.95rem;
+  }
+  input[type="email"]:focus, input[type="text"]:focus{
+    outline: 2px solid var(--teal); outline-offset: 2px; border-color: transparent;
+  }
+  input::placeholder{ color: rgba(179,167,207,0.5); }
+  .fine-print{ font-size: 0.72rem; color: rgba(179,167,207,0.55); line-height: 1.5; }
+
+  .toast-overlay{
+    position: fixed; inset:0; z-index: 20;
+    display:flex; align-items:center; justify-content:center;
+    background: rgba(10,7,20,0.88);
+    backdrop-filter: blur(3px);
+    opacity: 0; pointer-events:none;
+    transition: opacity 0.35s ease;
+    text-align:center; padding: 24px;
+  }
+  .toast-overlay.show{ opacity: 1; pointer-events:auto; }
+  .toast-overlay h2{
+    font-family: var(--font-display); font-style: italic; font-weight:500;
+    font-size: 2.2rem; color: var(--gold-soft); margin: 0 0 10px;
+  }
+  .toast-overlay p{ color: var(--ink-dim); max-width: 380px; margin: 0 auto; line-height:1.5;}
+
+  .sigil-wrap{
+    display:flex; justify-content:center; margin-bottom: 18px;
+  }
+  .sigil-wrap svg{ width: 72px; height:72px; }
+
+  .result-type{
+    text-align:center;
+    font-family: var(--font-display);
+    font-size: 0.85rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--teal);
+    margin: 0 0 6px;
+  }
+  .result-name{
+    text-align:center;
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 2.4rem;
+    margin: 0 0 6px;
+    color: var(--ink);
+  }
+  .result-tagline{
+    text-align:center;
+    font-family: var(--font-display);
+    font-style: italic;
     color: var(--gold-soft);
-    margin:0 0 6px;
+    font-size: 1.1rem;
+    margin: 0 0 28px;
   }
-  #overlay .final-score{
-    font-family:'Baloo 2', sans-serif;
-    font-size:44px;
-    font-weight:800;
-    color:#fff;
-    margin:6px 0;
-    text-shadow:0 0 20px rgba(245,183,0,0.5);
+  .result-desc p{
+    line-height: 1.75;
+    color: var(--ink-dim);
+    margin: 0 0 16px;
+    font-size: 0.97rem;
   }
-  #overlay .best{
-    font-size:13px;
-    color:var(--lavender-dim);
-    margin-bottom:16px;
-    font-weight:700;
+  .secondary-blurb{
+    margin-top: 22px;
+    padding-top: 22px;
+    border-top: 1px solid var(--line);
+    font-size: 0.9rem;
+    color: var(--ink-dim);
+    line-height: 1.6;
   }
-  #overlay .best span{ color: var(--gold-soft); }
-  #playAgain{
-    background: linear-gradient(180deg, var(--gold-soft), var(--gold));
-    border:none;
-    color:#221a02;
-    font-weight:800;
-    font-family:'Baloo 2', sans-serif;
-    font-size:16px;
-    padding:10px 26px;
-    border-radius:12px;
-    cursor:pointer;
-    box-shadow:0 6px 16px rgba(245,183,0,0.35);
+  .secondary-blurb b{ color: var(--gold-soft); font-weight: 500; }
+
+  footer.mirror-footer{
+    text-align:center;
+    color: rgba(179,167,207,0.4);
+    font-size: 0.72rem;
+    margin-top: 40px;
+    line-height: 1.6;
   }
-  #playAgain:active{ transform:translateY(1px); }
+
+  @media (max-width: 480px){
+    .card{ padding: 26px 18px; }
+    h1{ font-size: 1.7rem; }
+    .question-text{ font-size: 1.2rem; }
+    .likert-opt span.lbl{ display:none; }
+    .likert-opt{ padding: 12px 2px; }
+    .result-name{ font-size: 1.9rem; }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .stars{ animation: none; }
+    .btn, .likert-opt, .skypath-fill, .skypath-dot, .toast-overlay{ transition: none; }
+  }
 </style>
 </head>
 <body>
-
+<div class="stars"></div>
 <div id="app">
-  <h1>Pop Streak</h1>
-
-  <div class="hud">
-    <div class="hud-block">
-      <div class="hud-label">Score</div>
-      <div class="hud-value gold" id="scoreVal">0</div>
-    </div>
-    <div class="hud-block">
-      <div class="hud-label">Turns Left</div>
-      <div class="hud-value" id="turnsVal">30</div>
-    </div>
-    <div class="hud-block">
-      <div class="hud-label">Best</div>
-      <div class="hud-value" id="bestVal">0</div>
-    </div>
+  <div class="topbar">
+    <span class="brand">The Mirror Test</span>
+    <span class="progress-label" id="progressLabel"></span>
   </div>
-
-  <div id="board-wrap">
-    <canvas id="game" width="684" height="626"></canvas>
-    <div class="next-preview">
-      <div>Next</div>
-      <div class="next-dot" id="nextDot"></div>
-    </div>
-    <div id="overlay">
-      <h2 id="overlayTitle">Game Over</h2>
-      <div class="final-score" id="finalScore">0</div>
-      <div class="best" id="bestLine">Best: <span id="bestInline">0</span></div>
-      <button id="playAgain">Play Again</button>
-    </div>
+  <div class="skypath" id="skypath" style="display:none;">
+    <div class="skypath-fill" id="skypathFill"></div>
+    <div class="skypath-dot" id="skypathDot"></div>
   </div>
+  <main id="main"></main>
+  <footer class="mirror-footer">Not a diagnostic instrument. Not even a little bit. Just a mirror with good lighting.</footer>
+</div>
 
-  <div class="legend" id="legend"></div>
-
-  <div class="footer-row">
-    <span>Aim with mouse / touch, tap to fire</span>
-    <button id="resetBtn">Restart</button>
+<div class="toast-overlay" id="toastOverlay">
+  <div>
+    <h2>Just kidding&nbsp;😂</h2>
+    <p>We don't need your email. Nobody actually does. Here's what the mirror already saw&nbsp;&mdash;</p>
   </div>
 </div>
 
 <script>
 (function(){
-  // ---------- Config ----------
-  const R = 19;
-  const COLS_EVEN = 16;
-  const BOARD_LEFT = 20;
-  const TOP_Y = 30;
-  const ROW_H = R * Math.sqrt(3);
-  const MAX_ROWS = 15;
-  const DANGER_ROW = 13;
-  const TOTAL_TURNS = 30;
-  const NEW_ROW_EVERY = 4;
-  const BASE_POINTS = 10;
-  const COMBO_GROWTH = 1.1;
-  const SHOOTER_Y = 520 + 2 * (R * Math.sqrt(3));
-  const SHOOTER_X = BOARD_LEFT + (COLS_EVEN * 2 * R) / 2;
-  const BUBBLE_SPEED = 9.5;
 
-  const COLORS = {
-    blue:   { top:'#8fc0ff', mid:'#3B82F6', dark:'#1e4fa8' },
-    red:    { top:'#ff9aa8', mid:'#F4475E', dark:'#a01e33' },
-    yellow: { top:'#ffe28a', mid:'#FFC93C', dark:'#b8860a' },
-    green:  { top:'#8ff0cf', mid:'#34D399', dark:'#157a56' }
+  const TYPES_ORDER = ['ember','tide','stone','wind','frost','bloom','storm','dawn'];
+
+  const TYPES = {
+    ember: {
+      name: 'The Ember',
+      tagline: '"You run warm in a world that mostly runs lukewarm."',
+      sigil: `<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M32 8c6 8 2 12-1 16-4 5-6 9-3 15 2-3 4-4 6-4 0 4-2 7-5 9 9 0 15-6 15-14 0-6-4-9-6-13 1 4-1 6-3 6-3 0-2-4-3-9-1 3-3 4-6 4 2-4-1-7 6-10z"/></svg>`,
+      desc: [
+        "There's a heat to you that people notice before they can name it &mdash; in how you talk about the things you care about, in how fast you go from calm to fully lit. You rarely do anything halfway for long. You're drawn toward whatever feels most alive in the room, and you have little patience for going through the motions just to keep the peace. People come to you when they need someone to actually feel something with them, because you don't perform enthusiasm &mdash; you just have it.",
+        "That intensity is a gift, and it's also the thing you get tired of managing. Someone has probably called you 'too much' at some point, and you've quietly wondered if they were right. They weren't. What you carry isn't excess, it's voltage &mdash; and voltage needs somewhere to go. When there's nothing worth caring about in front of you, you don't calm down. You just go looking for a fire that isn't yours to tend.",
+        "The people who stay close to you are the ones who aren't scared off by your highs or your lows, who read your bluntness as respect instead of an attack. Your growth edge is realizing that stillness isn't the opposite of being alive &mdash; some of your best moments are the quiet ones you almost talked yourself out of having."
+      ]
+    },
+    tide: {
+      name: 'The Tide',
+      tagline: '"You feel the room before you understand why."',
+      sigil: `<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 26c5-6 11-6 16 0s11 6 16 0 11-6 16 0"/><path d="M6 38c5-6 11-6 16 0s11 6 16 0 11-6 16 0"/></svg>`,
+      desc: [
+        "You absorb a room before you've consciously registered a single detail in it. A shift in someone's tone, a tension nobody's named yet, the exact moment a conversation turns &mdash; you clock it early, often before the people involved do. This makes you a remarkably good mirror for other people's inner weather. It also means your own mood rarely belongs entirely to you; it's shaped by what's around you more than you'd probably like to admit.",
+        "You've cried at things that, on paper, weren't that sad. You've also gone unreadable for days at a time, needing to disappear and recalibrate somewhere no one can reach you. Neither of these is a flaw. It's the cost of a nervous system that's tuned to pick up more than most people's. The trouble is that people mistake your depth for moodiness, when really you're just processing at a different depth than they are.",
+        "What you need most are people who don't require you to explain every shift before they trust it's real. Your growth edge is learning to trust your own read on things without needing someone else's permission to feel it &mdash; the tide doesn't apologize for moving, it just moves, and it's still the same ocean underneath."
+      ]
+    },
+    stone: {
+      name: 'The Stone',
+      tagline: '"You\'re the ground people didn\'t know they needed until they were standing on it."',
+      sigil: `<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 46L24 16h16l14 30z"/><path d="M20 46l6-14h12l6 14"/></svg>`,
+      desc: [
+        "You are, more often than not, the calm in whatever room you're in &mdash; not because nothing affects you, but because you've decided that reacting to every small disturbance isn't worth the energy. People lean on you constantly, sometimes without ever quite noticing they're doing it, and you rarely make a thing of it. You'd rather be useful and quiet than celebrated and loud.",
+        "You're suspicious of anything that arrives with too much shine on it &mdash; a promise that sounds too easy, an idea that's all momentum and no foundation. Plans comfort you more than they excite you, and you'd take 'reliable' over 'exciting' most days of the week without hesitation. This has probably earned you a reputation as the reasonable one, the steady one, the one who doesn't panic. It's a compliment that can also feel a little lonely.",
+        "Because you give steadiness so freely, you can forget it's allowed to flow the other direction too. Your growth edge is letting yourself need something without first calculating whether you've earned it. The ground is allowed to ask for maintenance. It's still the ground."
+      ]
+    },
+    wind: {
+      name: 'The Wind',
+      tagline: '"You were built for movement, even when you\'re standing still."',
+      sigil: `<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M32 32m-18 0a18 18 0 1 0 36 0a18 18 0 1 0 -36 0"/><path d="M32 32m-11 0a11 11 0 1 0 22 0a11 11 0 1 0 -22 0" opacity="0.6"/><path d="M32 32m-4 0a4 4 0 1 0 8 0a4 4 0 1 0 -8 0" opacity="0.3"/></svg>`,
+      desc: [
+        "You get bored of your own routines faster than most people can even settle into one. There's a restlessness in you that isn't anxiety exactly &mdash; it's closer to hunger. New places, new questions, new versions of yourself all pull at you at once, and staying still for too long starts to feel less like comfort and more like a held breath.",
+        "You've probably started more things than you've finished, and you've made an uneasy peace with that, even if other people haven't. The idea of living the same year on repeat, in the same place, doing the same rounds, makes something in your chest tighten. You ask 'why' more than most people find comfortable, not to be difficult, but because the question genuinely hasn't left your head yet.",
+        "People sometimes read this as flightiness. It isn't. You're not running from things, you're running toward whatever's still alive. Your growth edge is discovering that some kinds of depth don't cost you your freedom &mdash; that certain roots don't hold you down so much as give you somewhere solid to launch from."
+      ]
+    },
+    frost: {
+      name: 'The Frost',
+      tagline: '"You see the crack before anyone else notices the wall."',
+      sigil: `<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M32 6v52M12 16l40 32M52 16L12 48"/></svg>`,
+      desc: [
+        "You'd rather be accurate than agreeable, and you've never fully understood people who choose otherwise. Something in you notices when a detail is slightly off &mdash; in a plan, a story, a person's tone &mdash; often before you can articulate exactly why. It's less a skill you practice than a setting you're built with, and it rarely turns off.",
+        "Small talk can feel like a genuine waste of both people's time, a kind of social static you tolerate rather than enjoy. You trust a clean argument over a strong feeling, even in moments when the feeling later turns out to have been right. This has probably gotten you labeled cold by people who mistook your economy of warmth for its absence. It isn't absent. It's just rationed, and given carefully, to people who've earned the real version of you.",
+        "Your growth edge is understanding that being right isn't always the same as being useful in the moment &mdash; that sometimes the truth needs to arrive a little later, wrapped in something softer, or it just bounces off the person who needed to hear it most."
+      ]
+    },
+    bloom: {
+      name: 'The Bloom',
+      tagline: '"You remember things about people that they forgot they told you."',
+      sigil: `<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="32" cy="20" r="7"/><circle cx="46" cy="32" r="7"/><circle cx="32" cy="44" r="7"/><circle cx="18" cy="32" r="7"/><circle cx="32" cy="32" r="4" fill="currentColor" stroke="none"/></svg>`,
+      desc: [
+        "You feel responsible for how the people around you are doing, sometimes more than they feel responsible for it themselves. It shows up in small ways &mdash; you remember a detail someone mentioned once in passing months ago, you notice when someone's gone quiet in a group and check on them later, privately. You've probably held a group together more than once without anyone quite clocking that you were the one doing it.",
+        "You find it hard to fully enjoy something if there's no one there to enjoy it with you, and you'd choose a shared ordinary afternoon over a spectacular one spent alone almost every time. This isn't neediness, it's orientation &mdash; you're simply tuned toward connection as the thing that makes anything else worth having.",
+        "The risk is that you get so good at tending to everyone else that you forget you're allowed a turn. Your growth edge is learning to receive care with the same ease you give it &mdash; to let yourself be looked after without immediately trying to make yourself useful again to balance the scale."
+      ]
+    },
+    storm: {
+      name: 'The Storm',
+      tagline: '"You don\'t fear the shake-up. You are the shake-up."',
+      sigil: `<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M36 6L18 34h12L26 58l22-30H36z"/></svg>`,
+      desc: [
+        "You get restless when things stay the same for too long, and there's a part of you that would rather cause a stir than sit quietly inside a comfort that's stopped serving anyone. You've probably walked away from something stable &mdash; a job, a routine, a version of your life that looked fine from the outside &mdash; because it had started to feel stagnant on the inside, and that was reason enough.",
+        "Rules read to you as suggestions more than commandments, especially when they no longer make sense for the situation in front of you. People sometimes brace when you enter a room, expecting disruption, and honestly, sometimes they're right to. But what looks like chaos from the outside is usually just momentum, refusing to wait for permission.",
+        "Your growth edge is learning to tell the difference between something that's genuinely a cage and something that just needs patience instead of demolition. Not everything stable is stagnant. Some things are just quietly building toward their own moment, and they need you to stay long enough to see it."
+      ]
+    },
+    dawn: {
+      name: 'The Dawn',
+      tagline: '"You see the version of things that hasn\'t happened yet."',
+      sigil: `<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 40a18 18 0 0 1 36 0"/><path d="M8 46h48M32 6v10M12 18l6 6M52 18l-6 6"/></svg>`,
+      desc: [
+        "You tend to see potential in things before it's obvious to anyone else &mdash; in a half-formed plan, an unfinished project, a person still figuring themselves out. Where others see a rough draft, you tend to see the shape of what it could become, and you hold onto that image with more patience than most people can manage.",
+        "You believe most people are doing their best, even in moments when their best looks nothing like it. This isn't naivety, even if it gets mistaken for it. It's a kind of long-view faith &mdash; a willingness to hold hope past the point where it would be easier to give up on. You've probably held onto something &mdash; a relationship, a goal, a belief about someone &mdash; longer than was strictly reasonable, and more than once it paid off in ways no one else saw coming.",
+        "Your growth edge is remembering that hope works best with something solid underneath it. Not everything blooms just because you believed in it hard enough &mdash; but that doesn't make the believing wrong. It just means the dawn still needs the ground to land on."
+      ]
+    }
   };
-  const COLOR_KEYS = Object.keys(COLORS);
 
-  const canvas = document.getElementById('game');
-  const ctx = canvas.getContext('2d');
+  const QUESTIONS = [
+    {type:'ember', text:"I feel most alive when I'm in the middle of something urgent."},
+    {type:'tide', text:"My mood shifts with the room I'm in more than I'd like to admit."},
+    {type:'stone', text:"I've been told I'm the \u201Creasonable one\u201D in most situations."},
+    {type:'wind', text:"I get bored of my own routines faster than most people seem to."},
+    {type:'frost', text:"I'd rather be accurate than agreeable."},
+    {type:'bloom', text:"I feel responsible for how the people around me are doing."},
+    {type:'storm', text:"I get restless when things stay the same for too long."},
+    {type:'dawn', text:"I tend to see potential in things before it's obvious to anyone else."},
+    {type:'ember', text:"Silence, if it goes on too long, starts to feel like a countdown."},
+    {type:'tide', text:"I've cried at something that wasn't really that sad."},
+    {type:'stone', text:"Plans comfort me more than they excite me."},
+    {type:'wind', text:"I've started more things than I've finished."},
+    {type:'frost', text:"I notice when something is slightly off before I can explain why."},
+    {type:'bloom', text:"I remember small details about people I barely know."},
+    {type:'storm', text:"I'd rather cause a stir than stay quiet and comfortable."},
+    {type:'dawn', text:"I believe most people are doing their best, even when it doesn't look like it."},
+    {type:'ember', text:"I'd rather burn out chasing something than fade out doing nothing."},
+    {type:'tide', text:"I go through phases where I need to disappear for a while."},
+    {type:'stone', text:"I don't need much to feel okay."},
+    {type:'wind', text:"The idea of living in one place forever makes me a little anxious."},
+    {type:'frost', text:"Small talk feels like a waste of both our time."},
+    {type:'bloom', text:"I find it hard to enjoy something if no one else is there to enjoy it with me."},
+    {type:'storm', text:"I've walked away from something stable because it felt stagnant."},
+    {type:'dawn', text:"I hold onto hope longer than is probably reasonable."},
+    {type:'ember', text:"If I had to pick a temperature to describe myself, it wouldn't be lukewarm."},
+    {type:'tide', text:"The moon feels more relatable to me than the sun."},
+    {type:'stone', text:"If my life were a piece of furniture, it would be built to last, not to impress."},
+    {type:'wind', text:"I'd choose a window seat over an aisle seat, even on a short trip."},
+    {type:'frost', text:"I prefer even numbers to odd ones."},
+    {type:'bloom', text:"If I found a stray animal, I'd probably already be planning where it sleeps tonight."}
+  ];
 
-  let grid = [];
-  let turnsLeft = TOTAL_TURNS;
-  let shotsFired = 0;
-  let score = 0;
-  let comboFloatTexts = [];
-  let particles = [];
-  let current = null;
-  let nextColor = null;
-  let flying = null;
-  let aimAngle = -Math.PI/2;
-  let gameOver = false;
-  let animating = false;
-  let dropAnim = [];
+  const LIKERT = [
+    {v:1, l:'Strongly Disagree'},
+    {v:2, l:'Disagree'},
+    {v:3, l:'Neutral'},
+    {v:4, l:'Agree'},
+    {v:5, l:'Strongly Agree'}
+  ];
 
-  const scoreEl = document.getElementById('scoreVal');
-  const turnsEl = document.getElementById('turnsVal');
-  const bestEl = document.getElementById('bestVal');
-  const nextDot = document.getElementById('nextDot');
-  const overlay = document.getElementById('overlay');
-  const finalScoreEl = document.getElementById('finalScore');
-  const bestInlineEl = document.getElementById('bestInline');
-  const overlayTitle = document.getElementById('overlayTitle');
+  let idx = -1; // -1 = intro
+  const answers = {};
+  const main = document.getElementById('main');
+  const progressLabel = document.getElementById('progressLabel');
+  const skypath = document.getElementById('skypath');
+  const skypathFill = document.getElementById('skypathFill');
+  const skypathDot = document.getElementById('skypathDot');
 
-  const HS_KEY = 'popStreak_highScore_v1';
-  function getHighScore(){ return parseInt(localStorage.getItem(HS_KEY) || '0', 10); }
-  function setHighScore(v){ localStorage.setItem(HS_KEY, String(v)); }
-  bestEl.textContent = getHighScore();
-
-  function colsInRow(row){ return (row % 2 === 0) ? COLS_EVEN : COLS_EVEN - 1; }
-
-  function cellCenter(row, col){
-    const y = TOP_Y + row * ROW_H;
-    const x = (row % 2 === 0)
-      ? BOARD_LEFT + R + col * 2 * R
-      : BOARD_LEFT + 2 * R + col * 2 * R;
-    return {x, y};
-  }
-
-  function neighborsOf(row, col){
-    const even = row % 2 === 0;
-    const list = even ? [
-      [row, col-1],[row, col+1],
-      [row-1, col-1],[row-1, col],
-      [row+1, col-1],[row+1, col]
-    ] : [
-      [row, col-1],[row, col+1],
-      [row-1, col],[row-1, col+1],
-      [row+1, col],[row+1, col+1]
-    ];
-    return list.filter(([r,c]) => r>=0 && r<MAX_ROWS && c>=0 && c<colsInRow(r));
-  }
-
-  function makeEmptyGrid(){
-    const g = [];
-    for(let r=0;r<MAX_ROWS;r++){ g.push(new Array(colsInRow(r)).fill(null)); }
-    return g;
-  }
-
-  function randomColor(){ return COLOR_KEYS[Math.floor(Math.random()*COLOR_KEYS.length)]; }
-
-  function randomCellContent(){
-    const roll = Math.random();
-    let type = 'normal';
-    if(roll < 0.06) type = 'bomb';
-    else if(roll < 0.11) type = 'rainbow';
-    else if(roll < 0.17) type = 'multiplier';
-    return { color: randomColor(), type };
-  }
-
-  function fillInitialRows(numRows){
-    for(let r=0;r<numRows;r++){
-      for(let c=0;c<colsInRow(r);c++){
-        grid[r][c] = randomCellContent();
-      }
+  function updateProgress(){
+    if(idx < 0 || idx >= QUESTIONS.length){
+      skypath.style.display = 'none';
+      progressLabel.textContent = '';
+      return;
     }
+    skypath.style.display = 'block';
+    const pct = (idx / QUESTIONS.length) * 100;
+    skypathFill.style.width = pct + '%';
+    skypathDot.style.left = pct + '%';
+    progressLabel.textContent = `Statement ${idx+1} of ${QUESTIONS.length}`;
   }
 
-  function shiftGridDown(){
-    const snapshot = [];
-    for(let r=0;r<MAX_ROWS;r++){
-      for(let c=0;c<colsInRow(r);c++){
-        if(grid[r][c]) snapshot.push({...cellCenter(r,c), data: grid[r][c]});
-      }
-    }
-    const newGrid = makeEmptyGrid();
-    for(const item of snapshot){
-      const targetY = item.y + ROW_H;
-      const targetRow = Math.round((targetY - TOP_Y) / ROW_H);
-      if(targetRow >= MAX_ROWS) continue;
-      const nc = colsInRow(targetRow);
-      const targetCol = (targetRow % 2 === 0)
-        ? Math.round((item.x - BOARD_LEFT - R) / (2*R))
-        : Math.round((item.x - BOARD_LEFT - 2*R) / (2*R));
-      const clampedCol = Math.max(0, Math.min(nc-1, targetCol));
-      newGrid[targetRow][clampedCol] = item.data;
-    }
-    for(let c=0;c<colsInRow(0);c++){
-      newGrid[0][c] = randomCellContent();
-    }
-    grid = newGrid;
+  function renderIntro(){
+    skypath.style.display = 'none';
+    progressLabel.textContent = '';
+    main.innerHTML = `
+      <div class="card">
+        <p class="eyebrow">A brief self-portrait</p>
+        <h1>Somewhere in here is a version of you that's <em>hard to argue with.</em></h1>
+        <p class="lede">Thirty short statements. No right answers, no time limit, no wrong turns. Answer with your gut, not your résumé &mdash; the first reaction is usually the honest one. At the end, we'll show you which of eight types you lean toward.</p>
+        <div class="btn-row">
+          <button class="btn" id="startBtn">Begin</button>
+          <span style="font-size:0.8rem; color:var(--ink-dim);">~4 minutes</span>
+        </div>
+      </div>
+    `;
+    document.getElementById('startBtn').addEventListener('click', () => { idx = 0; render(); });
   }
 
-  function isGridEmpty(){
-    for(let r=0;r<MAX_ROWS;r++) for(let c=0;c<colsInRow(r);c++) if(grid[r][c]) return false;
-    return true;
-  }
-
-  function highestOccupiedDangerRow(){
-    for(let r=MAX_ROWS-1;r>=DANGER_ROW;r--){
-      for(let c=0;c<colsInRow(r);c++) if(grid[r][c]) return true;
-    }
-    return false;
-  }
-
-  function initGame(){
-    grid = makeEmptyGrid();
-    fillInitialRows(8);
-    turnsLeft = TOTAL_TURNS;
-    shotsFired = 0;
-    score = 0;
-    particles = [];
-    comboFloatTexts = [];
-    dropAnim = [];
-    flying = null;
-    gameOver = false;
-    animating = false;
-    current = randomColor();
-    nextColor = randomColor();
-    updateHUD();
-    overlay.classList.remove('show');
-    updateNextDot();
-  }
-
-  function updateHUD(){
-    scoreEl.textContent = Math.round(score);
-    turnsEl.textContent = turnsLeft;
-    turnsEl.classList.toggle('turns-low', turnsLeft <= 5);
-    bestEl.textContent = getHighScore();
-  }
-  function updateNextDot(){
-    const c = COLORS[nextColor];
-    nextDot.style.background = `radial-gradient(circle at 35% 30%, ${c.top}, ${c.mid} 60%, ${c.dark})`;
-  }
-
-  function drawBubble(x, y, color, type, radius){
-    radius = radius || R;
-    const c = COLORS[color];
-    ctx.save();
-    ctx.beginPath();
-    ctx.arc(x, y, radius, 0, Math.PI*2);
-    const grad = ctx.createRadialGradient(x-radius*0.35, y-radius*0.4, radius*0.1, x, y, radius);
-    grad.addColorStop(0, c.top);
-    grad.addColorStop(0.55, c.mid);
-    grad.addColorStop(1, c.dark);
-    ctx.fillStyle = grad;
-    ctx.fill();
-    ctx.lineWidth = 1.5;
-    ctx.strokeStyle = 'rgba(0,0,0,0.25)';
-    ctx.stroke();
-
-    ctx.beginPath();
-    ctx.ellipse(x-radius*0.32, y-radius*0.38, radius*0.32, radius*0.18, -0.6, 0, Math.PI*2);
-    ctx.fillStyle = 'rgba(255,255,255,0.55)';
-    ctx.fill();
-
-    if(type === 'bomb'){
-      ctx.fillStyle = 'rgba(10,10,20,0.85)';
-      ctx.beginPath(); ctx.arc(x, y+2, radius*0.32, 0, Math.PI*2); ctx.fill();
-      ctx.strokeStyle = 'rgba(255,255,255,0.8)'; ctx.lineWidth = 1.2;
-      ctx.beginPath(); ctx.moveTo(x, y-radius*0.15); ctx.lineTo(x+radius*0.28, y-radius*0.55); ctx.stroke();
-    } else if(type === 'rainbow'){
-      const stripes = ['#ff5a5a','#ffb84d','#ffe14d','#66e08a','#5ab8ff','#b98bff'];
-      ctx.save();
-      ctx.beginPath(); ctx.arc(x,y,radius*0.62,0,Math.PI*2); ctx.clip();
-      const bandH = (radius*1.24)/stripes.length;
-      stripes.forEach((s,i)=>{
-        ctx.fillStyle = s;
-        ctx.fillRect(x-radius*0.62, y-radius*0.62+i*bandH, radius*1.24, bandH+0.5);
+  function renderQuestion(){
+    updateProgress();
+    const q = QUESTIONS[idx];
+    const existing = answers[idx];
+    main.innerHTML = `
+      <div class="card">
+        <p class="eyebrow">Statement ${String(idx+1).padStart(2,'0')} / ${QUESTIONS.length}</p>
+        <p class="question-text">${q.text}</p>
+        <div class="likert" role="radiogroup" aria-label="Response scale">
+          ${LIKERT.map(o => `
+            <button class="likert-opt${existing===o.v ? ' selected':''}" data-value="${o.v}" role="radio" aria-checked="${existing===o.v}">
+              <span class="dot"></span>
+              <span class="lbl">${o.l}</span>
+            </button>
+          `).join('')}
+        </div>
+        <div class="btn-row" style="margin-top:26px;">
+          ${idx > 0 ? `<button class="back-link" id="backBtn">&larr; back</button>` : `<span></span>`}
+        </div>
+      </div>
+    `;
+    main.querySelectorAll('.likert-opt').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const val = parseInt(btn.dataset.value, 10);
+        answers[idx] = val;
+        main.querySelectorAll('.likert-opt').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        setTimeout(() => {
+          if(idx + 1 < QUESTIONS.length){ idx++; render(); }
+          else { idx = QUESTIONS.length; render(); }
+        }, 320);
       });
-      ctx.restore();
-    } else if(type === 'multiplier'){
-      ctx.fillStyle = '#fff';
-      ctx.font = `800 ${radius*1.05}px 'Baloo 2', sans-serif`;
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText('★', x, y+1);
-    }
-    ctx.restore();
-  }
-
-  function drawGrid(){
-    for(let r=0;r<MAX_ROWS;r++){
-      for(let c=0;c<colsInRow(r);c++){
-        const cell = grid[r][c];
-        if(cell){
-          const {x,y} = cellCenter(r,c);
-          drawBubble(x,y,cell.color, cell.type);
-        }
-      }
-    }
-  }
-
-  function drawShooter(){
-    ctx.save();
-    ctx.beginPath();
-    ctx.arc(SHOOTER_X, SHOOTER_Y+18, 26, Math.PI, Math.PI*2);
-    ctx.fillStyle = '#20265a';
-    ctx.fill();
-    ctx.strokeStyle = '#3a4290';
-    ctx.lineWidth = 2;
-    ctx.stroke();
-
-    if(!animating && !gameOver){
-      drawAimPreview();
-    }
-
-    ctx.translate(SHOOTER_X, SHOOTER_Y);
-    ctx.rotate(aimAngle + Math.PI/2);
-    ctx.fillStyle = '#2b3170';
-    ctx.strokeStyle = '#4650a8';
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    if(ctx.roundRect){ ctx.roundRect(-8, -36, 16, 30, 6); } else { ctx.rect(-8,-36,16,30); }
-    ctx.fill(); ctx.stroke();
-    ctx.restore();
-
-    if(current) drawBubble(SHOOTER_X, SHOOTER_Y, current, 'normal', R+1);
-  }
-
-  function drawAimPreview(){
-    let x = SHOOTER_X, y = SHOOTER_Y;
-    let dx = Math.cos(aimAngle) * 8, dy = Math.sin(aimAngle) * 8;
-    ctx.save();
-    ctx.setLineDash([5,7]);
-    ctx.strokeStyle = 'rgba(255,255,255,0.25)';
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.moveTo(x,y);
-    const boardW = COLS_EVEN * 2 * R;
-    for(let i=0;i<60;i++){
-      x += dx; y += dy;
-      if(x - R < BOARD_LEFT){ x = BOARD_LEFT + R; dx = -dx; }
-      if(x + R > BOARD_LEFT + boardW){ x = BOARD_LEFT + boardW - R; dx = -dx; }
-      if(y < TOP_Y) break;
-      ctx.lineTo(x,y);
-    }
-    ctx.stroke();
-    ctx.restore();
-  }
-
-  function drawParticles(){
-    particles.forEach(p=>{
-      ctx.save();
-      ctx.globalAlpha = Math.max(0, p.life/28);
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, p.r, 0, Math.PI*2);
-      ctx.fillStyle = p.color;
-      ctx.fill();
-      ctx.restore();
     });
+    const backBtn = document.getElementById('backBtn');
+    if(backBtn) backBtn.addEventListener('click', () => { idx--; render(); });
   }
 
-  function drawFloatTexts(){
-    comboFloatTexts.forEach(t=>{
-      ctx.save();
-      ctx.globalAlpha = Math.max(0, t.life/50);
-      ctx.font = `800 ${t.size}px 'Baloo 2', sans-serif`;
-      ctx.textAlign = 'center';
-      ctx.fillStyle = t.color;
-      ctx.fillText(t.text, t.x, t.y);
-      ctx.restore();
+  function renderGate(){
+    updateProgress();
+    main.innerHTML = `
+      <div class="card">
+        <p class="eyebrow">Last step</p>
+        <h1>Where should we send your results?</h1>
+        <p class="lede">Enter your email to unlock your full personality reading.</p>
+        <form class="gate" id="gateForm">
+          <input type="email" id="emailInput" placeholder="you@example.com" autocomplete="email">
+          <div class="btn-row">
+            <button type="submit" class="btn">Reveal My Results</button>
+            <button type="button" class="back-link" id="gateBackBtn">&larr; back</button>
+          </div>
+          <p class="fine-print">We'll send your results, plus the occasional follow-up reading, to this address.</p>
+        </form>
+      </div>
+    `;
+    document.getElementById('gateForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      showToastThenResults();
+    });
+    document.getElementById('gateBackBtn').addEventListener('click', () => { idx = QUESTIONS.length - 1; render(); });
+  }
+
+  function showToastThenResults(){
+    const overlay = document.getElementById('toastOverlay');
+    overlay.classList.add('show');
+    setTimeout(() => {
+      overlay.classList.remove('show');
+      idx = QUESTIONS.length + 1;
+      render();
+    }, 1500);
+  }
+
+  function computeResult(){
+    const scores = {};
+    TYPES_ORDER.forEach(t => scores[t] = 0);
+    QUESTIONS.forEach((q, i) => {
+      const val = answers[i];
+      if(val === undefined) return;
+      scores[q.type] += (val - 3);
+    });
+    const ranked = TYPES_ORDER.slice().sort((a,b) => scores[b] - scores[a]);
+    return { top: ranked[0], second: ranked[1], scores };
+  }
+
+  function renderResults(){
+    skypath.style.display = 'none';
+    progressLabel.textContent = '';
+    const { top, second } = computeResult();
+    const t = TYPES[top];
+    const s = TYPES[second];
+    main.innerHTML = `
+      <div class="card">
+        <div class="sigil-wrap" style="color:var(--gold-soft);">${t.sigil}</div>
+        <p class="result-type">Your type</p>
+        <h1 class="result-name" style="text-align:center;">${t.name}</h1>
+        <p class="result-tagline">${t.tagline}</p>
+        <div class="result-desc">
+          ${t.desc.map(p => `<p>${p}</p>`).join('')}
+        </div>
+        <div class="secondary-blurb">
+          There's also a strong current of <b>${s.name}</b> running underneath &mdash; ${s.tagline}
+        </div>
+        <div class="btn-row" style="justify-content:center; margin-top:28px;">
+          <button class="btn btn-ghost" id="retakeBtn">Take it again</button>
+        </div>
+      </div>
+    `;
+    document.getElementById('retakeBtn').addEventListener('click', () => {
+      idx = -1;
+      Object.keys(answers).forEach(k => delete answers[k]);
+      render();
     });
   }
 
   function render(){
-    ctx.clearRect(0,0,canvas.width,canvas.height);
-    drawGrid();
-    if(flying) drawBubble(flying.x, flying.y, flying.color, flying.type);
-    dropAnim.forEach(b=> drawBubble(b.x, b.y, b.color, b.type));
-    drawParticles();
-    drawFloatTexts();
-    drawShooter();
+    if(idx === -1) renderIntro();
+    else if(idx >= 0 && idx < QUESTIONS.length) renderQuestion();
+    else if(idx === QUESTIONS.length) renderGate();
+    else renderResults();
   }
 
-  function findMatchGroup(row, col){
-    const target = grid[row][col];
-    if(!target) return [];
-    const targetColor = target.type === 'rainbow' ? null : target.color;
-    const visited = new Set();
-    const stack = [[row,col]];
-    const group = [];
-    visited.add(row+','+col);
-    while(stack.length){
-      const [r,c] = stack.pop();
-      group.push([r,c]);
-      for(const [nr,nc] of neighborsOf(r,c)){
-        const key = nr+','+nc;
-        if(visited.has(key)) continue;
-        const cell = grid[nr][nc];
-        if(!cell) continue;
-        const matches = cell.type === 'rainbow' || targetColor === null || cell.color === targetColor;
-        if(matches){
-          visited.add(key);
-          stack.push([nr,nc]);
-        }
-      }
-    }
-    return group;
-  }
-
-  function findFloatingBubbles(){
-    const connected = new Set();
-    const queue = [];
-    for(let c=0;c<colsInRow(0);c++){
-      if(grid[0][c]){ connected.add('0,'+c); queue.push([0,c]); }
-    }
-    while(queue.length){
-      const [r,c] = queue.shift();
-      for(const [nr,nc] of neighborsOf(r,c)){
-        const key = nr+','+nc;
-        if(connected.has(key)) continue;
-        if(grid[nr][nc]){ connected.add(key); queue.push([nr,nc]); }
-      }
-    }
-    const floating = [];
-    for(let r=0;r<MAX_ROWS;r++){
-      for(let c=0;c<colsInRow(r);c++){
-        if(grid[r][c] && !connected.has(r+','+c)) floating.push([r,c]);
-      }
-    }
-    return floating;
-  }
-
-  function spawnPopParticles(x,y,colorKey){
-    const c = COLORS[colorKey] ? COLORS[colorKey].mid : '#ffffff';
-    for(let i=0;i<7;i++){
-      const ang = Math.random()*Math.PI*2;
-      const spd = 1.5 + Math.random()*3;
-      particles.push({x,y, vx:Math.cos(ang)*spd, vy:Math.sin(ang)*spd, life:28, r:2+Math.random()*2, color:c});
-    }
-  }
-
-  function resolveMatch(row, col){
-    const group = findMatchGroup(row, col);
-    if(group.length < 3){
-      return;
-    }
-    let poppedSet = new Set(group.map(([r,c])=>r+','+c));
-    let hasMultiplier = false;
-
-    const bombCells = group.filter(([r,c]) => grid[r][c] && grid[r][c].type === 'bomb');
-    bombCells.forEach(([r,c])=>{
-      neighborsOf(r,c).forEach(([nr,nc])=>{
-        if(grid[nr][nc]) poppedSet.add(nr+','+nc);
-      });
-      neighborsOf(r,c).forEach(([nr,nc])=>{
-        neighborsOf(nr,nc).forEach(([nr2,nc2])=>{
-          if(grid[nr2][nc2]) poppedSet.add(nr2+','+nc2);
-        });
-      });
-    });
-
-    poppedSet.forEach(key=>{
-      const [r,c] = key.split(',').map(Number);
-      if(grid[r][c] && grid[r][c].type === 'multiplier') hasMultiplier = true;
-    });
-
-    poppedSet.forEach(key=>{
-      const [r,c] = key.split(',').map(Number);
-      const cell = grid[r][c];
-      if(cell){
-        const {x,y} = cellCenter(r,c);
-        spawnPopParticles(x,y,cell.color);
-      }
-      grid[r][c] = null;
-    });
-
-    const floating = findFloatingBubbles();
-    floating.forEach(([r,c])=>{
-      const cell = grid[r][c];
-      if(cell){
-        const {x,y} = cellCenter(r,c);
-        dropAnim.push({x,y,vy:2, color:cell.color, type:cell.type});
-        poppedSet.add(r+','+c);
-        if(cell.type === 'multiplier') hasMultiplier = true;
-      }
-      grid[r][c] = null;
-    });
-
-    const N = poppedSet.size;
-    let turnScore = 0;
-    for(let i=0;i<N;i++){
-      turnScore += BASE_POINTS * Math.pow(COMBO_GROWTH, i);
-    }
-    if(hasMultiplier) turnScore *= 2;
-    turnScore = Math.round(turnScore);
-    score += turnScore;
-
-    const {x:fx,y:fy} = cellCenter(row,col);
-    let label = N + ' popped  +' + turnScore;
-    if(N >= 8) label = 'MEGA COMBO x' + N + '!  +' + turnScore;
-    else if(N >= 5) label = 'COMBO x' + N + '!  +' + turnScore;
-    if(hasMultiplier) label += '  ★x2';
-    comboFloatTexts.push({x:fx, y:fy, text:label, life:50, size: N>=8?18:14, color: hasMultiplier? '#FFD866':'#ffffff'});
-  }
-
-  function snapToGrid(x, y){
-    let bestRow = Math.round((y - TOP_Y) / ROW_H);
-    bestRow = Math.max(0, Math.min(MAX_ROWS-1, bestRow));
-    let candidates = [];
-    for(let dr=-1; dr<=1; dr++){
-      const row = bestRow + dr;
-      if(row < 0 || row >= MAX_ROWS) continue;
-      const nc = colsInRow(row);
-      let col = (row % 2 === 0)
-        ? Math.round((x - BOARD_LEFT - R) / (2*R))
-        : Math.round((x - BOARD_LEFT - 2*R) / (2*R));
-      for(let dc=-1; dc<=1; dc++){
-        const cc = col+dc;
-        if(cc>=0 && cc<nc) candidates.push([row,cc]);
-      }
-    }
-    let best = null, bestDist = Infinity;
-    candidates.forEach(([r,c])=>{
-      if(grid[r][c]) return;
-      const {x:cx,y:cy} = cellCenter(r,c);
-      const d = (cx-x)*(cx-x) + (cy-y)*(cy-y);
-      if(d < bestDist){ bestDist = d; best = [r,c]; }
-    });
-    if(!best){
-      for(let r=0;r<MAX_ROWS;r++){
-        for(let c=0;c<colsInRow(r);c++){
-          if(grid[r][c]) continue;
-          const {x:cx,y:cy} = cellCenter(r,c);
-          const d = (cx-x)*(cx-x) + (cy-y)*(cy-y);
-          if(d<bestDist){ bestDist=d; best=[r,c]; }
-        }
-      }
-    }
-    return best;
-  }
-
-  function fire(){
-    if(animating || gameOver || !current) return;
-    let angle = aimAngle;
-    const minA = -Math.PI + 0.18, maxA = -0.18;
-    if(angle < minA) angle = minA;
-    if(angle > maxA) angle = maxA;
-
-    flying = {
-      x: SHOOTER_X, y: SHOOTER_Y,
-      dx: Math.cos(angle) * BUBBLE_SPEED,
-      dy: Math.sin(angle) * BUBBLE_SPEED,
-      color: current,
-      type: 'normal'
-    };
-    animating = true;
-    current = nextColor;
-    nextColor = randomColor();
-    updateNextDot();
-  }
-
-  function stepFlying(){
-    if(!flying) return;
-    flying.x += flying.dx;
-    flying.y += flying.dy;
-    const boardW = COLS_EVEN * 2 * R;
-    if(flying.x - R < BOARD_LEFT){ flying.x = BOARD_LEFT + R; flying.dx *= -1; }
-    if(flying.x + R > BOARD_LEFT + boardW){ flying.x = BOARD_LEFT + boardW - R; flying.dx *= -1; }
-
-    let collided = flying.y - R <= TOP_Y - R*0.4;
-    if(!collided){
-      outer:
-      for(let r=0;r<MAX_ROWS;r++){
-        for(let c=0;c<colsInRow(r);c++){
-          const cell = grid[r][c];
-          if(!cell) continue;
-          const {x,y} = cellCenter(r,c);
-          const dist2 = (x-flying.x)*(x-flying.x) + (y-flying.y)*(y-flying.y);
-          if(dist2 < (2*R*0.92)*(2*R*0.92)){ collided = true; break outer; }
-        }
-      }
-    }
-
-    if(collided){
-      const spot = snapToGrid(flying.x, flying.y);
-      if(spot){
-        const [r,c] = spot;
-        grid[r][c] = { color: flying.color, type: 'normal' };
-        flying = null;
-        finishTurn(r,c);
-      } else {
-        flying = null;
-        finishTurn(null,null);
-      }
-    }
-  }
-
-  function finishTurn(r,c){
-    if(r !== null) resolveMatch(r,c);
-    shotsFired++;
-    turnsLeft--;
-    updateHUD();
-
-    if(shotsFired % NEW_ROW_EVERY === 0 && turnsLeft > 0){
-      shiftGridDown();
-    }
-
-    setTimeout(()=>{
-      animating = false;
-      checkEndConditions();
-    }, 260);
-  }
-
-  function checkEndConditions(){
-    if(gameOver) return;
-    if(isGridEmpty()){
-      score += 500;
-      endGame('Board Cleared!');
-      return;
-    }
-    if(highestOccupiedDangerRow()){
-      endGame('Bubbles Reached the Bottom!');
-      return;
-    }
-    if(turnsLeft <= 0){
-      endGame('Out of Turns!');
-      return;
-    }
-  }
-
-  function endGame(reason){
-    gameOver = true;
-    updateHUD();
-    const hs = getHighScore();
-    const finalScore = Math.round(score);
-    if(finalScore > hs){ setHighScore(finalScore); }
-    overlayTitle.textContent = reason;
-    finalScoreEl.textContent = finalScore;
-    bestInlineEl.textContent = getHighScore();
-    bestEl.textContent = getHighScore();
-    overlay.classList.add('show');
-  }
-
-  function tick(){
-    if(flying) stepFlying();
-
-    particles.forEach(p=>{ p.x+=p.vx; p.y+=p.vy; p.vy += 0.08; p.life--; });
-    particles = particles.filter(p=>p.life>0);
-
-    comboFloatTexts.forEach(t=>{ t.y -= 0.4; t.life--; });
-    comboFloatTexts = comboFloatTexts.filter(t=>t.life>0);
-
-    dropAnim.forEach(b=>{ b.y += b.vy; b.vy += 0.5; });
-    dropAnim = dropAnim.filter(b=> b.y < canvas.height + 30);
-
-    render();
-    requestAnimationFrame(tick);
-  }
-
-  function angleFromEvent(clientX, clientY){
-    const rect = canvas.getBoundingClientRect();
-    const scaleX = canvas.width / rect.width;
-    const scaleY = canvas.height / rect.height;
-    const x = (clientX - rect.left) * scaleX;
-    const y = (clientY - rect.top) * scaleY;
-    return Math.atan2(y - SHOOTER_Y, x - SHOOTER_X);
-  }
-
-  canvas.addEventListener('mousemove', (e)=>{
-    aimAngle = angleFromEvent(e.clientX, e.clientY);
-  });
-  canvas.addEventListener('click', (e)=>{
-    aimAngle = angleFromEvent(e.clientX, e.clientY);
-    fire();
-  });
-  canvas.addEventListener('touchstart', (e)=>{
-    const t = e.touches[0];
-    aimAngle = angleFromEvent(t.clientX, t.clientY);
-  }, {passive:true});
-  canvas.addEventListener('touchmove', (e)=>{
-    const t = e.touches[0];
-    aimAngle = angleFromEvent(t.clientX, t.clientY);
-    e.preventDefault();
-  }, {passive:false});
-  canvas.addEventListener('touchend', (e)=>{
-    fire();
-  });
-
-  document.getElementById('resetBtn').addEventListener('click', initGame);
-  document.getElementById('playAgain').addEventListener('click', initGame);
-
-  const legendData = [
-    { icon:'💣', label:'Bomb', color:'#F4475E', tip:'Pop a bomb bubble in a match and it blasts nearby bubbles too, regardless of color.' },
-    { icon:'🌈', label:'Rainbow', color:'#34D399', tip:'Rainbow bubbles connect to any color, helping link up bigger groups.' },
-    { icon:'★', label:'Star', color:'#FFC93C', tip:'Pop a star bubble in a match and it doubles your entire score for that turn.' }
-  ];
-  const legendEl = document.getElementById('legend');
-  legendData.forEach(item=>{
-    const div = document.createElement('div');
-    div.className = 'legend-item';
-    div.innerHTML = `<span class="legend-orb" style="background:radial-gradient(circle at 35% 30%, #fff2, ${item.color})">${item.icon}</span>${item.label}<div class="tooltip">${item.tip}</div>`;
-    div.addEventListener('click', ()=>{ div.classList.toggle('tap-active'); });
-    legendEl.appendChild(div);
-  });
-
-  initGame();
-  requestAnimationFrame(tick);
+  render();
 })();
 </script>
 </body>
