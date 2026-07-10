@@ -255,6 +255,45 @@
   .keys-hint{ display:flex; gap:10px; }
   .keys-hint span{ background:#241a2b; border:1px solid #46334f; padding:3px 8px; border-radius:4px; font-size:11px; }
 
+  .chat-toggle{
+    position:absolute; top:14px; right:14px;
+    background:#241a2b; border:1px solid #46334f; color:var(--cream);
+    font-family:'JetBrains Mono', monospace; font-size:10px; letter-spacing:1px;
+    padding:6px 10px; border-radius:6px; cursor:pointer;
+    display:flex; align-items:center; gap:6px;
+  }
+  .chat-badge{
+    background:var(--magenta); color:#2a0f1a; border-radius:50%;
+    min-width:16px; height:16px; font-size:10px; font-weight:700;
+    display:flex; align-items:center; justify-content:center; padding:0 3px;
+  }
+  .chat-panel{
+    position:absolute; top:50px; right:14px; left:14px; bottom:14px;
+    background:#0e0912; border:1px solid #46334f; border-radius:12px;
+    z-index:5; display:flex; flex-direction:column; padding:10px;
+  }
+  .chat-header{
+    display:flex; justify-content:space-between; align-items:center;
+    font-size:11px; letter-spacing:1px; color:#8a7a92; margin-bottom:8px;
+  }
+  .chat-close{ background:none; border:none; color:var(--cream); font-size:16px; cursor:pointer; line-height:1; }
+  .chat-messages{ flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:6px; margin-bottom:8px; }
+  .chat-msg{ font-size:12px; line-height:1.4; word-break:break-word; }
+  .chat-msg .who{ font-weight:700; margin-right:6px; }
+  .chat-msg.mine .who{ color:var(--amber); }
+  .chat-msg.theirs .who{ color:var(--teal); }
+  .chat-input-row{ display:flex; gap:6px; }
+  .chat-input-row input{
+    flex:1; background:#1c1220; border:1px solid #46334f; color:var(--cream);
+    font-family:'JetBrains Mono', monospace; font-size:12px; padding:8px; border-radius:6px;
+  }
+  .chat-input-row input:focus{ outline:2px solid var(--teal); }
+  .chat-send{
+    background:var(--teal); color:#052723; border:none;
+    font-family:'Rubik Mono One', sans-serif; font-size:11px;
+    padding:8px 12px; border-radius:6px; cursor:pointer;
+  }
+
   .hidden{ display:none !important; }
 
   @media (prefers-reduced-motion: reduce){
@@ -268,6 +307,21 @@
 <div class="deck">
   <h1 class="logo">TAPE<span>·</span>TAP</h1>
   <div class="subhead" id="subhead">ONLINE DUEL</div>
+
+  <button class="chat-toggle hidden" id="chatToggle">
+    CHAT <span class="chat-badge hidden" id="chatBadge">0</span>
+  </button>
+  <div class="chat-panel hidden" id="chatPanel">
+    <div class="chat-header">
+      <span>DUEL CHAT</span>
+      <button class="chat-close" id="chatClose">&times;</button>
+    </div>
+    <div class="chat-messages" id="chatMessages"></div>
+    <div class="chat-input-row">
+      <input type="text" id="chatInput" maxlength="200" placeholder="Say something…">
+      <button class="chat-send" id="chatSend">SEND</button>
+    </div>
+  </div>
 
   <div id="screenMenu" class="panel">
     <p>Race a friend on separate devices. Same notes, same clock, whoever's tape snaps first loses. Both of you need this open inside Claude for sync to work.</p>
@@ -445,6 +499,91 @@
   let code = null;
   let seed = null;
   let startTime = null;
+
+  let chatPollId = null;
+  let chatOpen = false;
+  let lastChatCount = 0;
+  let chatSeen = 0;
+
+  function chatKey(){ return 'taptap:'+code+':chat'; }
+
+  function renderChatMessages(list){
+    const box = el('chatMessages');
+    box.innerHTML = '';
+    list.forEach(m=>{
+      const div = document.createElement('div');
+      div.className = 'chat-msg ' + (m.from === role ? 'mine' : 'theirs');
+      const who = document.createElement('span');
+      who.className = 'who';
+      who.textContent = (m.from === role ? 'You' : 'Rival') + ':';
+      div.appendChild(who);
+      div.appendChild(document.createTextNode(m.text));
+      box.appendChild(div);
+    });
+    box.scrollTop = box.scrollHeight;
+  }
+
+  function updateChatBadge(n){
+    const b = el('chatBadge');
+    if(n > 0){ b.textContent = n > 9 ? '9+' : String(n); b.classList.remove('hidden'); }
+    else b.classList.add('hidden');
+  }
+
+  async function loadAndRenderChat(){
+    if(!code || !storageOk) return;
+    const data = await safeGet(chatKey());
+    const list = (data && data.messages) ? data.messages : [];
+    if(list.length !== lastChatCount){
+      renderChatMessages(list);
+      lastChatCount = list.length;
+      if(!chatOpen) updateChatBadge(list.length - chatSeen);
+    }
+  }
+
+  function startChat(){
+    lastChatCount = 0; chatSeen = 0; chatOpen = false;
+    el('chatToggle').classList.remove('hidden');
+    el('chatMessages').innerHTML = '';
+    updateChatBadge(0);
+    loadAndRenderChat();
+    chatPollId = setInterval(loadAndRenderChat, 1200);
+  }
+
+  function stopChat(){
+    clearInterval(chatPollId);
+    el('chatToggle').classList.add('hidden');
+    el('chatPanel').classList.add('hidden');
+    chatOpen = false;
+    updateChatBadge(0);
+  }
+
+  async function sendChat(){
+    const input = el('chatInput');
+    const text = input.value.trim();
+    if(!text || !code || !storageOk) return;
+    input.value = '';
+    const data = await safeGet(chatKey());
+    const list = (data && data.messages) ? data.messages : [];
+    list.push({ from: role, text: text.slice(0,200), ts: Date.now() });
+    while(list.length > 40) list.shift();
+    await safeSet(chatKey(), { messages: list });
+    loadAndRenderChat();
+  }
+
+  el('chatToggle').addEventListener('click', ()=>{
+    chatOpen = !chatOpen;
+    el('chatPanel').classList.toggle('hidden', !chatOpen);
+    if(chatOpen){ chatSeen = lastChatCount; updateChatBadge(0); loadAndRenderChat(); }
+  });
+  el('chatClose').addEventListener('click', ()=>{
+    chatOpen = false;
+    el('chatPanel').classList.add('hidden');
+  });
+  el('chatSend').addEventListener('click', sendChat);
+  el('chatInput').addEventListener('keydown', (e)=>{
+    e.stopPropagation();
+    if(e.key === 'Enter'){ e.preventDefault(); sendChat(); }
+  });
   let chart = [];
   let chartIdx = 0;
   let activeNotes = [];
@@ -702,6 +841,7 @@
     await safeSet('taptap:'+code+':meta', { seed, createdAt: Date.now(), guestPresent:false, startTime:null });
     el('hostCode').textContent = code;
     show('screenHostWait');
+    startChat();
     pollIntervalId = setInterval(async ()=>{
       const meta = await safeGet('taptap:'+code+':meta');
       if(meta && meta.guestPresent && !meta.startTime){
@@ -716,6 +856,8 @@
 
   el('btnHostCancel').addEventListener('click', ()=>{
     clearInterval(pollIntervalId);
+    stopChat();
+    role = null; code = null; seed = null; startTime = null;
     show('screenMenu');
   });
 
@@ -730,6 +872,7 @@
     if(!meta){ el('joinError').textContent = "Room not found. Check the code."; return; }
     role = 'guest'; code = entered; seed = meta.seed;
     await safeSet('taptap:'+code+':meta', { seed: meta.seed, createdAt: meta.createdAt, guestPresent:true, startTime: meta.startTime||null });
+    startChat();
     if(meta.startTime){
       startTime = meta.startTime;
       beginCountdownAndPlay();
@@ -747,6 +890,7 @@
   });
 
   el('btnBackToMenu').addEventListener('click', ()=>{
+    stopChat();
     role = null; code = null; seed = null; startTime = null;
     show('screenMenu');
   });
