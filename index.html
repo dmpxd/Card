@@ -2,710 +2,758 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>The Mirror Test</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
+<title>Tape Tap: Online Duel</title>
 <style>
+  @import url('https://fonts.googleapis.com/css2?family=Rubik+Mono+One&family=JetBrains+Mono:wght@400;700&display=swap');
+
   :root{
-    --bg: #130d24;
-    --bg-panel: #1d1536;
-    --bg-panel-2: #271d45;
-    --gold: #c9a24b;
-    --gold-soft: #e6cd8b;
-    --teal: #4fb8a8;
-    --ink: #f2ecdf;
-    --ink-dim: #b3a7cf;
-    --line: rgba(201,162,75,0.22);
-    --danger: #d97a86;
-    --font-display: 'Fraunces', serif;
-    --font-body: 'Space Grotesk', sans-serif;
-    --radius: 14px;
+    --bg-deep:#160e1a;
+    --bg-panel:#26192e;
+    --cream:#f4ecd8;
+    --amber:#f2a93b;
+    --magenta:#d1477a;
+    --teal:#3fb8af;
   }
-
   *{box-sizing:border-box;}
-  html,body{margin:0;padding:0;}
   body{
-    background: radial-gradient(ellipse at 20% -10%, #23184a 0%, var(--bg) 55%) fixed;
-    color: var(--ink);
-    font-family: var(--font-body);
-    min-height: 100vh;
-    position: relative;
-    overflow-x: hidden;
-    -webkit-font-smoothing: antialiased;
-  }
-
-  .stars{
-    position: fixed;
-    inset: 0;
-    pointer-events: none;
-    z-index: 0;
+    margin:0;
+    min-height:100vh;
+    background:var(--bg-deep);
     background-image:
-      radial-gradient(1.5px 1.5px at 10% 20%, rgba(230,205,139,0.5), transparent),
-      radial-gradient(1.5px 1.5px at 80% 10%, rgba(230,205,139,0.4), transparent),
-      radial-gradient(1px 1px at 60% 70%, rgba(230,205,139,0.35), transparent),
-      radial-gradient(1.5px 1.5px at 30% 85%, rgba(230,205,139,0.4), transparent),
-      radial-gradient(1px 1px at 90% 60%, rgba(230,205,139,0.3), transparent),
-      radial-gradient(1.5px 1.5px at 45% 40%, rgba(230,205,139,0.35), transparent);
-    background-repeat: no-repeat;
-    animation: drift 60s linear infinite alternate;
-  }
-  @keyframes drift{ from{ transform: translateY(0);} to{ transform: translateY(-20px);} }
-
-  #app{
-    position: relative;
-    z-index: 1;
-    max-width: 640px;
-    margin: 0 auto;
-    padding: 28px 20px 80px;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-  }
-
-  .topbar{
+      radial-gradient(circle at 20% 10%, rgba(242,169,59,0.08), transparent 40%),
+      radial-gradient(circle at 80% 90%, rgba(63,184,175,0.08), transparent 40%);
     display:flex;
     align-items:center;
-    justify-content:space-between;
-    padding-bottom: 18px;
-    margin-bottom: 8px;
+    justify-content:center;
+    font-family:'JetBrains Mono', monospace;
+    color:var(--cream);
+    padding:20px;
+    -webkit-tap-highlight-color:transparent;
   }
-  .brand{
-    font-family: var(--font-display);
-    font-style: italic;
-    font-weight: 500;
-    font-size: 1.15rem;
-    letter-spacing: 0.02em;
-    color: var(--gold-soft);
+  .deck{
+    width:100%;
+    max-width:420px;
+    background:var(--bg-panel);
+    border-radius:18px;
+    padding:18px;
+    border:2px solid #3a2a44;
+    position:relative;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.4);
   }
-  .progress-label{
-    font-size: 0.72rem;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--ink-dim);
+  .logo{
+    font-family:'Rubik Mono One', sans-serif;
+    font-size:22px;
+    letter-spacing:1px;
+    color:var(--amber);
+    margin:0 0 4px;
+    text-align:center;
+    text-shadow: 2px 2px 0 rgba(0,0,0,0.4);
   }
-
-  .skypath{
-    position: relative;
-    height: 3px;
-    background: rgba(255,255,255,0.08);
-    border-radius: 3px;
-    margin-bottom: 34px;
-    overflow: visible;
-  }
-  .skypath-fill{
-    position:absolute;
-    left:0; top:0; bottom:0;
-    width: 0%;
-    background: linear-gradient(90deg, var(--teal), var(--gold-soft));
-    border-radius: 3px;
-    transition: width 0.5s cubic-bezier(.4,0,.2,1);
-  }
-  .skypath-dot{
-    position:absolute;
-    top: 50%;
-    width: 9px; height: 9px;
-    background: var(--gold-soft);
-    border-radius: 50%;
-    box-shadow: 0 0 10px 2px rgba(230,205,139,0.7);
-    transform: translate(-50%,-50%);
-    transition: left 0.5s cubic-bezier(.4,0,.2,1);
+  .logo span{ color:var(--teal); }
+  .subhead{
+    text-align:center;
+    font-size:11px;
+    color:#8a7a92;
+    margin-bottom:16px;
+    letter-spacing:1px;
   }
 
-  main{ flex: 1; display:flex; flex-direction:column; justify-content:center; }
-
-  .card{
-    background: linear-gradient(160deg, var(--bg-panel), var(--bg-panel-2));
-    border: 1px solid var(--line);
-    border-radius: var(--radius);
-    padding: 36px 30px;
-    box-shadow: 0 20px 60px -20px rgba(0,0,0,0.6);
+  .panel{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:14px;
+    text-align:center;
+    padding:10px 4px;
   }
-
-  .eyebrow{
-    font-size: 0.72rem;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--teal);
-    margin: 0 0 14px;
-    font-weight: 500;
+  .panel p{
+    font-size:12.5px;
+    color:#b8a9c0;
+    line-height:1.6;
+    max-width:320px;
+    margin:0;
   }
-
-  h1{
-    font-family: var(--font-display);
-    font-weight: 500;
-    font-size: 2.1rem;
-    line-height: 1.15;
-    margin: 0 0 16px;
-    color: var(--ink);
-  }
-  h1 em{ color: var(--gold-soft); font-style: italic; }
-
-  .lede{
-    font-size: 1rem;
-    line-height: 1.65;
-    color: var(--ink-dim);
-    margin: 0 0 26px;
-  }
-
   .btn{
-    appearance: none;
-    border: none;
-    cursor: pointer;
-    font-family: var(--font-body);
-    font-weight: 500;
-    font-size: 0.95rem;
-    letter-spacing: 0.01em;
-    border-radius: 999px;
-    padding: 14px 30px;
-    background: var(--gold-soft);
-    color: #241a10;
-    transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+    background:var(--amber);
+    color:#2a1a05;
+    border:none;
+    font-family:'Rubik Mono One', sans-serif;
+    font-size:13px;
+    padding:12px 22px;
+    border-radius:8px;
+    cursor:pointer;
+    width:100%;
+    max-width:260px;
   }
-  .btn:hover{ transform: translateY(-1px); box-shadow: 0 8px 20px -8px rgba(230,205,139,0.6); }
-  .btn:active{ transform: translateY(0); }
-  .btn:focus-visible{ outline: 2px solid var(--teal); outline-offset: 3px; }
-  .btn-ghost{
-    background: transparent;
-    border: 1px solid var(--line);
-    color: var(--ink-dim);
+  .btn:active{ transform:scale(0.97); }
+  .btn.ghost{
+    background:transparent;
+    color:var(--cream);
+    border:1px solid #46334f;
   }
-  .btn-ghost:hover{ color: var(--ink); border-color: var(--gold); box-shadow:none; }
-  .btn-row{ display:flex; align-items:center; gap: 14px; margin-top: 8px; flex-wrap: wrap;}
+  .btn.teal{ background:var(--teal); color:#052723; }
 
-  .question-text{
-    font-family: var(--font-display);
-    font-size: 1.5rem;
-    line-height: 1.4;
-    font-weight: 500;
-    color: var(--ink);
-    margin: 0 0 30px;
-  }
-
-  .likert{
-    display:flex;
-    justify-content: space-between;
-    gap: 8px;
-  }
-  .likert-opt{
-    flex: 1;
-    display:flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 10px;
-    background: transparent;
-    border: 1px solid var(--line);
-    border-radius: 10px;
-    padding: 14px 4px 10px;
-    cursor: pointer;
-    color: var(--ink-dim);
-    transition: border-color 0.15s ease, background 0.15s ease, transform 0.1s ease;
-  }
-  .likert-opt .dot{
-    width: 14px; height:14px;
-    border-radius: 50%;
-    border: 2px solid var(--ink-dim);
-    transition: all 0.15s ease;
-  }
-  .likert-opt span.lbl{
-    font-size: 0.66rem;
-    line-height: 1.2;
+  input.code-input{
+    background:#0e0912;
+    border:1px solid #46334f;
+    color:var(--cream);
+    font-family:'JetBrains Mono', monospace;
+    font-weight:700;
+    font-size:22px;
+    letter-spacing:6px;
     text-align:center;
-    letter-spacing: 0.01em;
+    padding:10px;
+    border-radius:8px;
+    width:180px;
+    text-transform:uppercase;
   }
-  .likert-opt:hover{ border-color: var(--gold); background: rgba(201,162,75,0.06); }
-  .likert-opt:focus-visible{ outline: 2px solid var(--teal); outline-offset: 2px; }
-  .likert-opt.selected{ border-color: var(--gold-soft); background: rgba(201,162,75,0.14); color: var(--ink); }
-  .likert-opt.selected .dot{ background: var(--gold-soft); border-color: var(--gold-soft); transform: scale(1.1); }
+  input.code-input:focus{ outline:2px solid var(--teal); }
 
-  .back-link{
-    background:none; border:none; color: var(--ink-dim); cursor:pointer;
-    font-family: var(--font-body); font-size: 0.85rem; padding: 6px 0;
-    display:inline-flex; align-items:center; gap:6px;
+  .code-display{
+    font-family:'Rubik Mono One', sans-serif;
+    font-size:34px;
+    letter-spacing:8px;
+    color:var(--teal);
+    background:#0e0912;
+    border:1px solid #46334f;
+    border-radius:10px;
+    padding:14px 18px;
   }
-  .back-link:hover{ color: var(--gold-soft); }
 
-  form.gate{ display:flex; flex-direction: column; gap: 14px; }
-  input[type="email"], input[type="text"]{
-    background: rgba(0,0,0,0.2);
-    border: 1px solid var(--line);
-    border-radius: 10px;
-    padding: 14px 16px;
-    color: var(--ink);
-    font-family: var(--font-body);
-    font-size: 0.95rem;
+  .spinner{
+    width:26px; height:26px;
+    border:3px solid #46334f;
+    border-top-color:var(--teal);
+    border-radius:50%;
+    animation: sp 0.8s linear infinite;
   }
-  input[type="email"]:focus, input[type="text"]:focus{
-    outline: 2px solid var(--teal); outline-offset: 2px; border-color: transparent;
-  }
-  input::placeholder{ color: rgba(179,167,207,0.5); }
-  .fine-print{ font-size: 0.72rem; color: rgba(179,167,207,0.55); line-height: 1.5; }
+  @keyframes sp{ to{ transform:rotate(360deg); } }
 
-  .toast-overlay{
-    position: fixed; inset:0; z-index: 20;
-    display:flex; align-items:center; justify-content:center;
-    background: rgba(10,7,20,0.88);
-    backdrop-filter: blur(3px);
-    opacity: 0; pointer-events:none;
-    transition: opacity 0.35s ease;
-    text-align:center; padding: 24px;
+  .countdown-num{
+    font-family:'Rubik Mono One', sans-serif;
+    font-size:64px;
+    color:var(--amber);
   }
-  .toast-overlay.show{ opacity: 1; pointer-events:auto; }
-  .toast-overlay h2{
-    font-family: var(--font-display); font-style: italic; font-weight:500;
-    font-size: 2.2rem; color: var(--gold-soft); margin: 0 0 10px;
-  }
-  .toast-overlay p{ color: var(--ink-dim); max-width: 380px; margin: 0 auto; line-height:1.5;}
 
-  .sigil-wrap{
-    display:flex; justify-content:center; margin-bottom: 18px;
-  }
-  .sigil-wrap svg{ width: 72px; height:72px; }
-
-  .result-type{
-    text-align:center;
-    font-family: var(--font-display);
-    font-size: 0.85rem;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    color: var(--teal);
-    margin: 0 0 6px;
-  }
-  .result-name{
-    text-align:center;
-    font-family: var(--font-display);
-    font-weight: 500;
-    font-size: 2.4rem;
-    margin: 0 0 6px;
-    color: var(--ink);
-  }
-  .result-tagline{
-    text-align:center;
-    font-family: var(--font-display);
-    font-style: italic;
-    color: var(--gold-soft);
-    font-size: 1.1rem;
-    margin: 0 0 28px;
-  }
-  .result-desc p{
-    line-height: 1.75;
-    color: var(--ink-dim);
-    margin: 0 0 16px;
-    font-size: 0.97rem;
-  }
-  .secondary-blurb{
-    margin-top: 22px;
-    padding-top: 22px;
-    border-top: 1px solid var(--line);
-    font-size: 0.9rem;
-    color: var(--ink-dim);
-    line-height: 1.6;
-  }
-  .secondary-blurb b{ color: var(--gold-soft); font-weight: 500; }
-
-  .browse-list{ display:flex; flex-direction:column; gap:10px; }
-  .browse-item{
-    border: 1px solid var(--line);
-    border-radius: 10px;
-    background: rgba(0,0,0,0.15);
-    overflow: hidden;
-  }
-  .browse-item summary{
-    list-style: none;
-    cursor: pointer;
-    padding: 14px 16px;
+  .opp-strip{
     display:flex;
     align-items:center;
-    gap: 14px;
+    gap:10px;
+    background:#0e0912;
+    border:1px solid #3a2a44;
+    border-radius:10px;
+    padding:8px 10px;
+    margin-bottom:10px;
   }
-  .browse-item summary::-webkit-details-marker{ display:none; }
-  .browse-item summary:hover{ background: rgba(201,162,75,0.06); }
-  .browse-item summary:focus-visible{ outline: 2px solid var(--teal); outline-offset: -2px; }
-  .browse-sigil{ flex-shrink:0; width:36px; height:36px; color: var(--gold-soft); }
-  .browse-sigil svg{ width:100%; height:100%; }
-  .browse-summary-text{ display:flex; flex-direction:column; gap:2px; }
-  .browse-name{ font-family: var(--font-display); font-weight:500; font-size:1.05rem; color: var(--ink); }
-  .browse-tagline{ font-family: var(--font-display); font-style: italic; font-size: 0.82rem; color: var(--ink-dim); }
-  .browse-item[open] summary{ border-bottom: 1px solid var(--line); }
-  .browse-item[open] summary .browse-sigil{ color: var(--teal); }
-  .browse-desc{ padding: 16px 18px 18px 66px; }
-  .browse-desc p{ font-size: 0.9rem; line-height: 1.65; color: var(--ink-dim); margin: 0 0 12px; }
-  .browse-desc p:last-child{ margin-bottom:0; }
-  @media (max-width: 480px){
-    .browse-desc{ padding-left: 18px; }
+  .opp-name{
+    font-size:10px;
+    letter-spacing:1px;
+    color:#8a7a92;
+    white-space:nowrap;
+  }
+  .opp-health{
+    display:flex;
+    gap:3px;
+    flex:1;
+  }
+  .opp-seg{
+    flex:1;
+    height:7px;
+    border-radius:2px;
+    background:#3a2a44;
+  }
+  .opp-seg.on{ background:var(--magenta); }
+  .opp-score{
+    font-weight:700;
+    font-size:13px;
+    color:var(--magenta);
+    min-width:56px;
+    text-align:right;
+  }
+  .opp-flash{
+    position:absolute;
+    top:8px; right:14px;
+    font-size:11px;
+    font-weight:700;
+    color:var(--magenta);
+    opacity:0;
+    transition:opacity .15s;
+  }
+  .opp-flash.show{ opacity:1; }
+
+  .counter-box{ text-align:right; }
+  .header-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    margin-bottom:10px;
+  }
+  .counter-label{ font-size:9px; letter-spacing:2px; color:#8a7a92; display:block; margin-bottom:2px; }
+  .counter-digits{
+    background:#0e0912; color:var(--teal); font-weight:700; font-size:16px;
+    letter-spacing:3px; padding:4px 8px; border-radius:4px; border:1px solid #3a2a44; min-width:70px;
   }
 
-  footer.mirror-footer{
-    text-align:center;
-    color: rgba(179,167,207,0.4);
-    font-size: 0.72rem;
-    margin-top: 40px;
-    line-height: 1.6;
+  .cassette{
+    background:#1c1220; border:1px solid #3a2a44; border-radius:12px;
+    padding:8px 14px 12px; margin-bottom:10px;
   }
+  .reel-row{ display:flex; justify-content:center; align-items:center; }
+  .reel{
+    width:44px; height:44px; border-radius:50%;
+    background: repeating-conic-gradient(#0e0912 0deg 8deg, #241a2b 8deg 16deg);
+    border:3px solid #46334f; position:relative;
+    animation: spin var(--spin-dur, 6s) linear infinite;
+  }
+  .reel::after{ content:''; position:absolute; inset:15px; background:var(--bg-panel); border-radius:50%; border:2px solid #46334f; }
+  @keyframes spin{ to{ transform:rotate(360deg); } }
 
-  @media (max-width: 480px){
-    .card{ padding: 26px 18px; }
-    h1{ font-size: 1.7rem; }
-    .question-text{ font-size: 1.2rem; }
-    .likert-opt span.lbl{ display:none; }
-    .likert-opt{ padding: 12px 2px; }
-    .result-name{ font-size: 1.9rem; }
+  .health-row{ display:flex; gap:5px; justify-content:center; margin-top:8px; }
+  .health-seg{ width:32px; height:8px; border-radius:2px; background:#3a2a44; transition:background .2s; }
+  .health-seg.on{ background:var(--amber); }
+
+  .combo-line{ text-align:center; height:18px; font-size:12px; font-weight:700; color:var(--magenta); letter-spacing:1px; margin-bottom:4px; }
+
+  .lanes{
+    display:flex; gap:6px; height:290px; position:relative;
+    background:#100a13; border-radius:10px; overflow:hidden; border:1px solid #3a2a44;
   }
+  .lane{ flex:1; position:relative; border-right:1px solid #241a2b; }
+  .lane:last-child{ border-right:none; }
+  .hit-line{ position:absolute; left:0; right:0; top:82%; height:3px; background:var(--cream); opacity:0.5; }
+  .note{ position:absolute; left:8%; right:8%; height:20px; border-radius:5px; top:-22px; }
+  .float-txt{
+    position:absolute; left:50%; top:82%; transform:translate(-50%,-50%);
+    font-size:11px; font-weight:700; letter-spacing:1px; pointer-events:none;
+    animation: floatUp .5s ease-out forwards; white-space:nowrap;
+  }
+  @keyframes floatUp{ 0%{opacity:1; transform:translate(-50%,-50%);} 100%{opacity:0; transform:translate(-50%,-140%);} }
+
+  .tap-zones{ display:flex; gap:6px; margin-top:8px; }
+  .tap-zone{
+    flex:1; height:52px; border-radius:8px; border:none; background:#241a2b; color:var(--cream);
+    font-family:'JetBrains Mono', monospace; font-weight:700; font-size:15px; letter-spacing:1px;
+    touch-action:none; user-select:none; transition: transform .06s;
+  }
+  .tap-zone:active{ transform:scale(0.94); }
+  .tap-zone.flash{ transform:scale(0.94); }
+  .tap-zone:focus-visible{ outline:2px solid var(--cream); outline-offset:2px; }
+
+  .overlay{
+    position:absolute; inset:0; background:rgba(14,9,18,0.96); border-radius:18px;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    text-align:center; padding:24px; gap:12px;
+  }
+  .overlay h2{ font-family:'Rubik Mono One', sans-serif; color:var(--amber); font-size:19px; margin:0; }
+  .final-row{ display:flex; gap:24px; margin:4px 0; }
+  .final-row div{ text-align:center; }
+  .final-row .fv{ font-size:22px; font-weight:700; }
+  .final-row .fl{ font-size:10px; letter-spacing:1px; color:#8a7a92; }
+  .winner-line{ font-family:'Rubik Mono One', sans-serif; font-size:15px; color:var(--teal); }
+
+  .keys-hint{ display:flex; gap:10px; }
+  .keys-hint span{ background:#241a2b; border:1px solid #46334f; padding:3px 8px; border-radius:4px; font-size:11px; }
+
+  .hidden{ display:none !important; }
 
   @media (prefers-reduced-motion: reduce){
-    .stars{ animation: none; }
-    .btn, .likert-opt, .skypath-fill, .skypath-dot, .toast-overlay{ transition: none; }
+    .reel{ animation:none; }
+    .float-txt{ animation:none; }
   }
 </style>
 </head>
 <body>
-<div class="stars"></div>
-<div id="app">
-  <div class="topbar">
-    <span class="brand">The Mirror Test</span>
-    <span class="progress-label" id="progressLabel"></span>
-  </div>
-  <div class="skypath" id="skypath" style="display:none;">
-    <div class="skypath-fill" id="skypathFill"></div>
-    <div class="skypath-dot" id="skypathDot"></div>
-  </div>
-  <main id="main"></main>
-  <footer class="mirror-footer">Not a diagnostic instrument. Not even a little bit. Just a mirror with good lighting.</footer>
-</div>
 
-<div class="toast-overlay" id="toastOverlay">
-  <div>
-    <h2>Joke lol</h2>
-    <button class="btn" id="toastDismissBtn" style="margin-top:8px;">See my results</button>
+<div class="deck">
+  <h1 class="logo">TAPE<span>·</span>TAP</h1>
+  <div class="subhead" id="subhead">ONLINE DUEL</div>
+
+  <div id="screenMenu" class="panel">
+    <p>Race a friend on separate devices. Same notes, same clock, whoever's tape snaps first loses. Both of you need this open inside Claude for sync to work.</p>
+    <button class="btn" id="btnHost">HOST A DUEL</button>
+    <button class="btn ghost" id="btnJoin">JOIN WITH A CODE</button>
+    <p id="storageWarning" class="hidden" style="color:var(--magenta);">Online sync isn't available in this view. Open this artifact directly in Claude (not a downloaded file) to duel a friend.</p>
+  </div>
+
+  <div id="screenJoinEntry" class="panel hidden">
+    <p>Enter the 4-character code your friend shared with you.</p>
+    <input class="code-input" id="codeInput" maxlength="4" placeholder="ABCD">
+    <button class="btn" id="btnJoinSubmit">CONNECT</button>
+    <button class="btn ghost" id="btnJoinBack">BACK</button>
+    <p id="joinError" style="color:var(--magenta); font-size:12px;"></p>
+  </div>
+
+  <div id="screenHostWait" class="panel hidden">
+    <p>Share this code with your friend:</p>
+    <div class="code-display" id="hostCode">----</div>
+    <div class="spinner"></div>
+    <p>Waiting for them to join…</p>
+    <button class="btn ghost" id="btnHostCancel">CANCEL</button>
+  </div>
+
+  <div id="screenGuestWait" class="panel hidden">
+    <div class="spinner"></div>
+    <p>Connected. Waiting for the host to start the countdown…</p>
+  </div>
+
+  <div id="screenCountdown" class="panel hidden">
+    <p>Get ready</p>
+    <div class="countdown-num" id="countdownNum">3</div>
+    <div class="keys-hint" id="countdownKeys"></div>
+  </div>
+
+  <div id="screenGame" class="hidden">
+    <div class="opp-strip">
+      <span class="opp-name">RIVAL</span>
+      <div class="opp-health" id="oppHealth"></div>
+      <span class="opp-score" id="oppScore">0000</span>
+    </div>
+    <div class="header-row">
+      <div></div>
+      <div class="counter-box">
+        <span class="counter-label">COUNTER</span>
+        <div class="counter-digits" id="counter">0000</div>
+      </div>
+    </div>
+    <div class="cassette">
+      <div class="reel-row"><div class="reel" id="reel"></div></div>
+      <div class="health-row" id="healthRow"></div>
+    </div>
+    <div class="combo-line" id="comboLine"></div>
+    <div class="lanes" id="lanes" style="position:relative;">
+      <div class="hit-line"></div>
+      <div class="lane" data-lane="0"></div>
+      <div class="lane" data-lane="1"></div>
+      <div class="lane" data-lane="2"></div>
+      <div class="lane" data-lane="3"></div>
+      <div class="opp-flash" id="oppFlash"></div>
+    </div>
+    <div class="tap-zones" id="tapZones">
+      <button class="tap-zone" data-lane="0" style="color:var(--amber)">Q</button>
+      <button class="tap-zone" data-lane="1" style="color:var(--magenta)">W</button>
+      <button class="tap-zone" data-lane="2" style="color:var(--teal)">E</button>
+      <button class="tap-zone" data-lane="3" style="color:var(--cream)">R</button>
+    </div>
+  </div>
+
+  <div id="screenWaitingResult" class="panel hidden">
+    <p id="ownResultLine"></p>
+    <div class="spinner"></div>
+    <p>Waiting for your rival to finish…</p>
+  </div>
+
+  <div id="screenResults" class="panel hidden">
+    <h2 style="font-family:'Rubik Mono One', sans-serif; color:var(--amber); font-size:19px; margin:0;">TAPE SNAPPED</h2>
+    <div class="winner-line" id="winnerLine"></div>
+    <div class="final-row" id="finalRow"></div>
+    <button class="btn" id="btnBackToMenu">BACK TO MENU</button>
   </div>
 </div>
 
 <script>
 (function(){
+  const LANE_COLORS = ['#f2a93b','#d1477a','#3fb8af','#f4ecd8'];
+  const LANE_FREQ = [330, 392, 440, 523];
+  const LANE_KEYS = ['q','w','e','r'];
+  const NOTE_TRAVEL_MS = 1500;
+  const HIT_RATIO = 0.82;
+  const MAX_HEALTH = 5;
+  const PERFECT_MS = 80;
+  const OUTER_MS = 260;
+  const MATCH_DURATION_MS = 45000;
+  const SYNC_INTERVAL_MS = 500;
 
-  const TYPES_ORDER = ['ember','tide','stone','wind','frost','bloom','storm','dawn'];
+  const el = id => document.getElementById(id);
+  const screens = ['screenMenu','screenJoinEntry','screenHostWait','screenGuestWait','screenCountdown','screenGame','screenWaitingResult','screenResults'];
+  function show(id){ screens.forEach(s => el(s).classList.toggle('hidden', s !== id)); }
 
-  const TYPES = {
-    ember: {
-      name: 'The Ember',
-      tagline: '"You run warm in a world that mostly runs lukewarm."',
-      sigil: `<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M32 8c6 8 2 12-1 16-4 5-6 9-3 15 2-3 4-4 6-4 0 4-2 7-5 9 9 0 15-6 15-14 0-6-4-9-6-13 1 4-1 6-3 6-3 0-2-4-3-9-1 3-3 4-6 4 2-4-1-7 6-10z"/></svg>`,
-      desc: [
-        "There's a heat to you that people notice before they can name it &mdash; in how you talk about the things you care about, in how fast you go from calm to fully lit. You rarely do anything halfway for long. You're drawn toward whatever feels most alive in the room, and you have little patience for going through the motions just to keep the peace. People come to you when they need someone to actually feel something with them, because you don't perform enthusiasm &mdash; you just have it.",
-        "That intensity is a gift, and it's also the thing you get tired of managing. Someone has probably called you 'too much' at some point, and you've quietly wondered if they were right. They weren't. What you carry isn't excess, it's voltage &mdash; and voltage needs somewhere to go. When there's nothing worth caring about in front of you, you don't calm down. You just go looking for a fire that isn't yours to tend.",
-        "The people who stay close to you are the ones who aren't scared off by your highs or your lows, who read your bluntness as respect instead of an attack. Your growth edge is realizing that stillness isn't the opposite of being alive &mdash; some of your best moments are the quiet ones you almost talked yourself out of having."
-      ]
-    },
-    tide: {
-      name: 'The Tide',
-      tagline: '"You feel the room before you understand why."',
-      sigil: `<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 26c5-6 11-6 16 0s11 6 16 0 11-6 16 0"/><path d="M6 38c5-6 11-6 16 0s11 6 16 0 11-6 16 0"/></svg>`,
-      desc: [
-        "You absorb a room before you've consciously registered a single detail in it. A shift in someone's tone, a tension nobody's named yet, the exact moment a conversation turns &mdash; you clock it early, often before the people involved do. This makes you a remarkably good mirror for other people's inner weather. It also means your own mood rarely belongs entirely to you; it's shaped by what's around you more than you'd probably like to admit.",
-        "You've cried at things that, on paper, weren't that sad. You've also gone unreadable for days at a time, needing to disappear and recalibrate somewhere no one can reach you. Neither of these is a flaw. It's the cost of a nervous system that's tuned to pick up more than most people's. The trouble is that people mistake your depth for moodiness, when really you're just processing at a different depth than they are.",
-        "What you need most are people who don't require you to explain every shift before they trust it's real. Your growth edge is learning to trust your own read on things without needing someone else's permission to feel it &mdash; the tide doesn't apologize for moving, it just moves, and it's still the same ocean underneath."
-      ]
-    },
-    stone: {
-      name: 'The Stone',
-      tagline: '"You\'re the ground people didn\'t know they needed until they were standing on it."',
-      sigil: `<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 46L24 16h16l14 30z"/><path d="M20 46l6-14h12l6 14"/></svg>`,
-      desc: [
-        "You are, more often than not, the calm in whatever room you're in &mdash; not because nothing affects you, but because you've decided that reacting to every small disturbance isn't worth the energy. People lean on you constantly, sometimes without ever quite noticing they're doing it, and you rarely make a thing of it. You'd rather be useful and quiet than celebrated and loud.",
-        "You're suspicious of anything that arrives with too much shine on it &mdash; a promise that sounds too easy, an idea that's all momentum and no foundation. Plans comfort you more than they excite you, and you'd take 'reliable' over 'exciting' most days of the week without hesitation. This has probably earned you a reputation as the reasonable one, the steady one, the one who doesn't panic. It's a compliment that can also feel a little lonely.",
-        "Because you give steadiness so freely, you can forget it's allowed to flow the other direction too. Your growth edge is letting yourself need something without first calculating whether you've earned it. The ground is allowed to ask for maintenance. It's still the ground."
-      ]
-    },
-    wind: {
-      name: 'The Wind',
-      tagline: '"You were built for movement, even when you\'re standing still."',
-      sigil: `<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M32 32m-18 0a18 18 0 1 0 36 0a18 18 0 1 0 -36 0"/><path d="M32 32m-11 0a11 11 0 1 0 22 0a11 11 0 1 0 -22 0" opacity="0.6"/><path d="M32 32m-4 0a4 4 0 1 0 8 0a4 4 0 1 0 -8 0" opacity="0.3"/></svg>`,
-      desc: [
-        "You get bored of your own routines faster than most people can even settle into one. There's a restlessness in you that isn't anxiety exactly &mdash; it's closer to hunger. New places, new questions, new versions of yourself all pull at you at once, and staying still for too long starts to feel less like comfort and more like a held breath.",
-        "You've probably started more things than you've finished, and you've made an uneasy peace with that, even if other people haven't. The idea of living the same year on repeat, in the same place, doing the same rounds, makes something in your chest tighten. You ask 'why' more than most people find comfortable, not to be difficult, but because the question genuinely hasn't left your head yet.",
-        "People sometimes read this as flightiness. It isn't. You're not running from things, you're running toward whatever's still alive. Your growth edge is discovering that some kinds of depth don't cost you your freedom &mdash; that certain roots don't hold you down so much as give you somewhere solid to launch from."
-      ]
-    },
-    frost: {
-      name: 'The Frost',
-      tagline: '"You see the crack before anyone else notices the wall."',
-      sigil: `<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M32 6v52M12 16l40 32M52 16L12 48"/></svg>`,
-      desc: [
-        "You'd rather be accurate than agreeable, and you've never fully understood people who choose otherwise. Something in you notices when a detail is slightly off &mdash; in a plan, a story, a person's tone &mdash; often before you can articulate exactly why. It's less a skill you practice than a setting you're built with, and it rarely turns off.",
-        "Small talk can feel like a genuine waste of both people's time, a kind of social static you tolerate rather than enjoy. You trust a clean argument over a strong feeling, even in moments when the feeling later turns out to have been right. This has probably gotten you labeled cold by people who mistook your economy of warmth for its absence. It isn't absent. It's just rationed, and given carefully, to people who've earned the real version of you.",
-        "Your growth edge is understanding that being right isn't always the same as being useful in the moment &mdash; that sometimes the truth needs to arrive a little later, wrapped in something softer, or it just bounces off the person who needed to hear it most."
-      ]
-    },
-    bloom: {
-      name: 'The Bloom',
-      tagline: '"You remember things about people that they forgot they told you."',
-      sigil: `<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="32" cy="20" r="7"/><circle cx="46" cy="32" r="7"/><circle cx="32" cy="44" r="7"/><circle cx="18" cy="32" r="7"/><circle cx="32" cy="32" r="4" fill="currentColor" stroke="none"/></svg>`,
-      desc: [
-        "You feel responsible for how the people around you are doing, sometimes more than they feel responsible for it themselves. It shows up in small ways &mdash; you remember a detail someone mentioned once in passing months ago, you notice when someone's gone quiet in a group and check on them later, privately. You've probably held a group together more than once without anyone quite clocking that you were the one doing it.",
-        "You find it hard to fully enjoy something if there's no one there to enjoy it with you, and you'd choose a shared ordinary afternoon over a spectacular one spent alone almost every time. This isn't neediness, it's orientation &mdash; you're simply tuned toward connection as the thing that makes anything else worth having.",
-        "The risk is that you get so good at tending to everyone else that you forget you're allowed a turn. Your growth edge is learning to receive care with the same ease you give it &mdash; to let yourself be looked after without immediately trying to make yourself useful again to balance the scale."
-      ]
-    },
-    storm: {
-      name: 'The Storm',
-      tagline: '"You don\'t fear the shake-up. You are the shake-up."',
-      sigil: `<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M36 6L18 34h12L26 58l22-30H36z"/></svg>`,
-      desc: [
-        "You get restless when things stay the same for too long, and there's a part of you that would rather cause a stir than sit quietly inside a comfort that's stopped serving anyone. You've probably walked away from something stable &mdash; a job, a routine, a version of your life that looked fine from the outside &mdash; because it had started to feel stagnant on the inside, and that was reason enough.",
-        "Rules read to you as suggestions more than commandments, especially when they no longer make sense for the situation in front of you. People sometimes brace when you enter a room, expecting disruption, and honestly, sometimes they're right to. But what looks like chaos from the outside is usually just momentum, refusing to wait for permission.",
-        "Your growth edge is learning to tell the difference between something that's genuinely a cage and something that just needs patience instead of demolition. Not everything stable is stagnant. Some things are just quietly building toward their own moment, and they need you to stay long enough to see it."
-      ]
-    },
-    dawn: {
-      name: 'The Dawn',
-      tagline: '"You see the version of things that hasn\'t happened yet."',
-      sigil: `<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 40a18 18 0 0 1 36 0"/><path d="M8 46h48M32 6v10M12 18l6 6M52 18l-6 6"/></svg>`,
-      desc: [
-        "You tend to see potential in things before it's obvious to anyone else &mdash; in a half-formed plan, an unfinished project, a person still figuring themselves out. Where others see a rough draft, you tend to see the shape of what it could become, and you hold onto that image with more patience than most people can manage.",
-        "You believe most people are doing their best, even in moments when their best looks nothing like it. This isn't naivety, even if it gets mistaken for it. It's a kind of long-view faith &mdash; a willingness to hold hope past the point where it would be easier to give up on. You've probably held onto something &mdash; a relationship, a goal, a belief about someone &mdash; longer than was strictly reasonable, and more than once it paid off in ways no one else saw coming.",
-        "Your growth edge is remembering that hope works best with something solid underneath it. Not everything blooms just because you believed in it hard enough &mdash; but that doesn't make the believing wrong. It just means the dawn still needs the ground to land on."
-      ]
+  const storageOk = !!(window.storage && window.storage.get && window.storage.set);
+  if(!storageOk) el('storageWarning').classList.remove('hidden');
+
+  async function safeGet(key){
+    try{
+      const r = await window.storage.get(key, true);
+      return r ? JSON.parse(r.value) : null;
+    }catch(e){ return null; }
+  }
+  async function safeSet(key, obj){
+    try{ await window.storage.set(key, JSON.stringify(obj), true); return true; }
+    catch(e){ return false; }
+  }
+
+  function makeCode(){
+    const chars = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
+    let c = '';
+    for(let i=0;i<4;i++) c += chars[Math.floor(Math.random()*chars.length)];
+    return c;
+  }
+
+  function mulberry32(seed){
+    return function(){
+      seed |= 0; seed = seed + 0x6D2B79F5 | 0;
+      let t = Math.imul(seed ^ seed >>> 15, 1 | seed);
+      t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+      return ((t ^ t >>> 14) >>> 0) / 4294967296;
+    };
+  }
+
+  function bpmAtElapsed(ms){
+    return Math.min(200, 100 + Math.floor(ms/15000)*8);
+  }
+
+  function generateChart(seed){
+    const rng = mulberry32(seed);
+    const chart = [];
+    let t = 300;
+    while(t < MATCH_DURATION_MS){
+      const bpm = bpmAtElapsed(t);
+      const interval = 60000/bpm;
+      const variance = rng() < 0.25 ? interval/2 : interval;
+      t += variance;
+      if(t < MATCH_DURATION_MS){
+        const lane = Math.floor(rng()*4);
+        chart.push({ time: t, lane });
+      }
     }
-  };
+    return chart;
+  }
 
-  const QUESTIONS = [
-    {type:'ember', text:"I feel most alive when I'm in the middle of something urgent."},
-    {type:'tide', text:"My mood shifts with the room I'm in more than I'd like to admit."},
-    {type:'stone', text:"I've been told I'm the \u201Creasonable one\u201D in most situations."},
-    {type:'wind', text:"I get bored of my own routines faster than most people seem to."},
-    {type:'frost', text:"I'd rather be accurate than agreeable."},
-    {type:'bloom', text:"I feel responsible for how the people around me are doing."},
-    {type:'storm', text:"I get restless when things stay the same for too long."},
-    {type:'dawn', text:"I tend to see potential in things before it's obvious to anyone else."},
-    {type:'ember', text:"Silence, if it goes on too long, starts to feel like a countdown."},
-    {type:'tide', text:"I've cried at something that wasn't really that sad."},
-    {type:'stone', text:"Plans comfort me more than they excite me."},
-    {type:'wind', text:"I've started more things than I've finished."},
-    {type:'frost', text:"I notice when something is slightly off before I can explain why."},
-    {type:'bloom', text:"I remember small details about people I barely know."},
-    {type:'storm', text:"I'd rather cause a stir than stay quiet and comfortable."},
-    {type:'dawn', text:"I believe most people are doing their best, even when it doesn't look like it."},
-    {type:'ember', text:"I'd rather burn out chasing something than fade out doing nothing."},
-    {type:'tide', text:"I go through phases where I need to disappear for a while."},
-    {type:'stone', text:"I don't need much to feel okay."},
-    {type:'wind', text:"The idea of living in one place forever makes me a little anxious."},
-    {type:'frost', text:"Small talk feels like a waste of both our time."},
-    {type:'bloom', text:"I find it hard to enjoy something if no one else is there to enjoy it with me."},
-    {type:'storm', text:"I've walked away from something stable because it felt stagnant."},
-    {type:'dawn', text:"I hold onto hope longer than is probably reasonable."},
-    {type:'ember', text:"If I had to pick a temperature to describe myself, it wouldn't be lukewarm."},
-    {type:'tide', text:"The moon feels more relatable to me than the sun."},
-    {type:'stone', text:"If my life were a piece of furniture, it would be built to last, not to impress."},
-    {type:'wind', text:"I'd choose a window seat over an aisle seat, even on a short trip."},
-    {type:'frost', text:"I prefer even numbers to odd ones."},
-    {type:'bloom', text:"If I found a stray animal, I'd probably already be planning where it sleeps tonight."}
-  ];
+  let audioCtx = null;
+  function ensureAudio(){ if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
+  function playTone(freq, dur, type){
+    if(!audioCtx) return;
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = type || 'square';
+    osc.frequency.value = freq;
+    gain.gain.setValueAtTime(0.0001, audioCtx.currentTime);
+    gain.gain.linearRampToValueAtTime(0.12, audioCtx.currentTime + 0.01);
+    gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + dur);
+    osc.connect(gain).connect(audioCtx.destination);
+    osc.start(); osc.stop(audioCtx.currentTime + dur);
+  }
+  function hitSound(lane, quality){
+    const base = LANE_FREQ[lane];
+    if(quality==='perfect') playTone(base*1.5, 0.13, 'square');
+    else playTone(base, 0.11, 'square');
+  }
+  function missSound(){ playTone(110, 0.16, 'sawtooth'); }
+  function reviveSound(){ playTone(660,0.09,'sine'); setTimeout(()=>playTone(880,0.13,'sine'),80); }
 
-  const LIKERT = [
-    {v:1, l:'Strongly Disagree'},
-    {v:2, l:'Disagree'},
-    {v:3, l:'Neutral'},
-    {v:4, l:'Agree'},
-    {v:5, l:'Strongly Agree'}
-  ];
+  let role = null;
+  let code = null;
+  let seed = null;
+  let startTime = null;
+  let chart = [];
+  let chartIdx = 0;
+  let activeNotes = [];
+  let rafId, syncIntervalId, pollIntervalId, countdownIntervalId;
 
-  let idx = -1; // -1 = intro
-  const answers = {};
-  const main = document.getElementById('main');
-  const progressLabel = document.getElementById('progressLabel');
-  const skypath = document.getElementById('skypath');
-  const skypathFill = document.getElementById('skypathFill');
-  const skypathDot = document.getElementById('skypathDot');
+  let me = { score:0, combo:0, bestCombo:0, health:MAX_HEALTH, alive:true, finished:false, elapsedAtFinish:null };
+  let opp = { score:0, health:MAX_HEALTH, combo:0, alive:true, finished:false, elapsedAtFinish:null };
+  let lastOppCombo = 0, lastOppHealth = MAX_HEALTH;
 
-  function updateProgress(){
-    if(idx < 0 || idx >= QUESTIONS.length){
-      skypath.style.display = 'none';
-      progressLabel.textContent = '';
+  const laneEls = () => Array.from(document.querySelectorAll('#lanes .lane'));
+  const tapZoneEls = () => Array.from(document.querySelectorAll('#tapZones .tap-zone'));
+
+  function resetMe(){
+    me = { score:0, combo:0, bestCombo:0, health:MAX_HEALTH, alive:true, finished:false, elapsedAtFinish:null };
+    opp = { score:0, health:MAX_HEALTH, combo:0, alive:true, finished:false, elapsedAtFinish:null };
+    lastOppCombo = 0; lastOppHealth = MAX_HEALTH;
+    activeNotes = []; chartIdx = 0;
+  }
+
+  function buildHealthUI(){
+    const row = el('healthRow'); row.innerHTML = '';
+    for(let i=0;i<MAX_HEALTH;i++){ const s=document.createElement('div'); s.className='health-seg'; row.appendChild(s); }
+    const oppRow = el('oppHealth'); oppRow.innerHTML = '';
+    for(let i=0;i<MAX_HEALTH;i++){ const s=document.createElement('div'); s.className='opp-seg'; oppRow.appendChild(s); }
+  }
+  function renderHealth(){
+    const segs = el('healthRow').children;
+    for(let i=0;i<segs.length;i++) segs[i].classList.toggle('on', i < me.health);
+  }
+  function renderOppHealth(){
+    const segs = el('oppHealth').children;
+    for(let i=0;i<segs.length;i++) segs[i].classList.toggle('on', i < opp.health);
+  }
+  function renderCounter(){ el('counter').textContent = String(me.score).padStart(4,'0'); }
+  function renderOppScore(){ el('oppScore').textContent = String(opp.score).padStart(4,'0'); }
+  function updateCombo(){ el('comboLine').textContent = me.combo>=3 ? (me.combo+' COMBO') : ''; }
+
+  function flashOpp(text){
+    const f = el('oppFlash');
+    f.textContent = text;
+    f.classList.add('show');
+    setTimeout(()=>f.classList.remove('show'), 400);
+  }
+
+  function setSpinSpeed(bpm){
+    const dur = Math.max(1.4, 6*(100/bpm));
+    el('reel').style.setProperty('--spin-dur', dur+'s');
+  }
+
+  function floatText(lane, text, color){
+    const f = document.createElement('div');
+    f.className = 'float-txt';
+    f.textContent = text;
+    f.style.color = color;
+    laneEls()[lane].appendChild(f);
+    setTimeout(()=>f.remove(), 500);
+  }
+
+  function comboMultiplier(){ return 1 + Math.floor(me.combo/10)*0.5; }
+
+  function flashZone(lane){
+    const z = tapZoneEls()[lane];
+    z.classList.add('flash');
+    setTimeout(()=>z.classList.remove('flash'), 90);
+  }
+
+  function registerHit(lane){
+    if(me.finished) return;
+    const now = Date.now();
+    const elapsed = now - startTime;
+    let best = null, bestDiff = Infinity;
+    for(const n of activeNotes){
+      if(n.lane !== lane || n.resolved) continue;
+      const diff = Math.abs(elapsed - n.time);
+      if(diff < bestDiff){ bestDiff = diff; best = n; }
+    }
+    flashZone(lane);
+    if(best && bestDiff <= OUTER_MS){
+      best.resolved = true;
+      best.el.remove();
+      let quality, points, color;
+      if(bestDiff <= PERFECT_MS){ quality='perfect'; points=100; color='var(--teal)'; }
+      else { quality='good'; points=50; color='var(--amber)'; }
+      me.combo++; me.bestCombo = Math.max(me.bestCombo, me.combo);
+      me.score += Math.round(points*comboMultiplier());
+      hitSound(lane, quality);
+      floatText(lane, quality==='perfect'?'PERFECT':'GOOD', color);
+      if(me.combo>0 && me.combo%20===0 && me.health<MAX_HEALTH){
+        me.health++; reviveSound(); floatText(lane, 'RESTORED', 'var(--cream)');
+      }
+      renderCounter(); renderHealth(); updateCombo();
+    }
+  }
+
+  function missNote(n){
+    n.el.remove();
+    me.combo = 0; me.health--;
+    missSound();
+    floatText(n.lane, 'MISS', 'var(--magenta)');
+    updateCombo(); renderHealth();
+    if(me.health <= 0 && me.alive){
+      me.alive = false;
+      finishMatch();
+    }
+  }
+
+  function finishMatch(){
+    me.finished = true;
+    me.elapsedAtFinish = Date.now() - startTime;
+    pushMyState(true);
+    stopGameLoop();
+    show('screenWaitingResult');
+    el('ownResultLine').textContent = (me.alive ? 'You survived the full side.' : 'Your tape snapped.') + ' Score: ' + String(me.score).padStart(4,'0');
+    checkForResults();
+    pollIntervalId = setInterval(checkForResults, 700);
+  }
+
+  async function pushMyState(force){
+    if(!storageOk) return;
+    await safeSet('taptap:'+code+':'+role, {
+      score: me.score, health: me.health, combo: me.combo, bestCombo: me.bestCombo,
+      alive: me.alive, finished: me.finished, elapsedAtFinish: me.elapsedAtFinish, ts: Date.now()
+    });
+  }
+
+  async function pollOpponent(){
+    if(!storageOk) return;
+    const otherRole = role === 'host' ? 'guest' : 'host';
+    const data = await safeGet('taptap:'+code+':'+otherRole);
+    if(!data) return;
+    if(data.combo > lastOppCombo) flashOpp('HIT');
+    if(data.health < lastOppHealth) flashOpp('MISS');
+    lastOppCombo = data.combo; lastOppHealth = data.health;
+    opp = { score:data.score, health:data.health, combo:data.combo, alive:data.alive, finished:data.finished, elapsedAtFinish:data.elapsedAtFinish };
+    renderOppHealth(); renderOppScore();
+  }
+
+  function tick(){
+    if(me.finished) return;
+    const now = Date.now();
+    const elapsed = now - startTime;
+
+    if(elapsed >= MATCH_DURATION_MS && me.alive){
+      finishMatch();
       return;
     }
-    skypath.style.display = 'block';
-    const pct = (idx / QUESTIONS.length) * 100;
-    skypathFill.style.width = pct + '%';
-    skypathDot.style.left = pct + '%';
-    progressLabel.textContent = `Statement ${idx+1} of ${QUESTIONS.length}`;
+
+    setSpinSpeed(bpmAtElapsed(elapsed));
+
+    while(chartIdx < chart.length && chart[chartIdx].time - NOTE_TRAVEL_MS <= elapsed){
+      const c = chart[chartIdx];
+      const lane = c.lane;
+      const noteEl = document.createElement('div');
+      noteEl.className = 'note';
+      noteEl.style.background = LANE_COLORS[lane];
+      laneEls()[lane].appendChild(noteEl);
+      activeNotes.push({ time:c.time, lane, resolved:false, el:noteEl });
+      chartIdx++;
+    }
+
+    const lh = laneEls()[0].clientHeight;
+    for(const n of activeNotes.slice()){
+      if(n.resolved) continue;
+      const progress = (elapsed - (n.time - NOTE_TRAVEL_MS)) / NOTE_TRAVEL_MS;
+      if(progress >= 1.05){
+        missNote(n);
+      } else {
+        n.el.style.top = (progress * HIT_RATIO * lh) + 'px';
+      }
+    }
+    activeNotes = activeNotes.filter(n => !n.resolved);
+
+    rafId = requestAnimationFrame(tick);
   }
 
-  function renderIntro(){
-    skypath.style.display = 'none';
-    progressLabel.textContent = '';
-    main.innerHTML = `
-      <div class="card">
-        <p class="eyebrow">A brief self-portrait</p>
-        <h1>Somewhere in here is a version of you that's <em>hard to argue with.</em></h1>
-        <p class="lede">Thirty short statements. No right answers, no time limit, no wrong turns. Answer with your gut, not your résumé &mdash; the first reaction is usually the honest one. At the end, we'll show you which of eight types you lean toward.</p>
-        <div class="btn-row">
-          <button class="btn" id="startBtn">Begin</button>
-          <span style="font-size:0.8rem; color:var(--ink-dim);">~4 minutes</span>
-        </div>
-      </div>
+  function startGameLoop(){
+    resetMe();
+    buildHealthUI();
+    renderHealth(); renderOppHealth();
+    renderCounter(); renderOppScore(); updateCombo();
+    laneEls().forEach(l => l.querySelectorAll('.note,.float-txt').forEach(e=>e.remove()));
+    show('screenGame');
+    rafId = requestAnimationFrame(tick);
+    syncIntervalId = setInterval(()=>{ pushMyState(false); pollOpponent(); }, SYNC_INTERVAL_MS);
+  }
+
+  function stopGameLoop(){
+    cancelAnimationFrame(rafId);
+    clearInterval(syncIntervalId);
+  }
+
+  async function checkForResults(){
+    const otherRole = role === 'host' ? 'guest' : 'host';
+    const data = await safeGet('taptap:'+code+':'+otherRole);
+    if(data && data.finished){
+      clearInterval(pollIntervalId);
+      opp = { score:data.score, health:data.health, combo:data.combo, alive:data.alive, finished:true, elapsedAtFinish:data.elapsedAtFinish };
+      showResults();
+    }
+  }
+
+  function showResults(){
+    let winnerText;
+    if(!me.alive && !opp.alive){
+      if(me.elapsedAtFinish === opp.elapsedAtFinish) winnerText = "DOUBLE KO — IT'S A TIE";
+      else winnerText = (me.elapsedAtFinish > opp.elapsedAtFinish ? 'YOU WIN' : 'YOUR RIVAL WINS') + ' — LASTED LONGER';
+    } else if(me.alive && !opp.alive){
+      winnerText = 'YOU WIN';
+    } else if(!me.alive && opp.alive){
+      winnerText = 'YOUR RIVAL WINS';
+    } else {
+      if(me.score === opp.score) winnerText = "IT'S A TIE";
+      else winnerText = (me.score > opp.score ? 'YOU WIN' : 'YOUR RIVAL WINS') + ' ON SCORE';
+    }
+    el('winnerLine').textContent = winnerText;
+    el('finalRow').innerHTML = `
+      <div><div class="fv" style="color:var(--amber)">${String(me.score).padStart(4,'0')}</div><div class="fl">YOU · BEST COMBO ${me.bestCombo}</div></div>
+      <div><div class="fv" style="color:var(--magenta)">${String(opp.score).padStart(4,'0')}</div><div class="fl">RIVAL</div></div>
     `;
-    document.getElementById('startBtn').addEventListener('click', () => { idx = 0; render(); });
+    show('screenResults');
   }
 
-  function renderQuestion(){
-    updateProgress();
-    const q = QUESTIONS[idx];
-    const existing = answers[idx];
-    main.innerHTML = `
-      <div class="card">
-        <p class="eyebrow">Statement ${String(idx+1).padStart(2,'0')} / ${QUESTIONS.length}</p>
-        <p class="question-text">${q.text}</p>
-        <div class="likert" role="radiogroup" aria-label="Response scale">
-          ${LIKERT.map(o => `
-            <button class="likert-opt${existing===o.v ? ' selected':''}" data-value="${o.v}" role="radio" aria-checked="${existing===o.v}">
-              <span class="dot"></span>
-              <span class="lbl">${o.l}</span>
-            </button>
-          `).join('')}
-        </div>
-        <div class="btn-row" style="margin-top:26px;">
-          ${idx > 0 ? `<button class="back-link" id="backBtn">&larr; back</button>` : `<span></span>`}
-        </div>
-      </div>
-    `;
-    main.querySelectorAll('.likert-opt').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const val = parseInt(btn.dataset.value, 10);
-        answers[idx] = val;
-        main.querySelectorAll('.likert-opt').forEach(b => b.classList.remove('selected'));
-        btn.classList.add('selected');
-        setTimeout(() => {
-          if(idx + 1 < QUESTIONS.length){ idx++; render(); }
-          else { idx = QUESTIONS.length; render(); }
-        }, 320);
-      });
-    });
-    const backBtn = document.getElementById('backBtn');
-    if(backBtn) backBtn.addEventListener('click', () => { idx--; render(); });
+  window.addEventListener('keydown', (e)=>{
+    if(e.repeat) return;
+    if(el('screenGame').classList.contains('hidden')) return;
+    const idx = LANE_KEYS.indexOf(e.key.toLowerCase());
+    if(idx !== -1){ registerHit(idx); }
+  });
+  tapZoneEls().forEach(z=>{
+    z.addEventListener('pointerdown', (e)=>{ e.preventDefault(); registerHit(parseInt(z.dataset.lane,10)); });
+  });
+
+  function beginCountdownAndPlay(){
+    ensureAudio();
+    if(audioCtx.state === 'suspended') audioCtx.resume();
+    chart = generateChart(seed);
+    show('screenCountdown');
+    el('countdownKeys').innerHTML = '<span>Q</span><span>W</span><span>E</span><span>R</span>';
+    countdownIntervalId = setInterval(()=>{
+      const msLeft = startTime - Date.now();
+      if(msLeft <= 0){
+        clearInterval(countdownIntervalId);
+        startGameLoop();
+      } else {
+        el('countdownNum').textContent = Math.ceil(msLeft/1000);
+      }
+    }, 100);
   }
 
-  function renderGate(){
-    updateProgress();
-    main.innerHTML = `
-      <div class="card">
-        <p class="eyebrow">Last step</p>
-        <h1>Where should we send your results?</h1>
-        <p class="lede">Enter your email to unlock your full personality reading.</p>
-        <div class="gate" id="gateForm">
-          <input type="text" inputmode="email" id="emailInput" placeholder="you@example.com" autocomplete="email">
-          <div class="btn-row">
-            <button type="button" class="btn" id="revealBtn">Reveal My Results</button>
-            <button type="button" class="back-link" id="gateBackBtn">&larr; back</button>
-          </div>
-          <p class="fine-print">We'll send your results, plus the occasional follow-up reading, to this address.</p>
-        </div>
-      </div>
-    `;
-    document.getElementById('revealBtn').addEventListener('click', () => {
-      showToastThenResults();
-    });
-    document.getElementById('gateBackBtn').addEventListener('click', () => { idx = QUESTIONS.length - 1; render(); });
-  }
+  el('btnHost').addEventListener('click', async ()=>{
+    if(!storageOk) return;
+    role = 'host';
+    code = makeCode();
+    seed = Math.floor(Math.random()*1e9);
+    await safeSet('taptap:'+code+':meta', { seed, createdAt: Date.now(), guestPresent:false, startTime:null });
+    el('hostCode').textContent = code;
+    show('screenHostWait');
+    pollIntervalId = setInterval(async ()=>{
+      const meta = await safeGet('taptap:'+code+':meta');
+      if(meta && meta.guestPresent && !meta.startTime){
+        const st = Date.now() + 5000;
+        await safeSet('taptap:'+code+':meta', { seed, createdAt: meta.createdAt, guestPresent:true, startTime: st });
+        startTime = st;
+        clearInterval(pollIntervalId);
+        beginCountdownAndPlay();
+      }
+    }, 1000);
+  });
 
-  function showToastThenResults(){
-    const overlay = document.getElementById('toastOverlay');
-    overlay.classList.add('show');
-    document.getElementById('toastDismissBtn').addEventListener('click', () => {
-      overlay.classList.remove('show');
-      idx = QUESTIONS.length + 1;
-      render();
-    }, { once: true });
-  }
+  el('btnHostCancel').addEventListener('click', ()=>{
+    clearInterval(pollIntervalId);
+    show('screenMenu');
+  });
 
-  function computeResult(){
-    const scores = {};
-    TYPES_ORDER.forEach(t => scores[t] = 0);
-    QUESTIONS.forEach((q, i) => {
-      const val = answers[i];
-      if(val === undefined) return;
-      scores[q.type] += (val - 3);
-    });
-    const ranked = TYPES_ORDER.slice().sort((a,b) => scores[b] - scores[a]);
-    return { top: ranked[0], second: ranked[1], scores };
-  }
+  el('btnJoin').addEventListener('click', ()=>{ show('screenJoinEntry'); el('joinError').textContent=''; });
+  el('btnJoinBack').addEventListener('click', ()=> show('screenMenu'));
 
-  function renderResults(){
-    skypath.style.display = 'none';
-    progressLabel.textContent = '';
-    const { top, second } = computeResult();
-    const t = TYPES[top];
-    const s = TYPES[second];
-    main.innerHTML = `
-      <div class="card">
-        <div class="sigil-wrap" style="color:var(--gold-soft);">${t.sigil}</div>
-        <p class="result-type">Your type</p>
-        <h1 class="result-name" style="text-align:center;">${t.name}</h1>
-        <p class="result-tagline">${t.tagline}</p>
-        <div class="result-desc">
-          ${t.desc.map(p => `<p>${p}</p>`).join('')}
-        </div>
-        <div class="secondary-blurb">
-          There's also a strong current of <b>${s.name}</b> running underneath &mdash; ${s.tagline}
-        </div>
-        <div class="btn-row" style="justify-content:center; margin-top:28px; flex-direction:column; align-items:center; gap:10px;">
-          <button class="btn btn-ghost" id="retakeBtn">Take it again</button>
-          <button class="back-link" id="browseBtn">Browse all eight types &rarr;</button>
-        </div>
-      </div>
-    `;
-    document.getElementById('retakeBtn').addEventListener('click', () => {
-      idx = -1;
-      Object.keys(answers).forEach(k => delete answers[k]);
-      render();
-    });
-    document.getElementById('browseBtn').addEventListener('click', () => { idx = 'browse'; render(); });
-  }
+  el('btnJoinSubmit').addEventListener('click', async ()=>{
+    if(!storageOk) return;
+    const entered = el('codeInput').value.trim().toUpperCase();
+    if(entered.length !== 4){ el('joinError').textContent = 'Enter a 4-character code.'; return; }
+    const meta = await safeGet('taptap:'+entered+':meta');
+    if(!meta){ el('joinError').textContent = "Room not found. Check the code."; return; }
+    role = 'guest'; code = entered; seed = meta.seed;
+    await safeSet('taptap:'+code+':meta', { seed: meta.seed, createdAt: meta.createdAt, guestPresent:true, startTime: meta.startTime||null });
+    if(meta.startTime){
+      startTime = meta.startTime;
+      beginCountdownAndPlay();
+    } else {
+      show('screenGuestWait');
+      pollIntervalId = setInterval(async ()=>{
+        const m2 = await safeGet('taptap:'+code+':meta');
+        if(m2 && m2.startTime){
+          clearInterval(pollIntervalId);
+          startTime = m2.startTime;
+          beginCountdownAndPlay();
+        }
+      }, 800);
+    }
+  });
 
-  function renderBrowse(){
-    skypath.style.display = 'none';
-    progressLabel.textContent = '';
-    main.innerHTML = `
-      <div class="card">
-        <p class="eyebrow">The full cast</p>
-        <h1>All eight types.</h1>
-        <p class="lede">Click a type to expand its reading. None of them are better than the others &mdash; they're just different weather.</p>
-        <div class="browse-list">
-          ${TYPES_ORDER.map(key => {
-            const t = TYPES[key];
-            return `
-              <details class="browse-item">
-                <summary>
-                  <span class="browse-sigil">${t.sigil}</span>
-                  <span class="browse-summary-text">
-                    <span class="browse-name">${t.name}</span>
-                    <span class="browse-tagline">${t.tagline}</span>
-                  </span>
-                </summary>
-                <div class="browse-desc">
-                  ${t.desc.map(p => `<p>${p}</p>`).join('')}
-                </div>
-              </details>
-            `;
-          }).join('')}
-        </div>
-        <div class="btn-row" style="margin-top:26px;">
-          <button class="back-link" id="browseBackBtn">&larr; back to your results</button>
-        </div>
-      </div>
-    `;
-    document.getElementById('browseBackBtn').addEventListener('click', () => { idx = QUESTIONS.length + 1; render(); });
-  }
+  el('btnBackToMenu').addEventListener('click', ()=>{
+    role = null; code = null; seed = null; startTime = null;
+    show('screenMenu');
+  });
 
-  function render(){
-    if(idx === 'browse') renderBrowse();
-    else if(idx === -1) renderIntro();
-    else if(idx >= 0 && idx < QUESTIONS.length) renderQuestion();
-    else if(idx === QUESTIONS.length) renderGate();
-    else renderResults();
-  }
-
-  render();
+  show('screenMenu');
 })();
 </script>
+
 </body>
 </html>
