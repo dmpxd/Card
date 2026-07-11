@@ -256,28 +256,16 @@
   .keys-hint{ display:flex; gap:10px; }
   .keys-hint span{ background:#241a2b; border:1px solid #46334f; padding:3px 8px; border-radius:4px; font-size:11px; }
 
-  .chat-toggle{
-    position:absolute; top:14px; right:14px;
-    background:#241a2b; border:1px solid #46334f; color:var(--cream);
-    font-family:'JetBrains Mono', monospace; font-size:10px; letter-spacing:1px;
-    padding:6px 10px; border-radius:6px; cursor:pointer;
-    display:flex; align-items:center; gap:6px;
-  }
-  .chat-badge{
-    background:var(--magenta); color:#2a0f1a; border-radius:50%;
-    min-width:16px; height:16px; font-size:10px; font-weight:700;
-    display:flex; align-items:center; justify-content:center; padding:0 3px;
-  }
   .chat-panel{
-    position:absolute; top:50px; right:14px; left:14px; bottom:14px;
+    margin-top:14px;
     background:#0e0912; border:1px solid #46334f; border-radius:12px;
-    z-index:5; display:flex; flex-direction:column; padding:10px;
+    display:flex; flex-direction:column; padding:10px;
+    height:150px;
   }
   .chat-header{
     display:flex; justify-content:space-between; align-items:center;
     font-size:11px; letter-spacing:1px; color:#8a7a92; margin-bottom:8px;
   }
-  .chat-close{ background:none; border:none; color:var(--cream); font-size:16px; cursor:pointer; line-height:1; }
   .chat-messages{ flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:6px; margin-bottom:8px; }
   .chat-msg{ font-size:12px; line-height:1.4; word-break:break-word; }
   .chat-msg .who{ font-weight:700; margin-right:6px; }
@@ -289,11 +277,13 @@
     font-family:'JetBrains Mono', monospace; font-size:12px; padding:8px; border-radius:6px;
   }
   .chat-input-row input:focus{ outline:2px solid var(--teal); }
+  .chat-input-row input:disabled{ opacity:0.4; }
   .chat-send{
     background:var(--teal); color:#052723; border:none;
     font-family:'Rubik Mono One', sans-serif; font-size:11px;
     padding:8px 12px; border-radius:6px; cursor:pointer;
   }
+  .chat-send:disabled{ opacity:0.4; cursor:not-allowed; }
 
   .hidden{ display:none !important; }
 
@@ -309,18 +299,14 @@
   <h1 class="logo">TAPE<span>·</span>TAP</h1>
   <div class="subhead">ONLINE DUEL</div>
 
-  <button class="chat-toggle hidden" id="chatToggle">
-    CHAT <span class="chat-badge hidden" id="chatBadge">0</span>
-  </button>
-  <div class="chat-panel hidden" id="chatPanel">
+  <div class="chat-panel" id="chatPanel">
     <div class="chat-header">
       <span>DUEL CHAT</span>
-      <button class="chat-close" id="chatClose">&times;</button>
     </div>
     <div class="chat-messages" id="chatMessages"></div>
     <div class="chat-input-row">
-      <input type="text" id="chatInput" maxlength="200" placeholder="Say something…">
-      <button class="chat-send" id="chatSend">SEND</button>
+      <input type="text" id="chatInput" maxlength="200" placeholder="Join a room to chat…" disabled>
+      <button class="chat-send" id="chatSend" disabled>SEND</button>
     </div>
   </div>
 
@@ -423,7 +409,7 @@
   const MAX_HEALTH = 5;
   const PERFECT_MS = 80;
   const OUTER_MS = 260;
-  const MATCH_DURATION_MS = 45000;
+  const MATCH_DURATION_MS = 30000;
   const SYNC_INTERVAL_MS = 400;
 
   const el = id => document.getElementById(id);
@@ -558,15 +544,12 @@
       chatLog.push({ from: msg.from, text: msg.text, ts: msg.ts });
       if(chatLog.length > 40) chatLog.shift();
       renderChatMessages();
-      if(!chatOpen) updateChatBadge((chatUnseen = chatUnseen + 1));
       return;
     }
   }
 
   // ---- Chat ----
-  let chatOpen = false;
   let chatLog = [];
-  let chatUnseen = 0;
 
   function renderChatMessages(){
     const box = el('chatMessages');
@@ -583,22 +566,17 @@
     });
     box.scrollTop = box.scrollHeight;
   }
-  function updateChatBadge(n){
-    const b = el('chatBadge');
-    if(n > 0){ b.textContent = n > 9 ? '9+' : String(n); b.classList.remove('hidden'); }
-    else b.classList.add('hidden');
-  }
-  function showChatUI(){
-    chatLog = []; chatUnseen = 0; chatOpen = false;
-    el('chatToggle').classList.remove('hidden');
+  function enableChatInput(){
+    chatLog = [];
     el('chatMessages').innerHTML = '';
-    updateChatBadge(0);
+    el('chatInput').disabled = false;
+    el('chatSend').disabled = false;
+    el('chatInput').placeholder = 'Say something…';
   }
-  function hideChatUI(){
-    el('chatToggle').classList.add('hidden');
-    el('chatPanel').classList.add('hidden');
-    chatOpen = false;
-    updateChatBadge(0);
+  function disableChatInput(){
+    el('chatInput').disabled = true;
+    el('chatSend').disabled = true;
+    el('chatInput').placeholder = 'Join a room to chat…';
   }
   function sendChat(){
     const input = el('chatInput');
@@ -607,15 +585,6 @@
     input.value = '';
     wsSend({ type:'chat', text });
   }
-  el('chatToggle').addEventListener('click', ()=>{
-    chatOpen = !chatOpen;
-    el('chatPanel').classList.toggle('hidden', !chatOpen);
-    if(chatOpen){ chatUnseen = 0; updateChatBadge(0); }
-  });
-  el('chatClose').addEventListener('click', ()=>{
-    chatOpen = false;
-    el('chatPanel').classList.add('hidden');
-  });
   el('chatSend').addEventListener('click', sendChat);
   el('chatInput').addEventListener('keydown', (e)=>{
     e.stopPropagation();
@@ -681,8 +650,6 @@
     setTimeout(()=>f.remove(), 500);
   }
 
-  function comboMultiplier(){ return 1 + Math.floor(me.combo/10)*0.5; }
-
   function flashZone(lane){
     const z = tapZoneEls()[lane];
     z.classList.add('flash');
@@ -703,11 +670,11 @@
     if(best && bestDiff <= OUTER_MS){
       best.resolved = true;
       best.el.remove();
-      let quality, points, color;
-      if(bestDiff <= PERFECT_MS){ quality='perfect'; points=100; color='var(--teal)'; }
-      else { quality='good'; points=50; color='var(--amber)'; }
+      let quality, color;
+      if(bestDiff <= PERFECT_MS){ quality='perfect'; color='var(--teal)'; }
+      else { quality='good'; color='var(--amber)'; }
       me.combo++; me.bestCombo = Math.max(me.bestCombo, me.combo);
-      me.score += Math.round(points*comboMultiplier());
+      me.score += 100;
       hitSound(lane, quality);
       floatText(lane, quality==='perfect'?'PERFECT':'GOOD', color);
       if(me.combo>0 && me.combo%20===0 && me.health<MAX_HEALTH){
@@ -719,14 +686,11 @@
 
   function missNote(n){
     n.el.remove();
-    me.combo = 0; me.health--;
+    me.combo = 0;
+    if(me.health > 0) me.health--;
     missSound();
     floatText(n.lane, 'MISS', 'var(--magenta)');
     updateCombo(); renderHealth();
-    if(me.health <= 0 && me.alive){
-      me.alive = false;
-      finishMatch();
-    }
   }
 
   function pushMyState(){
@@ -742,7 +706,7 @@
     pushMyState();
     stopGameLoop();
     show('screenWaitingResult');
-    el('ownResultLine').textContent = (me.alive ? 'You survived the full side.' : 'Your tape snapped.') + ' Score: ' + String(me.score).padStart(4,'0');
+    el('ownResultLine').textContent = 'Side finished. Your score: ' + String(me.score).padStart(4,'0');
     if(opp.finished){ showResults(); }
     else { awaitingOpponentFinish = true; }
   }
@@ -752,7 +716,7 @@
     const now = Date.now();
     const elapsed = now - startTime;
 
-    if(elapsed >= MATCH_DURATION_MS && me.alive){
+    if(elapsed >= MATCH_DURATION_MS){
       finishMatch();
       return;
     }
@@ -803,17 +767,8 @@
 
   function showResults(){
     let winnerText;
-    if(!me.alive && !opp.alive){
-      if(me.elapsedAtFinish === opp.elapsedAtFinish) winnerText = "DOUBLE KO — IT'S A TIE";
-      else winnerText = (me.elapsedAtFinish > opp.elapsedAtFinish ? 'YOU WIN' : 'YOUR RIVAL WINS') + ' — LASTED LONGER';
-    } else if(me.alive && !opp.alive){
-      winnerText = 'YOU WIN';
-    } else if(!me.alive && opp.alive){
-      winnerText = 'YOUR RIVAL WINS';
-    } else {
-      if(me.score === opp.score) winnerText = "IT'S A TIE";
-      else winnerText = (me.score > opp.score ? 'YOU WIN' : 'YOUR RIVAL WINS') + ' ON SCORE';
-    }
+    if(me.score === opp.score) winnerText = "IT'S A TIE";
+    else winnerText = (me.score > opp.score ? 'YOU WIN' : 'YOUR RIVAL WINS') + ' ON SCORE';
     el('winnerLine').textContent = winnerText;
     el('finalRow').innerHTML = `
       <div><div class="fv" style="color:var(--amber)">${String(me.score).padStart(4,'0')}</div><div class="fl">YOU · BEST COMBO ${me.bestCombo}</div></div>
@@ -865,7 +820,7 @@
       ws.addEventListener('message', (e)=> handleServerMessage(JSON.parse(e.data)));
       ws.addEventListener('close', ()=>{});
       wsSend({ type:'join', role:'host', seed });
-      showChatUI();
+      enableChatInput();
     }catch(e){
       el('joinError').textContent = 'Could not reach the game server.';
       show('screenMenu');
@@ -874,7 +829,7 @@
 
   el('btnHostCancel').addEventListener('click', ()=>{
     closeConnection();
-    hideChatUI();
+    disableChatInput();
     role = null; code = null; seed = null; startTime = null;
     show('screenMenu');
   });
@@ -892,7 +847,7 @@
       ws = await connect(code);
       ws.addEventListener('message', (e)=> handleServerMessage(JSON.parse(e.data)));
       wsSend({ type:'join', role:'guest' });
-      showChatUI();
+      enableChatInput();
     }catch(e){
       el('joinError').textContent = 'Could not reach the game server.';
       show('screenJoinEntry');
@@ -901,7 +856,7 @@
 
   el('btnBackToMenu').addEventListener('click', ()=>{
     closeConnection();
-    hideChatUI();
+    disableChatInput();
     role = null; code = null; seed = null; startTime = null;
     show('screenMenu');
   });
