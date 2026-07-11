@@ -93,6 +93,7 @@
     border:1px solid #46334f;
   }
   .btn.teal{ background:var(--teal); color:#052723; }
+  .btn:disabled{ opacity:0.5; cursor:not-allowed; }
 
   input.code-input{
     background:#0e0912;
@@ -306,7 +307,7 @@
 
 <div class="deck">
   <h1 class="logo">TAPE<span>·</span>TAP</h1>
-  <div class="subhead" id="subhead">ONLINE DUEL</div>
+  <div class="subhead">ONLINE DUEL</div>
 
   <button class="chat-toggle hidden" id="chatToggle">
     CHAT <span class="chat-badge hidden" id="chatBadge">0</span>
@@ -324,10 +325,10 @@
   </div>
 
   <div id="screenMenu" class="panel">
-    <p>Race a friend on separate devices. Same notes, same clock, whoever's tape snaps first loses. Both of you need this open inside Claude for sync to work.</p>
+    <p>Race a friend on separate devices. Same notes, same clock — whoever's tape snaps first loses.</p>
     <button class="btn" id="btnHost">HOST A DUEL</button>
     <button class="btn ghost" id="btnJoin">JOIN WITH A CODE</button>
-    <p id="storageWarning" class="hidden" style="color:var(--magenta);">Online sync isn't available in this view. Open this artifact directly in Claude (not a downloaded file) to duel a friend.</p>
+    <p id="configWarning" class="hidden" style="color:var(--magenta);">Set WORKER_URL at the top of the script to your deployed Worker's address before this will connect.</p>
   </div>
 
   <div id="screenJoinEntry" class="panel hidden">
@@ -348,7 +349,7 @@
 
   <div id="screenGuestWait" class="panel hidden">
     <div class="spinner"></div>
-    <p>Connected. Waiting for the host to start the countdown…</p>
+    <p>Connected. Waiting for the host's countdown…</p>
   </div>
 
   <div id="screenCountdown" class="panel hidden">
@@ -407,6 +408,13 @@
 
 <script>
 (function(){
+  // ---- CONFIGURE THIS ----
+  // After you deploy the worker (see wrangler.toml / worker.js), set this to
+  // your Worker's address using the wss:// scheme, e.g.:
+  // const WORKER_URL = 'wss://tape-tap-duel.yoursubdomain.workers.dev';
+  const WORKER_URL = 'wss://tape-tap-duel.penisenlargement.workers.dev';
+  // -------------------------
+
   const LANE_COLORS = ['#f2a93b','#d1477a','#3fb8af','#f4ecd8'];
   const LANE_FREQ = [330, 392, 440, 523];
   const LANE_KEYS = ['q','w','e','r'];
@@ -416,24 +424,17 @@
   const PERFECT_MS = 80;
   const OUTER_MS = 260;
   const MATCH_DURATION_MS = 45000;
-  const SYNC_INTERVAL_MS = 500;
+  const SYNC_INTERVAL_MS = 400;
 
   const el = id => document.getElementById(id);
   const screens = ['screenMenu','screenJoinEntry','screenHostWait','screenGuestWait','screenCountdown','screenGame','screenWaitingResult','screenResults'];
   function show(id){ screens.forEach(s => el(s).classList.toggle('hidden', s !== id)); }
 
-  const storageOk = !!(window.storage && window.storage.get && window.storage.set);
-  if(!storageOk) el('storageWarning').classList.remove('hidden');
-
-  async function safeGet(key){
-    try{
-      const r = await window.storage.get(key, true);
-      return r ? JSON.parse(r.value) : null;
-    }catch(e){ return null; }
-  }
-  async function safeSet(key, obj){
-    try{ await window.storage.set(key, JSON.stringify(obj), true); return true; }
-    catch(e){ return false; }
+  const configOk = WORKER_URL.indexOf('REPLACE-WITH-YOUR-WORKER-URL') === -1;
+  if(!configOk){
+    el('configWarning').classList.remove('hidden');
+    el('btnHost').disabled = true;
+    el('btnJoin').disabled = true;
   }
 
   function makeCode(){
@@ -495,22 +496,82 @@
   function missSound(){ playTone(110, 0.16, 'sawtooth'); }
   function reviveSound(){ playTone(660,0.09,'sine'); setTimeout(()=>playTone(880,0.13,'sine'),80); }
 
+  // ---- Networking (WebSocket to the Durable Object worker) ----
+  let ws = null;
   let role = null;
   let code = null;
   let seed = null;
   let startTime = null;
+  let awaitingOpponentFinish = false;
 
-  let chatPollId = null;
+  function connect(roomCode){
+    return new Promise((resolve, reject) => {
+      try{
+        const socket = new WebSocket(WORKER_URL + '/room/' + roomCode);
+        socket.addEventListener('open', () => resolve(socket));
+        socket.addEventListener('error', () => reject(new Error('connection failed')));
+      }catch(e){ reject(e); }
+    });
+  }
+
+  function wsSend(obj){
+    if(ws && ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify(obj));
+  }
+
+  function handleServerMessage(msg){
+    if(msg.type === 'joined'){
+      seed = msg.seed;
+      return;
+    }
+    if(msg.type === 'start'){
+      seed = msg.seed;
+      startTime = msg.startTime;
+      beginCountdownAndPlay();
+      return;
+    }
+    if(msg.type === 'peerJoined'){
+      return;
+    }
+    if(msg.type === 'peerLeft'){
+      el('oppFlash').textContent = 'DISCONNECTED';
+      el('oppFlash').classList.add('show');
+      return;
+    }
+    if(msg.type === 'error'){
+      el('joinError').textContent = msg.message;
+      return;
+    }
+    if(msg.type === 'opponentState'){
+      const data = msg.payload;
+      if(data.combo > lastOppCombo) flashOpp('HIT');
+      if(data.health < lastOppHealth) flashOpp('MISS');
+      lastOppCombo = data.combo; lastOppHealth = data.health;
+      opp = { score:data.score, health:data.health, combo:data.combo, alive:data.alive, finished:data.finished, elapsedAtFinish:data.elapsedAtFinish };
+      renderOppHealth(); renderOppScore();
+      if(awaitingOpponentFinish && opp.finished){
+        awaitingOpponentFinish = false;
+        showResults();
+      }
+      return;
+    }
+    if(msg.type === 'chat'){
+      chatLog.push({ from: msg.from, text: msg.text, ts: msg.ts });
+      if(chatLog.length > 40) chatLog.shift();
+      renderChatMessages();
+      if(!chatOpen) updateChatBadge((chatUnseen = chatUnseen + 1));
+      return;
+    }
+  }
+
+  // ---- Chat ----
   let chatOpen = false;
-  let lastChatCount = 0;
-  let chatSeen = 0;
+  let chatLog = [];
+  let chatUnseen = 0;
 
-  function chatKey(){ return 'taptap:'+code+':chat'; }
-
-  function renderChatMessages(list){
+  function renderChatMessages(){
     const box = el('chatMessages');
     box.innerHTML = '';
-    list.forEach(m=>{
+    chatLog.forEach(m=>{
       const div = document.createElement('div');
       div.className = 'chat-msg ' + (m.from === role ? 'mine' : 'theirs');
       const who = document.createElement('span');
@@ -522,58 +583,34 @@
     });
     box.scrollTop = box.scrollHeight;
   }
-
   function updateChatBadge(n){
     const b = el('chatBadge');
     if(n > 0){ b.textContent = n > 9 ? '9+' : String(n); b.classList.remove('hidden'); }
     else b.classList.add('hidden');
   }
-
-  async function loadAndRenderChat(){
-    if(!code || !storageOk) return;
-    const data = await safeGet(chatKey());
-    const list = (data && data.messages) ? data.messages : [];
-    if(list.length !== lastChatCount){
-      renderChatMessages(list);
-      lastChatCount = list.length;
-      if(!chatOpen) updateChatBadge(list.length - chatSeen);
-    }
-  }
-
-  function startChat(){
-    lastChatCount = 0; chatSeen = 0; chatOpen = false;
+  function showChatUI(){
+    chatLog = []; chatUnseen = 0; chatOpen = false;
     el('chatToggle').classList.remove('hidden');
     el('chatMessages').innerHTML = '';
     updateChatBadge(0);
-    loadAndRenderChat();
-    chatPollId = setInterval(loadAndRenderChat, 1200);
   }
-
-  function stopChat(){
-    clearInterval(chatPollId);
+  function hideChatUI(){
     el('chatToggle').classList.add('hidden');
     el('chatPanel').classList.add('hidden');
     chatOpen = false;
     updateChatBadge(0);
   }
-
-  async function sendChat(){
+  function sendChat(){
     const input = el('chatInput');
     const text = input.value.trim();
-    if(!text || !code || !storageOk) return;
+    if(!text) return;
     input.value = '';
-    const data = await safeGet(chatKey());
-    const list = (data && data.messages) ? data.messages : [];
-    list.push({ from: role, text: text.slice(0,200), ts: Date.now() });
-    while(list.length > 40) list.shift();
-    await safeSet(chatKey(), { messages: list });
-    loadAndRenderChat();
+    wsSend({ type:'chat', text });
   }
-
   el('chatToggle').addEventListener('click', ()=>{
     chatOpen = !chatOpen;
     el('chatPanel').classList.toggle('hidden', !chatOpen);
-    if(chatOpen){ chatSeen = lastChatCount; updateChatBadge(0); loadAndRenderChat(); }
+    if(chatOpen){ chatUnseen = 0; updateChatBadge(0); }
   });
   el('chatClose').addEventListener('click', ()=>{
     chatOpen = false;
@@ -584,10 +621,12 @@
     e.stopPropagation();
     if(e.key === 'Enter'){ e.preventDefault(); sendChat(); }
   });
+
+  // ---- Game state ----
   let chart = [];
   let chartIdx = 0;
   let activeNotes = [];
-  let rafId, syncIntervalId, pollIntervalId, countdownIntervalId;
+  let rafId, syncIntervalId, countdownIntervalId;
 
   let me = { score:0, combo:0, bestCombo:0, health:MAX_HEALTH, alive:true, finished:false, elapsedAtFinish:null };
   let opp = { score:0, health:MAX_HEALTH, combo:0, alive:true, finished:false, elapsedAtFinish:null };
@@ -690,35 +729,22 @@
     }
   }
 
+  function pushMyState(){
+    wsSend({ type:'state', payload: {
+      score: me.score, health: me.health, combo: me.combo, bestCombo: me.bestCombo,
+      alive: me.alive, finished: me.finished, elapsedAtFinish: me.elapsedAtFinish
+    }});
+  }
+
   function finishMatch(){
     me.finished = true;
     me.elapsedAtFinish = Date.now() - startTime;
-    pushMyState(true);
+    pushMyState();
     stopGameLoop();
     show('screenWaitingResult');
     el('ownResultLine').textContent = (me.alive ? 'You survived the full side.' : 'Your tape snapped.') + ' Score: ' + String(me.score).padStart(4,'0');
-    checkForResults();
-    pollIntervalId = setInterval(checkForResults, 700);
-  }
-
-  async function pushMyState(force){
-    if(!storageOk) return;
-    await safeSet('taptap:'+code+':'+role, {
-      score: me.score, health: me.health, combo: me.combo, bestCombo: me.bestCombo,
-      alive: me.alive, finished: me.finished, elapsedAtFinish: me.elapsedAtFinish, ts: Date.now()
-    });
-  }
-
-  async function pollOpponent(){
-    if(!storageOk) return;
-    const otherRole = role === 'host' ? 'guest' : 'host';
-    const data = await safeGet('taptap:'+code+':'+otherRole);
-    if(!data) return;
-    if(data.combo > lastOppCombo) flashOpp('HIT');
-    if(data.health < lastOppHealth) flashOpp('MISS');
-    lastOppCombo = data.combo; lastOppHealth = data.health;
-    opp = { score:data.score, health:data.health, combo:data.combo, alive:data.alive, finished:data.finished, elapsedAtFinish:data.elapsedAtFinish };
-    renderOppHealth(); renderOppScore();
+    if(opp.finished){ showResults(); }
+    else { awaitingOpponentFinish = true; }
   }
 
   function tick(){
@@ -767,22 +793,12 @@
     laneEls().forEach(l => l.querySelectorAll('.note,.float-txt').forEach(e=>e.remove()));
     show('screenGame');
     rafId = requestAnimationFrame(tick);
-    syncIntervalId = setInterval(()=>{ pushMyState(false); pollOpponent(); }, SYNC_INTERVAL_MS);
+    syncIntervalId = setInterval(pushMyState, SYNC_INTERVAL_MS);
   }
 
   function stopGameLoop(){
     cancelAnimationFrame(rafId);
     clearInterval(syncIntervalId);
-  }
-
-  async function checkForResults(){
-    const otherRole = role === 'host' ? 'guest' : 'host';
-    const data = await safeGet('taptap:'+code+':'+otherRole);
-    if(data && data.finished){
-      clearInterval(pollIntervalId);
-      opp = { score:data.score, health:data.health, combo:data.combo, alive:data.alive, finished:true, elapsedAtFinish:data.elapsedAtFinish };
-      showResults();
-    }
   }
 
   function showResults(){
@@ -833,30 +849,32 @@
     }, 100);
   }
 
+  function closeConnection(){
+    if(ws){ try{ ws.close(); }catch(e){} ws = null; }
+  }
+
   el('btnHost').addEventListener('click', async ()=>{
-    if(!storageOk) return;
+    if(!configOk) return;
     role = 'host';
     code = makeCode();
     seed = Math.floor(Math.random()*1e9);
-    await safeSet('taptap:'+code+':meta', { seed, createdAt: Date.now(), guestPresent:false, startTime:null });
     el('hostCode').textContent = code;
     show('screenHostWait');
-    startChat();
-    pollIntervalId = setInterval(async ()=>{
-      const meta = await safeGet('taptap:'+code+':meta');
-      if(meta && meta.guestPresent && !meta.startTime){
-        const st = Date.now() + 5000;
-        await safeSet('taptap:'+code+':meta', { seed, createdAt: meta.createdAt, guestPresent:true, startTime: st });
-        startTime = st;
-        clearInterval(pollIntervalId);
-        beginCountdownAndPlay();
-      }
-    }, 1000);
+    try{
+      ws = await connect(code);
+      ws.addEventListener('message', (e)=> handleServerMessage(JSON.parse(e.data)));
+      ws.addEventListener('close', ()=>{});
+      wsSend({ type:'join', role:'host', seed });
+      showChatUI();
+    }catch(e){
+      el('joinError').textContent = 'Could not reach the game server.';
+      show('screenMenu');
+    }
   });
 
   el('btnHostCancel').addEventListener('click', ()=>{
-    clearInterval(pollIntervalId);
-    stopChat();
+    closeConnection();
+    hideChatUI();
     role = null; code = null; seed = null; startTime = null;
     show('screenMenu');
   });
@@ -865,32 +883,25 @@
   el('btnJoinBack').addEventListener('click', ()=> show('screenMenu'));
 
   el('btnJoinSubmit').addEventListener('click', async ()=>{
-    if(!storageOk) return;
+    if(!configOk) return;
     const entered = el('codeInput').value.trim().toUpperCase();
     if(entered.length !== 4){ el('joinError').textContent = 'Enter a 4-character code.'; return; }
-    const meta = await safeGet('taptap:'+entered+':meta');
-    if(!meta){ el('joinError').textContent = "Room not found. Check the code."; return; }
-    role = 'guest'; code = entered; seed = meta.seed;
-    await safeSet('taptap:'+code+':meta', { seed: meta.seed, createdAt: meta.createdAt, guestPresent:true, startTime: meta.startTime||null });
-    startChat();
-    if(meta.startTime){
-      startTime = meta.startTime;
-      beginCountdownAndPlay();
-    } else {
-      show('screenGuestWait');
-      pollIntervalId = setInterval(async ()=>{
-        const m2 = await safeGet('taptap:'+code+':meta');
-        if(m2 && m2.startTime){
-          clearInterval(pollIntervalId);
-          startTime = m2.startTime;
-          beginCountdownAndPlay();
-        }
-      }, 800);
+    role = 'guest'; code = entered;
+    show('screenGuestWait');
+    try{
+      ws = await connect(code);
+      ws.addEventListener('message', (e)=> handleServerMessage(JSON.parse(e.data)));
+      wsSend({ type:'join', role:'guest' });
+      showChatUI();
+    }catch(e){
+      el('joinError').textContent = 'Could not reach the game server.';
+      show('screenJoinEntry');
     }
   });
 
   el('btnBackToMenu').addEventListener('click', ()=>{
-    stopChat();
+    closeConnection();
+    hideChatUI();
     role = null; code = null; seed = null; startTime = null;
     show('screenMenu');
   });
