@@ -130,10 +130,17 @@
   }
   @keyframes sp{ to{ transform:rotate(360deg); } }
 
+  .countdown-overlay{
+    position:absolute; inset:0;
+    background:rgba(16,10,19,0.55);
+    display:flex; align-items:center; justify-content:center;
+    border-radius:10px; z-index:6; pointer-events:none;
+  }
   .countdown-num{
     font-family:'Rubik Mono One', sans-serif;
-    font-size:64px;
+    font-size:56px;
     color:var(--amber);
+    text-shadow: 2px 2px 0 rgba(0,0,0,0.5);
   }
 
   .vs-strip{
@@ -319,12 +326,6 @@
     <button class="btn ghost" id="btnLeaveLobby">LEAVE</button>
   </div>
 
-  <div id="screenCountdown" class="panel hidden">
-    <p>Get ready</p>
-    <div class="countdown-num" id="countdownNum">3</div>
-    <div class="keys-hint"><span>Q</span><span>W</span><span>E</span><span>R</span></div>
-  </div>
-
   <div id="screenGame" class="hidden">
     <div id="duelTopBar" class="hidden">
       <div class="vs-strip">
@@ -354,6 +355,9 @@
       <div class="lane" data-lane="2"></div>
       <div class="lane" data-lane="3"></div>
       <div class="opp-flash" id="oppFlash"></div>
+      <div class="countdown-overlay hidden" id="countdownOverlay">
+        <div class="countdown-num" id="countdownNum">3</div>
+      </div>
     </div>
     <div class="tap-zones" id="tapZones">
       <button class="tap-zone" data-lane="0" style="color:var(--amber)">Q</button>
@@ -410,14 +414,14 @@
   const PERFECT_MS = 80;
   const OUTER_MS = 200;
   const INPUT_COOLDOWN_MS = 150;
-  const EMPTY_PRESS_PENALTY = 20;
+  const EMPTY_PRESS_PENALTY = 50;
   const DUEL_DURATION_MS = 30000;
   const SYNC_INTERVAL_MS = 400;
   const SOLO_RAMP_HITS = 15;
   const SOLO_BPM_MAX = 220;
 
   const el = id => document.getElementById(id);
-  const screens = ['screenMenu','screenJoinEntry','screenLobby','screenCountdown','screenGame','screenWaitingResult','screenResults','screenSoloResults'];
+  const screens = ['screenMenu','screenJoinEntry','screenLobby','screenGame','screenWaitingResult','screenResults','screenSoloResults'];
   function show(id){ screens.forEach(s => el(s).classList.toggle('hidden', s !== id)); }
 
   const configOk = WORKER_URL.indexOf('REPLACE-WITH-YOUR-WORKER-URL') === -1;
@@ -496,6 +500,10 @@
     if(quality==='perfect') playTone(base*1.5, 0.12, 'square');
     else playTone(base, 0.1, 'square');
   }
+
+  // BGM removed per request; stubs kept so existing calls are harmless no-ops.
+  function startBGM(){}
+  function stopBGM(){}
   function missSound(){ playTone(110, 0.13, 'sawtooth'); }
   function reviveSound(){ playTone(660,0.08,'sine'); setTimeout(()=>playTone(880,0.11,'sine'),80); }
 
@@ -751,6 +759,14 @@
 
   function soloComboMultiplier(){ return 1 + Math.floor(me.combo/10)*0.5; }
 
+  function streakBonus(combo){
+    if(combo === 10) return 100;
+    if(combo === 25) return 250;
+    if(combo === 50) return 500;
+    if(combo > 50 && combo % 50 === 0) return combo * 10;
+    return 0;
+  }
+
   function registerHit(lane){
     if(mode==='duel' && me.finished) return;
     if(mode==='solo' && me.health<=0) return;
@@ -783,19 +799,23 @@
       }
       hitSound(lane, quality);
       floatText(lane, quality==='perfect'?'PERFECT':'GOOD', quality==='perfect'?'var(--teal)':'var(--amber)');
+      const bonus = streakBonus(me.combo);
+      if(bonus > 0){
+        me.score += bonus;
+        reviveSound();
+        floatText(lane, me.combo + ' STREAK +' + bonus, 'var(--cream)');
+      }
       if(me.combo>0 && me.combo%20===0 && me.health<MAX_HEALTH){
-        me.health++; reviveSound(); floatText(lane, 'RESTORED', 'var(--cream)');
+        me.health++; floatText(lane, 'RESTORED', 'var(--cream)');
       }
       renderCounter(); renderHealth(); updateCombo();
     } else {
-      // empty press: penalize so spamming every key can't beat real timing
+      // wrong key: kills your streak and costs points, so spamming can't beat real timing
       me.combo = 0;
       updateCombo();
       flashZone(lane, 'miss');
-      if(mode==='duel'){
-        me.score = Math.max(0, me.score - EMPTY_PRESS_PENALTY);
-        renderCounter();
-      }
+      me.score = Math.max(0, me.score - EMPTY_PRESS_PENALTY);
+      renderCounter();
     }
   }
 
@@ -826,6 +846,7 @@
     me.finished = true;
     pushMyState();
     stopDuelLoop();
+    stopBGM();
     show('screenWaitingResult');
     el('ownResultLine').textContent = 'Side finished. Your score: ' + String(me.score).padStart(4,'0');
     if(opp.finished){ showResults(); }
@@ -906,12 +927,14 @@
     ensureAudio();
     if(audioCtx.state === 'suspended') audioCtx.resume();
     chart = generateChart(seed, DUEL_DURATION_MS);
-    show('screenCountdown');
+    startDuelRound();
+    startBGM();
+    el('countdownOverlay').classList.remove('hidden');
     countdownIntervalId = setInterval(()=>{
       const msLeft = startTime - Date.now();
       if(msLeft <= 0){
         clearInterval(countdownIntervalId);
-        startDuelRound();
+        el('countdownOverlay').classList.add('hidden');
       } else {
         el('countdownNum').textContent = Math.ceil(msLeft/1000);
       }
@@ -933,6 +956,7 @@
     clearLaneVisuals();
     ensureAudio();
     if(audioCtx.state === 'suspended') audioCtx.resume();
+    startBGM();
     startTime = Date.now();
     nextSpawnTime = startTime + 300;
     renderCounter(); updateCombo();
@@ -942,6 +966,7 @@
 
   function endSolo(){
     cancelAnimationFrame(rafId);
+    stopBGM();
     const isNewBest = me.score > soloBestScore;
     if(isNewBest) soloBestScore = me.score;
     el('soloFinalScore').textContent = String(me.score).padStart(4,'0');
