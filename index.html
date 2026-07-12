@@ -288,6 +288,15 @@
   }
   .chat-send:disabled{ opacity:0.4; cursor:not-allowed; }
 
+  .diff-row{ display:flex; gap:6px; width:100%; max-width:260px; }
+  .diff-row .btn{ padding:9px 6px; font-size:11px; }
+  .diff-btn{
+    flex:1; background:#241a2b; border:1px solid #46334f; color:var(--cream);
+    font-family:'JetBrains Mono', monospace; font-weight:700; font-size:11px; letter-spacing:1px;
+    padding:7px 4px; border-radius:6px; cursor:pointer;
+  }
+  .diff-btn.active{ background:var(--amber); color:#2a1a05; border-color:var(--amber); }
+
   .hidden{ display:none !important; }
 
   @media (prefers-reduced-motion: reduce){
@@ -306,7 +315,12 @@
     <p>Race a friend in real time — 30 seconds, 100 points a note, most points wins. Or warm up solo.</p>
     <button class="btn" id="btnHost">HOST A DUEL</button>
     <button class="btn ghost" id="btnJoin">JOIN WITH A CODE</button>
-    <button class="btn ghost" id="btnSolo">SINGLE PLAYER</button>
+    <p style="margin:6px 0 0; font-size:11px; letter-spacing:1px; color:#8a7a92;">SINGLE PLAYER</p>
+    <div class="diff-row">
+      <button class="btn ghost diff-select" data-diff="easy">EASY</button>
+      <button class="btn ghost diff-select" data-diff="normal">NORMAL</button>
+      <button class="btn ghost diff-select" data-diff="hard">HARD</button>
+    </div>
     <p id="configWarning" class="hidden" style="color:var(--magenta);">Set WORKER_URL at the top of the script to your deployed Worker's address before duels will connect.</p>
   </div>
 
@@ -321,6 +335,12 @@
   <div id="screenLobby" class="panel hidden">
     <p id="lobbyCodeLine">Share this code with your friend:</p>
     <div class="code-display hidden" id="lobbyCode">----</div>
+    <p style="margin:0; font-size:11px; letter-spacing:1px; color:#8a7a92;">DIFFICULTY</p>
+    <div class="diff-row" id="lobbyDiffRow">
+      <button class="diff-btn" data-diff="easy">EASY</button>
+      <button class="diff-btn active" data-diff="normal">NORMAL</button>
+      <button class="diff-btn" data-diff="hard">HARD</button>
+    </div>
     <p id="lobbyStatus">Waiting for your friend to join…</p>
     <button class="btn" id="btnReady">I'M READY</button>
     <button class="btn ghost" id="btnLeaveLobby">LEAVE</button>
@@ -342,6 +362,7 @@
       <span class="counter-label">SCORE</span>
       <div class="counter-digits" id="counterSolo">0000</div>
     </div>
+    <div id="diffLabel" style="text-align:center; font-size:10px; letter-spacing:1px; color:#8a7a92; margin-bottom:6px;"></div>
 
     <div class="cassette">
       <div class="reel-row"><div class="reel" id="reel"></div></div>
@@ -411,14 +432,18 @@
   const NOTE_TRAVEL_MS = 1500;
   const HIT_RATIO = 0.82;
   const MAX_HEALTH = 5;
-  const PERFECT_MS = 80;
-  const OUTER_MS = 200;
   const INPUT_COOLDOWN_MS = 150;
   const EMPTY_PRESS_PENALTY = 50;
   const DUEL_DURATION_MS = 30000;
   const SYNC_INTERVAL_MS = 400;
-  const SOLO_RAMP_HITS = 15;
-  const SOLO_BPM_MAX = 220;
+
+  const DIFFICULTIES = {
+    easy:   { label:'EASY',   startBpm:80,  bpmStep:6,  bpmCap:160, outerMs:260, perfectMs:100, rampHits:20 },
+    normal: { label:'NORMAL', startBpm:100, bpmStep:8,  bpmCap:200, outerMs:200, perfectMs:80,  rampHits:15 },
+    hard:   { label:'HARD',   startBpm:120, bpmStep:10, bpmCap:240, outerMs:150, perfectMs:60,  rampHits:10 }
+  };
+  let currentDiffKey = 'normal';
+  let currentDiff = DIFFICULTIES.normal;
 
   const el = id => document.getElementById(id);
   const screens = ['screenMenu','screenJoinEntry','screenLobby','screenGame','screenWaitingResult','screenResults','screenSoloResults'];
@@ -447,16 +472,18 @@
     };
   }
 
-  function bpmAtElapsed(ms){
-    return Math.min(200, 100 + Math.floor(ms/15000)*8);
+  function bpmAtElapsed(ms, diff){
+    diff = diff || currentDiff;
+    return Math.min(diff.bpmCap, diff.startBpm + Math.max(0, Math.floor(ms/15000))*diff.bpmStep);
   }
 
-  function generateChart(seed, durationMs){
+  function generateChart(seed, durationMs, diff){
+    diff = diff || currentDiff;
     const rng = mulberry32(seed);
     const chart = [];
     let t = 300;
     while(t < durationMs){
-      const bpm = bpmAtElapsed(t);
+      const bpm = bpmAtElapsed(t, diff);
       const interval = 60000/bpm;
       const variance = rng() < 0.25 ? interval/2 : interval;
       t += variance;
@@ -534,6 +561,16 @@
     if(ws){ try{ ws.close(); }catch(e){} ws = null; }
   }
 
+  function selectDifficulty(key, broadcast){
+    currentDiffKey = key;
+    currentDiff = DIFFICULTIES[key];
+    document.querySelectorAll('#lobbyDiffRow .diff-btn').forEach(b=> b.classList.toggle('active', b.dataset.diff===key));
+    if(broadcast) wsSend({ type:'setDifficulty', level:key });
+  }
+  document.querySelectorAll('#lobbyDiffRow .diff-btn').forEach(b=>{
+    b.addEventListener('click', ()=> selectDifficulty(b.dataset.diff, true));
+  });
+
   function updateLobbyUI(){
     const codeBox = el('lobbyCode');
     if(role==='host'){ codeBox.classList.remove('hidden'); codeBox.textContent = code; el('lobbyCodeLine').classList.remove('hidden'); }
@@ -561,7 +598,12 @@
     }
     if(msg.type === 'peerJoined'){
       opponentConnected = true;
+      if(role === 'host') wsSend({ type:'setDifficulty', level:currentDiffKey });
       updateLobbyUI();
+      return;
+    }
+    if(msg.type === 'setDifficulty'){
+      selectDifficulty(msg.level, false);
       return;
     }
     if(msg.type === 'peerLeft'){
@@ -783,9 +825,9 @@
       if(diff < bestDiff){ bestDiff = diff; best = n; }
     }
 
-    if(best && bestDiff <= OUTER_MS){
+    if(best && bestDiff <= currentDiff.outerMs){
       best.resolved = true;
-      const quality = bestDiff <= PERFECT_MS ? 'perfect' : 'good';
+      const quality = bestDiff <= currentDiff.perfectMs ? 'perfect' : 'good';
       animateNoteHit(best.el, quality);
       flashZone(lane, quality);
       me.combo++; me.bestCombo = Math.max(me.bestCombo, me.combo);
@@ -795,7 +837,7 @@
         const pts = quality==='perfect' ? 100 : 50;
         me.score += Math.round(pts * soloComboMultiplier());
         hitsSinceRamp++;
-        if(hitsSinceRamp >= SOLO_RAMP_HITS && bpm < SOLO_BPM_MAX){ bpm += 10; hitsSinceRamp = 0; }
+        if(hitsSinceRamp >= currentDiff.rampHits && bpm < currentDiff.bpmCap){ bpm += currentDiff.bpmStep; hitsSinceRamp = 0; }
       }
       hitSound(lane, quality);
       floatText(lane, quality==='perfect'?'PERFECT':'GOOD', quality==='perfect'?'var(--teal)':'var(--amber)');
@@ -902,6 +944,7 @@
     el('duelTopBar').classList.remove('hidden');
     el('soloTopBar').classList.add('hidden');
     el('chatPanel').classList.remove('hidden');
+    el('diffLabel').textContent = 'DIFFICULTY: ' + currentDiff.label;
     show('screenGame');
     rafId = requestAnimationFrame(tick);
     syncIntervalId = setInterval(pushMyState, SYNC_INTERVAL_MS);
@@ -942,17 +985,19 @@
   }
 
   // ---- Solo mode ----
-  function startSolo(){
+  function startSolo(diffKey){
+    if(diffKey){ currentDiffKey = diffKey; currentDiff = DIFFICULTIES[diffKey]; }
     closeConnection();
     role = null; code = null;
     mode = 'solo';
     resetMe();
-    bpm = 100; hitsSinceRamp = 0;
+    bpm = currentDiff.startBpm; hitsSinceRamp = 0;
     buildHealthUI();
     renderHealth();
     el('duelTopBar').classList.add('hidden');
     el('soloTopBar').classList.remove('hidden');
     el('chatPanel').classList.add('hidden');
+    el('diffLabel').textContent = 'DIFFICULTY: ' + currentDiff.label;
     clearLaneVisuals();
     ensureAudio();
     if(audioCtx.state === 'suspended') audioCtx.resume();
@@ -977,8 +1022,10 @@
     show('screenSoloResults');
   }
 
-  el('btnSolo').addEventListener('click', startSolo);
-  el('btnSoloAgain').addEventListener('click', startSolo);
+  document.querySelectorAll('.diff-select').forEach(b=>{
+    b.addEventListener('click', ()=> startSolo(b.dataset.diff));
+  });
+  el('btnSoloAgain').addEventListener('click', ()=> startSolo());
   el('btnSoloMenu').addEventListener('click', ()=>{
     el('chatPanel').classList.remove('hidden');
     disableChatInput();
