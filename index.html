@@ -15,16 +15,14 @@
     --magenta:#d1477a;
     --teal:#3fb8af;
   }
-
   *{box-sizing:border-box;}
-
   body{
     margin:0;
     min-height:100vh;
     background:var(--bg-deep);
     background-image:
       radial-gradient(circle at 20% 10%, rgba(242,169,59,0.08), transparent 40%),
-      radial-gradient(circle at 80% 90%, rgba(209,71,122,0.08), transparent 40%);
+      radial-gradient(circle at 80% 90%, rgba(63,184,175,0.08), transparent 40%);
     display:flex;
     align-items:center;
     justify-content:center;
@@ -33,273 +31,257 @@
     padding:20px;
     -webkit-tap-highlight-color:transparent;
   }
-
   .deck{
     width:100%;
     max-width:420px;
     background:var(--bg-panel);
     border-radius:18px;
-    padding:18px 18px 22px;
+    padding:18px;
     border:2px solid #3a2a44;
     position:relative;
     box-shadow: 0 20px 50px rgba(0,0,0,0.4);
   }
-
-  .deck-header{
-    display:flex;
-    justify-content:space-between;
-    align-items:flex-start;
-    margin-bottom:12px;
-  }
-
   .logo{
     font-family:'Rubik Mono One', sans-serif;
     font-size:22px;
     letter-spacing:1px;
     color:var(--amber);
-    margin:0;
-    line-height:1;
+    margin:0 0 4px;
+    text-align:center;
     text-shadow: 2px 2px 0 rgba(0,0,0,0.4);
   }
-
-  .logo span{ color:var(--magenta); }
-
-  .counter-box{
-    text-align:right;
-  }
-
-  .counter-label{
-    font-size:9px;
-    letter-spacing:2px;
-    color:#8a7a92;
-    display:block;
-    margin-bottom:2px;
-  }
-
-  .counter-digits{
-    background:#0e0912;
-    color:var(--teal);
-    font-weight:700;
-    font-size:18px;
-    letter-spacing:3px;
-    padding:4px 8px;
-    border-radius:4px;
-    border:1px solid #3a2a44;
-    min-width:80px;
-  }
-
-  .cassette{
-    background:#1c1220;
-    border:1px solid #3a2a44;
-    border-radius:12px;
-    padding:10px 14px 14px;
-    margin-bottom:14px;
-  }
-
-  .reel-row{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    padding:0 10px;
-  }
-
-  .reel{
-    width:52px;
-    height:52px;
-    border-radius:50%;
-    background: repeating-conic-gradient(#0e0912 0deg 8deg, #241a2b 8deg 16deg);
-    border:3px solid #46334f;
-    position:relative;
-    animation: spin var(--spin-dur, 6s) linear infinite;
-  }
-
-  .reel::after{
-    content:'';
-    position:absolute;
-    inset:18px;
-    background:var(--bg-panel);
-    border-radius:50%;
-    border:2px solid #46334f;
-  }
-
-  @keyframes spin{ to{ transform:rotate(360deg); } }
-
-  .tape-strip{
-    flex:1;
-    height:6px;
-    background:linear-gradient(90deg, #46334f, #2a1e31, #46334f);
-    margin:0 8px;
-    border-radius:3px;
-  }
-
-  .health-row{
-    display:flex;
-    gap:5px;
-    justify-content:center;
-    margin-top:10px;
-  }
-
-  .health-seg{
-    width:36px;
-    height:8px;
-    border-radius:2px;
-    background:#3a2a44;
-    transition: background .2s;
-  }
-
-  .health-seg.on{ background:var(--amber); }
-
-  .combo-line{
+  .logo span{ color:var(--teal); }
+  .subhead{
     text-align:center;
-    height:20px;
-    font-size:13px;
-    font-weight:700;
-    color:var(--magenta);
+    font-size:11px;
+    color:#8a7a92;
+    margin-bottom:16px;
     letter-spacing:1px;
-    margin-bottom:4px;
   }
 
-  .lanes{
-    display:flex;
-    gap:6px;
-    height:340px;
-    position:relative;
-    background:#100a13;
-    border-radius:10px;
-    overflow:hidden;
-    border:1px solid #3a2a44;
-  }
-
-  .lane{
-    flex:1;
-    position:relative;
-    border-right:1px solid #241a2b;
-  }
-  .lane:last-child{ border-right:none; }
-
-  .hit-line{
-    position:absolute;
-    left:0; right:0;
-    top:82%;
-    height:3px;
-    background:var(--cream);
-    opacity:0.5;
-  }
-
-  .note{
-    position:absolute;
-    left:8%;
-    right:8%;
-    height:22px;
-    border-radius:5px;
-    top:-24px;
-  }
-
-  .float-txt{
-    position:absolute;
-    left:50%;
-    top:82%;
-    transform:translate(-50%,-50%);
-    font-size:12px;
-    font-weight:700;
-    letter-spacing:1px;
-    pointer-events:none;
-    animation: floatUp .5s ease-out forwards;
-  }
-
-  @keyframes floatUp{
-    0%{ opacity:1; transform:translate(-50%,-50%); }
-    100%{ opacity:0; transform:translate(-50%,-140%); }
-  }
-
-  .tap-zones{
-    display:flex;
-    gap:6px;
-    margin-top:8px;
-  }
-
-  .tap-zone{
-    flex:1;
-    height:56px;
-    border-radius:8px;
-    border:none;
-    background:#241a2b;
-    color:var(--cream);
-    font-family:'JetBrains Mono', monospace;
-    font-weight:700;
-    font-size:16px;
-    letter-spacing:1px;
-    touch-action:none;
-    user-select:none;
-    transition: transform .06s, background .06s;
-  }
-
-  .tap-zone:active{ transform:scale(0.94); }
-
-  .tap-zone.flash{ transform:scale(0.94); }
-
-  .tap-zone:focus-visible{ outline:2px solid var(--cream); outline-offset:2px; }
-
-  .overlay{
-    position:absolute;
-    inset:0;
-    background:rgba(14,9,18,0.94);
-    border-radius:18px;
+  .panel{
     display:flex;
     flex-direction:column;
     align-items:center;
-    justify-content:center;
-    text-align:center;
-    padding:24px;
     gap:12px;
+    text-align:center;
+    padding:10px 4px;
   }
-
-  .overlay h2{
-    font-family:'Rubik Mono One', sans-serif;
-    color:var(--amber);
-    font-size:20px;
-    margin:0;
-  }
-
-  .overlay p{
+  .panel p{
+    font-size:12.5px;
     color:#b8a9c0;
-    font-size:13px;
     line-height:1.6;
-    max-width:280px;
+    max-width:320px;
     margin:0;
   }
-
-  .overlay .final{
-    font-size:26px;
-    color:var(--teal);
-    font-weight:700;
-  }
-
-  .play-btn{
-    margin-top:8px;
+  .btn{
     background:var(--amber);
     color:#2a1a05;
     border:none;
     font-family:'Rubik Mono One', sans-serif;
-    font-size:14px;
-    padding:12px 24px;
+    font-size:13px;
+    padding:12px 22px;
     border-radius:8px;
     cursor:pointer;
+    width:100%;
+    max-width:260px;
   }
-  .play-btn:active{ transform:scale(0.97); }
-
-  .keys-hint{
-    display:flex;
-    gap:10px;
-    margin-top:4px;
-  }
-  .keys-hint span{
-    background:#241a2b;
+  .btn:active{ transform:scale(0.97); }
+  .btn.ghost{
+    background:transparent;
+    color:var(--cream);
     border:1px solid #46334f;
-    padding:3px 8px;
-    border-radius:4px;
-    font-size:11px;
   }
+  .btn:disabled{ opacity:0.45; cursor:not-allowed; }
+
+  input.code-input{
+    background:#0e0912;
+    border:1px solid #46334f;
+    color:var(--cream);
+    font-family:'JetBrains Mono', monospace;
+    font-weight:700;
+    font-size:22px;
+    letter-spacing:6px;
+    text-align:center;
+    padding:10px;
+    border-radius:8px;
+    width:180px;
+    text-transform:uppercase;
+  }
+  input.code-input:focus{ outline:2px solid var(--teal); }
+
+  .code-display{
+    font-family:'Rubik Mono One', sans-serif;
+    font-size:34px;
+    letter-spacing:8px;
+    color:var(--teal);
+    background:#0e0912;
+    border:1px solid #46334f;
+    border-radius:10px;
+    padding:14px 18px;
+  }
+
+  .spinner{
+    width:26px; height:26px;
+    border:3px solid #46334f;
+    border-top-color:var(--teal);
+    border-radius:50%;
+    animation: sp 0.8s linear infinite;
+  }
+  @keyframes sp{ to{ transform:rotate(360deg); } }
+
+  .countdown-num{
+    font-family:'Rubik Mono One', sans-serif;
+    font-size:64px;
+    color:var(--amber);
+  }
+
+  .vs-strip{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    width:100%;
+    margin-bottom:8px;
+  }
+  .score-chip{
+    flex:1;
+    background:#0e0912;
+    border:1px solid #3a2a44;
+    border-radius:6px;
+    padding:6px 10px;
+    text-align:center;
+    transition: border-color .2s;
+  }
+  .score-chip .lbl{ font-size:9px; letter-spacing:2px; color:#8a7a92; display:block; }
+  .score-chip .val{ font-weight:700; font-size:18px; letter-spacing:2px; }
+  .score-chip.me .val{ color:var(--amber); }
+  .score-chip.rival .val{ color:var(--magenta); }
+  .score-chip.lead{ border-color:var(--cream); }
+  .vs-label{ font-family:'Rubik Mono One', sans-serif; font-size:11px; color:#8a7a92; }
+
+  .opp-health-row{
+    display:flex; align-items:center; gap:8px;
+    margin-bottom:8px;
+  }
+  .opp-name{ font-size:9px; letter-spacing:1px; color:#8a7a92; white-space:nowrap; }
+  .opp-health{ display:flex; gap:3px; flex:1; }
+  .opp-seg{ flex:1; height:6px; border-radius:2px; background:#3a2a44; }
+  .opp-seg.on{ background:var(--magenta); }
+
+  .opp-flash{
+    position:absolute; top:8px; right:14px;
+    font-size:11px; font-weight:700; color:var(--magenta);
+    opacity:0; transition:opacity .15s;
+  }
+  .opp-flash.show{ opacity:1; }
+
+  .solo-topbar{ text-align:center; margin-bottom:10px; }
+  .counter-label{ font-size:9px; letter-spacing:2px; color:#8a7a92; display:block; margin-bottom:2px; }
+  .counter-digits{
+    background:#0e0912; color:var(--teal); font-weight:700; font-size:18px;
+    letter-spacing:3px; padding:5px 10px; border-radius:4px; border:1px solid #3a2a44;
+    display:inline-block; min-width:80px;
+  }
+
+  .cassette{
+    background:#1c1220; border:1px solid #3a2a44; border-radius:12px;
+    padding:8px 14px 12px; margin-bottom:10px;
+  }
+  .reel-row{ display:flex; justify-content:center; align-items:center; }
+  .reel{
+    width:44px; height:44px; border-radius:50%;
+    background: repeating-conic-gradient(#0e0912 0deg 8deg, #241a2b 8deg 16deg);
+    border:3px solid #46334f; position:relative;
+    animation: spin var(--spin-dur, 6s) linear infinite;
+  }
+  .reel::after{ content:''; position:absolute; inset:15px; background:var(--bg-panel); border-radius:50%; border:2px solid #46334f; }
+  @keyframes spin{ to{ transform:rotate(360deg); } }
+
+  .health-row{ display:flex; gap:5px; justify-content:center; margin-top:8px; }
+  .health-seg{ width:32px; height:8px; border-radius:2px; background:#3a2a44; transition:background .2s; }
+  .health-seg.on{ background:var(--amber); }
+
+  .combo-line{ text-align:center; height:18px; font-size:12px; font-weight:700; color:var(--magenta); letter-spacing:1px; margin-bottom:4px; }
+
+  .lanes{
+    display:flex; gap:6px; height:290px; position:relative;
+    background:#100a13; border-radius:10px; overflow:hidden; border:1px solid #3a2a44;
+  }
+  .lane{ flex:1; position:relative; border-right:1px solid #241a2b; }
+  .lane:last-child{ border-right:none; }
+  .hit-line{ position:absolute; left:0; right:0; top:82%; height:3px; background:var(--cream); opacity:0.5; }
+  .note{
+    position:absolute; left:8%; right:8%; height:20px; border-radius:5px; top:-22px;
+    transition: transform 150ms ease, opacity 150ms ease, box-shadow 150ms ease;
+  }
+  .note.hit-perfect{ transform:scale(1.7); opacity:0; box-shadow:0 0 16px 4px var(--teal); }
+  .note.hit-good{ transform:scale(1.4); opacity:0; box-shadow:0 0 12px 3px var(--amber); }
+  .note.hit-miss{ transform:translateY(14px) scale(0.75); opacity:0; filter:grayscale(1); }
+
+  .float-txt{
+    position:absolute; left:50%; top:82%; transform:translate(-50%,-50%);
+    font-size:11px; font-weight:700; letter-spacing:1px; pointer-events:none;
+    animation: floatUp .5s ease-out forwards; white-space:nowrap;
+  }
+  @keyframes floatUp{ 0%{opacity:1; transform:translate(-50%,-50%);} 100%{opacity:0; transform:translate(-50%,-140%);} }
+
+  .tap-zones{ display:flex; gap:6px; margin-top:8px; }
+  .tap-zone{
+    flex:1; height:52px; border-radius:8px; border:none; background:#241a2b; color:var(--cream);
+    font-family:'JetBrains Mono', monospace; font-weight:700; font-size:15px; letter-spacing:1px;
+    touch-action:none; user-select:none; transition: transform .08s, background .08s, color .08s;
+  }
+  .tap-zone:active{ transform:scale(0.94); }
+  .tap-zone.flash-perfect{ background:var(--teal); color:#052723; transform:scale(0.94); }
+  .tap-zone.flash-good{ background:var(--amber); color:#2a1a05; transform:scale(0.94); }
+  .tap-zone.flash-miss{ background:var(--magenta); color:#2a0f1a; transform:scale(0.94); }
+  .tap-zone:focus-visible{ outline:2px solid var(--cream); outline-offset:2px; }
+
+  .overlay{
+    position:absolute; inset:0; background:rgba(14,9,18,0.96); border-radius:18px;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    text-align:center; padding:24px; gap:12px;
+  }
+  .overlay h2{ font-family:'Rubik Mono One', sans-serif; color:var(--amber); font-size:19px; margin:0; }
+  .final-row{ display:flex; gap:24px; margin:4px 0; }
+  .final-row div{ text-align:center; }
+  .final-row .fv{ font-size:22px; font-weight:700; }
+  .final-row .fl{ font-size:10px; letter-spacing:1px; color:#8a7a92; }
+  .winner-line{ font-family:'Rubik Mono One', sans-serif; font-size:15px; color:var(--teal); }
+
+  .keys-hint{ display:flex; gap:10px; }
+  .keys-hint span{ background:#241a2b; border:1px solid #46334f; padding:3px 8px; border-radius:4px; font-size:11px; }
+
+  .chat-panel{
+    margin-top:14px;
+    background:#0e0912; border:1px solid #46334f; border-radius:12px;
+    display:flex; flex-direction:column; padding:10px;
+    height:140px;
+  }
+  .chat-header{
+    display:flex; justify-content:space-between; align-items:center;
+    font-size:11px; letter-spacing:1px; color:#8a7a92; margin-bottom:8px;
+  }
+  .chat-messages{ flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:6px; margin-bottom:8px; }
+  .chat-msg{ font-size:12px; line-height:1.4; word-break:break-word; }
+  .chat-msg .who{ font-weight:700; margin-right:6px; }
+  .chat-msg.mine .who{ color:var(--amber); }
+  .chat-msg.theirs .who{ color:var(--teal); }
+  .chat-input-row{ display:flex; gap:6px; }
+  .chat-input-row input{
+    flex:1; background:#1c1220; border:1px solid #46334f; color:var(--cream);
+    font-family:'JetBrains Mono', monospace; font-size:12px; padding:8px; border-radius:6px;
+  }
+  .chat-input-row input:focus{ outline:2px solid var(--teal); }
+  .chat-input-row input:disabled{ opacity:0.4; }
+  .chat-send{
+    background:var(--teal); color:#052723; border:none;
+    font-family:'Rubik Mono One', sans-serif; font-size:11px;
+    padding:8px 12px; border-radius:6px; cursor:pointer;
+  }
+  .chat-send:disabled{ opacity:0.4; cursor:not-allowed; }
+
+  .hidden{ display:none !important; }
 
   @media (prefers-reduced-motion: reduce){
     .reel{ animation:none; }
@@ -310,77 +292,192 @@
 <body>
 
 <div class="deck">
-  <div class="deck-header">
-    <h1 class="logo">TAPE<span>·</span>TAP</h1>
-    <div class="counter-box">
-      <span class="counter-label">COUNTER</span>
-      <div class="counter-digits" id="counter">0000</div>
-    </div>
+  <h1 class="logo">TAPE<span>·</span>TAP</h1>
+  <div class="subhead">DUEL A FRIEND · OR PLAY SOLO</div>
+
+  <div id="screenMenu" class="panel">
+    <p>Race a friend in real time — 30 seconds, 100 points a note, most points wins. Or warm up solo.</p>
+    <button class="btn" id="btnHost">HOST A DUEL</button>
+    <button class="btn ghost" id="btnJoin">JOIN WITH A CODE</button>
+    <button class="btn ghost" id="btnSolo">SINGLE PLAYER</button>
+    <p id="configWarning" class="hidden" style="color:var(--magenta);">Set WORKER_URL at the top of the script to your deployed Worker's address before duels will connect.</p>
   </div>
 
-  <div class="cassette">
-    <div class="reel-row">
-      <div class="reel" id="reelL"></div>
-      <div class="tape-strip"></div>
-      <div class="reel" id="reelR"></div>
-    </div>
-    <div class="health-row" id="healthRow"></div>
+  <div id="screenJoinEntry" class="panel hidden">
+    <p>Enter the 4-character code your friend shared with you.</p>
+    <input class="code-input" id="codeInput" maxlength="4" placeholder="ABCD">
+    <button class="btn" id="btnJoinSubmit">CONNECT</button>
+    <button class="btn ghost" id="btnJoinBack">BACK</button>
+    <p id="joinError" style="color:var(--magenta); font-size:12px;"></p>
   </div>
 
-  <div class="combo-line" id="comboLine"></div>
+  <div id="screenLobby" class="panel hidden">
+    <p id="lobbyCodeLine">Share this code with your friend:</p>
+    <div class="code-display hidden" id="lobbyCode">----</div>
+    <p id="lobbyStatus">Waiting for your friend to join…</p>
+    <button class="btn" id="btnReady">I'M READY</button>
+    <button class="btn ghost" id="btnLeaveLobby">LEAVE</button>
+  </div>
 
-  <div class="lanes" id="lanes">
-    <div class="hit-line"></div>
-    <div class="lane" data-lane="0"></div>
-    <div class="lane" data-lane="1"></div>
-    <div class="lane" data-lane="2"></div>
-    <div class="lane" data-lane="3"></div>
+  <div id="screenCountdown" class="panel hidden">
+    <p>Get ready</p>
+    <div class="countdown-num" id="countdownNum">3</div>
+    <div class="keys-hint"><span>Q</span><span>W</span><span>E</span><span>R</span></div>
+  </div>
 
-    <div class="overlay" id="overlay">
-      <h2>TAPE TAP</h2>
-      <p>Tap the buttons in time with the notes as they hit the line. Keep the tape from snapping — miss too many and it's over.</p>
-      <div class="keys-hint">
-        <span>Q</span><span>W</span><span>E</span><span>R</span>
+  <div id="screenGame" class="hidden">
+    <div id="duelTopBar" class="hidden">
+      <div class="vs-strip">
+        <div class="score-chip me" id="chipMe"><span class="lbl">YOU</span><span class="val" id="counterMe">0000</span></div>
+        <div class="vs-label">VS</div>
+        <div class="score-chip rival" id="chipRival"><span class="lbl">RIVAL</span><span class="val" id="counterRival">0000</span></div>
       </div>
-      <button class="play-btn" id="playBtn">▶ PRESS PLAY</button>
+      <div class="opp-health-row">
+        <span class="opp-name">RIVAL TAPE</span>
+        <div class="opp-health" id="oppHealth"></div>
+      </div>
+    </div>
+    <div id="soloTopBar" class="solo-topbar hidden">
+      <span class="counter-label">SCORE</span>
+      <div class="counter-digits" id="counterSolo">0000</div>
+    </div>
+
+    <div class="cassette">
+      <div class="reel-row"><div class="reel" id="reel"></div></div>
+      <div class="health-row" id="healthRow"></div>
+    </div>
+    <div class="combo-line" id="comboLine"></div>
+    <div class="lanes" id="lanes" style="position:relative;">
+      <div class="hit-line"></div>
+      <div class="lane" data-lane="0"></div>
+      <div class="lane" data-lane="1"></div>
+      <div class="lane" data-lane="2"></div>
+      <div class="lane" data-lane="3"></div>
+      <div class="opp-flash" id="oppFlash"></div>
+    </div>
+    <div class="tap-zones" id="tapZones">
+      <button class="tap-zone" data-lane="0" style="color:var(--amber)">Q</button>
+      <button class="tap-zone" data-lane="1" style="color:var(--magenta)">W</button>
+      <button class="tap-zone" data-lane="2" style="color:var(--teal)">E</button>
+      <button class="tap-zone" data-lane="3" style="color:var(--cream)">R</button>
     </div>
   </div>
 
-  <div class="tap-zones" id="tapZones">
-    <button class="tap-zone" data-lane="0" style="color:var(--amber)">Q</button>
-    <button class="tap-zone" data-lane="1" style="color:var(--magenta)">W</button>
-    <button class="tap-zone" data-lane="2" style="color:var(--teal)">E</button>
-    <button class="tap-zone" data-lane="3" style="color:var(--cream)">R</button>
+  <div id="screenWaitingResult" class="panel hidden">
+    <p id="ownResultLine"></p>
+    <div class="spinner"></div>
+    <p>Waiting for your rival to finish…</p>
+  </div>
+
+  <div id="screenResults" class="panel hidden">
+    <h2 style="font-family:'Rubik Mono One', sans-serif; color:var(--amber); font-size:19px; margin:0;">SIDE COMPLETE</h2>
+    <div class="winner-line" id="winnerLine"></div>
+    <div class="final-row" id="finalRow"></div>
+    <button class="btn" id="btnRematch">REMATCH</button>
+    <button class="btn ghost" id="btnLeaveMatch">LEAVE MATCH</button>
+  </div>
+
+  <div id="screenSoloResults" class="panel hidden">
+    <h2 style="font-family:'Rubik Mono One', sans-serif; color:var(--amber); font-size:19px; margin:0;">TAPE SNAPPED</h2>
+    <div class="final-row">
+      <div><div class="fv" style="color:var(--teal)" id="soloFinalScore">0000</div><div class="fl" id="soloBestComboLine">Best combo: 0</div></div>
+    </div>
+    <p id="soloBestScoreLine"></p>
+    <button class="btn" id="btnSoloAgain">PLAY AGAIN</button>
+    <button class="btn ghost" id="btnSoloMenu">BACK TO MENU</button>
+  </div>
+
+  <div class="chat-panel" id="chatPanel">
+    <div class="chat-header"><span>DUEL CHAT</span></div>
+    <div class="chat-messages" id="chatMessages"></div>
+    <div class="chat-input-row">
+      <input type="text" id="chatInput" maxlength="200" placeholder="Join a room to chat…" disabled>
+      <button class="chat-send" id="chatSend" disabled>SEND</button>
+    </div>
   </div>
 </div>
 
 <script>
 (function(){
+  const WORKER_URL = 'wss://tape-tap-duel.penisenlargement.workers.dev';
+
   const LANE_COLORS = ['#f2a93b','#d1477a','#3fb8af','#f4ecd8'];
+  const LANE_FREQ = [330, 392, 440, 523];
   const LANE_KEYS = ['q','w','e','r'];
   const NOTE_TRAVEL_MS = 1500;
   const HIT_RATIO = 0.82;
   const MAX_HEALTH = 5;
   const PERFECT_MS = 80;
-  const GOOD_MS = 200;
-  const OUTER_MS = 260;
+  const OUTER_MS = 200;
+  const INPUT_COOLDOWN_MS = 150;
+  const EMPTY_PRESS_PENALTY = 20;
+  const DUEL_DURATION_MS = 30000;
+  const SYNC_INTERVAL_MS = 400;
+  const SOLO_RAMP_HITS = 15;
+  const SOLO_BPM_MAX = 220;
 
-  const lanesEl = document.getElementById('lanes');
-  const laneEls = Array.from(document.querySelectorAll('.lane'));
-  const overlay = document.getElementById('overlay');
-  const playBtn = document.getElementById('playBtn');
-  const counterEl = document.getElementById('counter');
-  const comboLine = document.getElementById('comboLine');
-  const healthRow = document.getElementById('healthRow');
-  const reelL = document.getElementById('reelL');
-  const reelR = document.getElementById('reelR');
-  const tapZones = Array.from(document.querySelectorAll('.tap-zone'));
+  const el = id => document.getElementById(id);
+  const screens = ['screenMenu','screenJoinEntry','screenLobby','screenCountdown','screenGame','screenWaitingResult','screenResults','screenSoloResults'];
+  function show(id){ screens.forEach(s => el(s).classList.toggle('hidden', s !== id)); }
 
-  let audioCtx = null;
-  function ensureAudio(){
-    if(!audioCtx){
-      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  const configOk = WORKER_URL.indexOf('REPLACE-WITH-YOUR-WORKER-URL') === -1;
+  if(!configOk){
+    el('configWarning').classList.remove('hidden');
+    el('btnHost').disabled = true;
+    el('btnJoin').disabled = true;
+  }
+
+  function makeCode(){
+    const chars = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
+    let c = '';
+    for(let i=0;i<4;i++) c += chars[Math.floor(Math.random()*chars.length)];
+    return c;
+  }
+
+  function mulberry32(seed){
+    return function(){
+      seed |= 0; seed = seed + 0x6D2B79F5 | 0;
+      let t = Math.imul(seed ^ seed >>> 15, 1 | seed);
+      t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+      return ((t ^ t >>> 14) >>> 0) / 4294967296;
+    };
+  }
+
+  function bpmAtElapsed(ms){
+    return Math.min(200, 100 + Math.floor(ms/15000)*8);
+  }
+
+  function generateChart(seed, durationMs){
+    const rng = mulberry32(seed);
+    const chart = [];
+    let t = 300;
+    while(t < durationMs){
+      const bpm = bpmAtElapsed(t);
+      const interval = 60000/bpm;
+      const variance = rng() < 0.25 ? interval/2 : interval;
+      t += variance;
+      if(t < durationMs){
+        const lane = Math.floor(rng()*4);
+        chart.push({ time: t, lane });
+      }
     }
+    return chart;
+  }
+
+  // ---- Audio (single compressed bus so hits never pile up into distortion) ----
+  let audioCtx = null, masterGain = null, compressor = null;
+  function ensureAudio(){
+    if(audioCtx) return;
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    compressor = audioCtx.createDynamicsCompressor();
+    compressor.threshold.value = -24;
+    compressor.knee.value = 30;
+    compressor.ratio.value = 8;
+    compressor.attack.value = 0.003;
+    compressor.release.value = 0.15;
+    masterGain = audioCtx.createGain();
+    masterGain.gain.value = 0.8;
+    masterGain.connect(compressor).connect(audioCtx.destination);
   }
   function playTone(freq, dur, type){
     if(!audioCtx) return;
@@ -389,86 +486,234 @@
     osc.type = type || 'square';
     osc.frequency.value = freq;
     gain.gain.setValueAtTime(0.0001, audioCtx.currentTime);
-    gain.gain.linearRampToValueAtTime(0.12, audioCtx.currentTime + 0.01);
+    gain.gain.linearRampToValueAtTime(0.1, audioCtx.currentTime + 0.01);
     gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + dur);
-    osc.connect(gain).connect(audioCtx.destination);
-    osc.start();
-    osc.stop(audioCtx.currentTime + dur);
+    osc.connect(gain).connect(masterGain);
+    osc.start(); osc.stop(audioCtx.currentTime + dur);
   }
-  const LANE_FREQ = [330, 392, 440, 523];
   function hitSound(lane, quality){
     const base = LANE_FREQ[lane];
-    if(quality === 'perfect') playTone(base * 1.5, 0.14, 'square');
-    else if(quality === 'good') playTone(base, 0.12, 'square');
+    if(quality==='perfect') playTone(base*1.5, 0.12, 'square');
+    else playTone(base, 0.1, 'square');
   }
-  function missSound(){ playTone(110, 0.18, 'sawtooth'); }
-  function reviveSound(){ playTone(660, 0.1, 'sine'); setTimeout(()=>playTone(880,0.15,'sine'),90); }
+  function missSound(){ playTone(110, 0.13, 'sawtooth'); }
+  function reviveSound(){ playTone(660,0.08,'sine'); setTimeout(()=>playTone(880,0.11,'sine'),80); }
 
-  let state;
-  function freshState(){
-    return {
-      running:false,
-      startTime:0,
-      score:0,
-      combo:0,
-      bestCombo:0,
-      health:MAX_HEALTH,
-      bpm:100,
-      hitsSinceRamp:0,
-      nextSpawn:0,
-      notes:[],
-      noteId:0,
-      lastFrame:0
-    };
+  // ---- Networking ----
+  let ws = null;
+  let role = null;
+  let code = null;
+  let seed = null;
+  let startTime = null;
+  let awaitingOpponentFinish = false;
+  let opponentConnected = false;
+  let iAmReady = false;
+  let opponentReady = false;
+
+  function connect(roomCode){
+    return new Promise((resolve, reject) => {
+      try{
+        const socket = new WebSocket(WORKER_URL + '/room/' + roomCode);
+        socket.addEventListener('open', () => resolve(socket));
+        socket.addEventListener('error', () => reject(new Error('connection failed')));
+      }catch(e){ reject(e); }
+    });
+  }
+  function wsSend(obj){
+    if(ws && ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify(obj));
+  }
+  function closeConnection(){
+    if(ws){ try{ ws.close(); }catch(e){} ws = null; }
   }
 
-  function buildHealth(){
-    healthRow.innerHTML = '';
-    for(let i=0;i<MAX_HEALTH;i++){
-      const seg = document.createElement('div');
-      seg.className = 'health-seg';
-      healthRow.appendChild(seg);
+  function updateLobbyUI(){
+    const codeBox = el('lobbyCode');
+    if(role==='host'){ codeBox.classList.remove('hidden'); codeBox.textContent = code; el('lobbyCodeLine').classList.remove('hidden'); }
+    else { codeBox.classList.add('hidden'); el('lobbyCodeLine').classList.add('hidden'); }
+
+    const btn = el('btnReady');
+    if(!opponentConnected){
+      el('lobbyStatus').textContent = role==='host' ? 'Waiting for your friend to join…' : 'Connecting…';
+      btn.disabled = true;
+    } else {
+      btn.disabled = iAmReady;
+      if(iAmReady && opponentReady) el('lobbyStatus').textContent = 'Both ready — starting…';
+      else if(iAmReady) el('lobbyStatus').textContent = "You're ready. Waiting on your rival…";
+      else if(opponentReady) el('lobbyStatus').textContent = 'Your rival is ready! Hit ready to start.';
+      else el('lobbyStatus').textContent = 'Both hit ready when you want to start.';
     }
+  }
+
+  function handleServerMessage(msg){
+    if(msg.type === 'joined'){
+      opponentConnected = (role === 'guest');
+      show('screenLobby');
+      updateLobbyUI();
+      return;
+    }
+    if(msg.type === 'peerJoined'){
+      opponentConnected = true;
+      updateLobbyUI();
+      return;
+    }
+    if(msg.type === 'peerLeft'){
+      if(!el('screenGame').classList.contains('hidden')){
+        el('oppFlash').textContent = 'RIVAL DISCONNECTED';
+        el('oppFlash').classList.add('show');
+      }
+      opponentConnected = false;
+      iAmReady = false; opponentReady = false;
+      if(!el('screenLobby').classList.contains('hidden')) updateLobbyUI();
+      return;
+    }
+    if(msg.type === 'peerReady'){
+      opponentReady = true;
+      updateLobbyUI();
+      return;
+    }
+    if(msg.type === 'start'){
+      seed = msg.seed;
+      startTime = msg.startTime;
+      iAmReady = false; opponentReady = false;
+      beginCountdownAndPlay();
+      return;
+    }
+    if(msg.type === 'error'){
+      el('joinError').textContent = msg.message;
+      return;
+    }
+    if(msg.type === 'opponentState'){
+      const data = msg.payload;
+      if(data.combo > lastOppCombo) flashOpp('HIT');
+      if(data.health < lastOppHealth) flashOpp('MISS');
+      lastOppCombo = data.combo; lastOppHealth = data.health;
+      opp = { score:data.score, health:data.health, combo:data.combo, finished:data.finished };
+      renderOppHealth(); renderOppScore();
+      if(awaitingOpponentFinish && opp.finished){
+        awaitingOpponentFinish = false;
+        showResults();
+      }
+      return;
+    }
+    if(msg.type === 'chat'){
+      chatLog.push({ from: msg.from, text: msg.text, ts: msg.ts });
+      if(chatLog.length > 40) chatLog.shift();
+      renderChatMessages();
+      return;
+    }
+  }
+
+  // ---- Chat ----
+  let chatLog = [];
+  function renderChatMessages(){
+    const box = el('chatMessages');
+    box.innerHTML = '';
+    chatLog.forEach(m=>{
+      const div = document.createElement('div');
+      div.className = 'chat-msg ' + (m.from === role ? 'mine' : 'theirs');
+      const who = document.createElement('span');
+      who.className = 'who';
+      who.textContent = (m.from === role ? 'You' : 'Rival') + ':';
+      div.appendChild(who);
+      div.appendChild(document.createTextNode(m.text));
+      box.appendChild(div);
+    });
+    box.scrollTop = box.scrollHeight;
+  }
+  function enableChatInput(){
+    chatLog = [];
+    el('chatMessages').innerHTML = '';
+    el('chatInput').disabled = false;
+    el('chatSend').disabled = false;
+    el('chatInput').placeholder = 'Say something…';
+  }
+  function disableChatInput(){
+    el('chatInput').disabled = true;
+    el('chatSend').disabled = true;
+    el('chatInput').placeholder = 'Join a room to chat…';
+  }
+  function sendChat(){
+    const input = el('chatInput');
+    const text = input.value.trim();
+    if(!text) return;
+    input.value = '';
+    wsSend({ type:'chat', text });
+  }
+  el('chatSend').addEventListener('click', sendChat);
+  el('chatInput').addEventListener('keydown', (e)=>{
+    e.stopPropagation();
+    if(e.key === 'Enter'){ e.preventDefault(); sendChat(); }
+  });
+
+  // ---- Shared game state ----
+  let mode = null; // 'duel' | 'solo'
+  let chart = [];
+  let chartIdx = 0;
+  let activeNotes = [];
+  let rafId, syncIntervalId, countdownIntervalId;
+  let lastPressTime = [0,0,0,0];
+
+  // solo-only
+  let bpm = 100;
+  let hitsSinceRamp = 0;
+  let nextSpawnTime = 0;
+  let soloBestScore = 0;
+
+  let me = { score:0, combo:0, bestCombo:0, health:MAX_HEALTH, finished:false };
+  let opp = { score:0, health:MAX_HEALTH, combo:0, finished:false };
+  let lastOppCombo = 0, lastOppHealth = MAX_HEALTH;
+
+  const laneEls = () => Array.from(document.querySelectorAll('#lanes .lane'));
+  const tapZoneEls = () => Array.from(document.querySelectorAll('#tapZones .tap-zone'));
+
+  function resetMe(){
+    me = { score:0, combo:0, bestCombo:0, health:MAX_HEALTH, finished:false };
+    opp = { score:0, health:MAX_HEALTH, combo:0, finished:false };
+    lastOppCombo = 0; lastOppHealth = MAX_HEALTH;
+    activeNotes = []; chartIdx = 0;
+    lastPressTime = [0,0,0,0];
+  }
+
+  function buildHealthUI(){
+    const row = el('healthRow'); row.innerHTML = '';
+    for(let i=0;i<MAX_HEALTH;i++){ const s=document.createElement('div'); s.className='health-seg'; row.appendChild(s); }
+    const oppRow = el('oppHealth'); oppRow.innerHTML = '';
+    for(let i=0;i<MAX_HEALTH;i++){ const s=document.createElement('div'); s.className='opp-seg'; oppRow.appendChild(s); }
   }
   function renderHealth(){
-    const segs = healthRow.children;
-    for(let i=0;i<segs.length;i++){
-      segs[i].classList.toggle('on', i < state.health);
-    }
+    const segs = el('healthRow').children;
+    for(let i=0;i<segs.length;i++) segs[i].classList.toggle('on', i < me.health);
   }
-
+  function renderOppHealth(){
+    const segs = el('oppHealth').children;
+    for(let i=0;i<segs.length;i++) segs[i].classList.toggle('on', i < opp.health);
+  }
   function renderCounter(){
-    counterEl.textContent = String(state.score).padStart(4,'0');
+    const txt = String(me.score).padStart(4,'0');
+    if(el('counterMe')) el('counterMe').textContent = txt;
+    if(el('counterSolo')) el('counterSolo').textContent = txt;
+    updateLeadHighlight();
+  }
+  function renderOppScore(){
+    el('counterRival').textContent = String(opp.score).padStart(4,'0');
+    updateLeadHighlight();
+  }
+  function updateLeadHighlight(){
+    el('chipMe').classList.toggle('lead', me.score > opp.score);
+    el('chipRival').classList.toggle('lead', opp.score > me.score);
+  }
+  function updateCombo(){ el('comboLine').textContent = me.combo>=3 ? (me.combo+' COMBO') : ''; }
+
+  function flashOpp(text){
+    const f = el('oppFlash');
+    f.textContent = text;
+    f.classList.add('show');
+    setTimeout(()=>f.classList.remove('show'), 400);
   }
 
-  function setSpinSpeed(){
-    const dur = Math.max(1.4, 6 * (100 / state.bpm));
-    reelL.style.setProperty('--spin-dur', dur + 's');
-    reelR.style.setProperty('--spin-dur', (dur*0.9) + 's');
-  }
-
-  function spawnNote(){
-    const lane = Math.floor(Math.random()*4);
-    const note = {
-      id: state.noteId++,
-      lane,
-      spawnTime: performance.now(),
-      hit:false,
-      el:null
-    };
-    const el = document.createElement('div');
-    el.className = 'note';
-    el.style.background = LANE_COLORS[lane];
-    el.style.boxShadow = '0 0 0 1px rgba(0,0,0,0.3)';
-    laneEls[lane].appendChild(el);
-    note.el = el;
-    state.notes.push(note);
-  }
-
-  function scheduleNextSpawn(now){
-    const interval = 60000 / state.bpm;
-    const variance = Math.random() < 0.25 ? interval/2 : interval;
-    state.nextSpawn = now + variance;
+  function setSpinSpeed(currentBpm){
+    const dur = Math.max(1.4, 6*(100/currentBpm));
+    el('reel').style.setProperty('--spin-dur', dur+'s');
   }
 
   function floatText(lane, text, color){
@@ -476,155 +721,324 @@
     f.className = 'float-txt';
     f.textContent = text;
     f.style.color = color;
-    laneEls[lane].appendChild(f);
+    laneEls()[lane].appendChild(f);
     setTimeout(()=>f.remove(), 500);
   }
 
-  function comboMultiplier(){
-    return 1 + Math.floor(state.combo/10)*0.5;
+  function createNoteEl(lane, hitTime){
+    const noteEl = document.createElement('div');
+    noteEl.className = 'note';
+    noteEl.style.background = LANE_COLORS[lane];
+    laneEls()[lane].appendChild(noteEl);
+    activeNotes.push({ time:hitTime, lane, resolved:false, el:noteEl });
   }
+
+  function animateNoteHit(elem, quality){
+    elem.classList.add(quality==='perfect' ? 'hit-perfect' : 'hit-good');
+    setTimeout(()=>elem.remove(), 160);
+  }
+  function animateNoteMiss(elem){
+    elem.classList.add('hit-miss');
+    setTimeout(()=>elem.remove(), 160);
+  }
+
+  function flashZone(lane, kind){
+    const z = tapZoneEls()[lane];
+    const cls = kind==='perfect' ? 'flash-perfect' : kind==='good' ? 'flash-good' : 'flash-miss';
+    z.classList.add(cls);
+    setTimeout(()=>z.classList.remove(cls), 120);
+  }
+
+  function soloComboMultiplier(){ return 1 + Math.floor(me.combo/10)*0.5; }
 
   function registerHit(lane){
-    if(!state.running) return;
-    const now = performance.now();
+    if(mode==='duel' && me.finished) return;
+    if(mode==='solo' && me.health<=0) return;
+
+    const now = Date.now();
+    if(now - lastPressTime[lane] < INPUT_COOLDOWN_MS) return; // debounce: can't hyper-spam a lane
+    lastPressTime[lane] = now;
+
+    const elapsed = now - startTime;
     let best = null, bestDiff = Infinity;
-    for(const n of state.notes){
-      if(n.lane !== lane || n.hit) continue;
-      const hitTime = n.spawnTime + NOTE_TRAVEL_MS;
-      const diff = Math.abs(now - hitTime);
+    for(const n of activeNotes){
+      if(n.lane !== lane || n.resolved) continue;
+      const diff = Math.abs(elapsed - n.time);
       if(diff < bestDiff){ bestDiff = diff; best = n; }
     }
-    flashZone(lane);
+
     if(best && bestDiff <= OUTER_MS){
-      best.hit = true;
-      best.el.remove();
-      state.notes = state.notes.filter(n=>n!==best);
-      let quality, points, color;
-      if(bestDiff <= PERFECT_MS){ quality='perfect'; points=100; color='var(--teal)'; }
-      else { quality='good'; points=50; color='var(--amber)'; }
-      state.combo++;
-      state.bestCombo = Math.max(state.bestCombo, state.combo);
-      state.score += Math.round(points * comboMultiplier());
-      state.hitsSinceRamp++;
+      best.resolved = true;
+      const quality = bestDiff <= PERFECT_MS ? 'perfect' : 'good';
+      animateNoteHit(best.el, quality);
+      flashZone(lane, quality);
+      me.combo++; me.bestCombo = Math.max(me.bestCombo, me.combo);
+      if(mode==='duel'){
+        me.score += 100;
+      } else {
+        const pts = quality==='perfect' ? 100 : 50;
+        me.score += Math.round(pts * soloComboMultiplier());
+        hitsSinceRamp++;
+        if(hitsSinceRamp >= SOLO_RAMP_HITS && bpm < SOLO_BPM_MAX){ bpm += 10; hitsSinceRamp = 0; }
+      }
       hitSound(lane, quality);
-      floatText(lane, quality==='perfect' ? 'PERFECT' : 'GOOD', color);
-      if(state.combo>0 && state.combo % 20 === 0 && state.health < MAX_HEALTH){
-        state.health++;
-        reviveSound();
-        floatText(lane, 'TAPE RESTORED', 'var(--cream)');
+      floatText(lane, quality==='perfect'?'PERFECT':'GOOD', quality==='perfect'?'var(--teal)':'var(--amber)');
+      if(me.combo>0 && me.combo%20===0 && me.health<MAX_HEALTH){
+        me.health++; reviveSound(); floatText(lane, 'RESTORED', 'var(--cream)');
       }
-      if(state.hitsSinceRamp >= 15 && state.bpm < 220){
-        state.bpm += 10;
-        state.hitsSinceRamp = 0;
-        setSpinSpeed();
-      }
-      renderCounter();
-      renderHealth();
+      renderCounter(); renderHealth(); updateCombo();
+    } else {
+      // empty press: penalize so spamming every key can't beat real timing
+      me.combo = 0;
       updateCombo();
+      flashZone(lane, 'miss');
+      if(mode==='duel'){
+        me.score = Math.max(0, me.score - EMPTY_PRESS_PENALTY);
+        renderCounter();
+      }
     }
-  }
-
-  function flashZone(lane){
-    const zone = tapZones[lane];
-    zone.classList.add('flash');
-    setTimeout(()=>zone.classList.remove('flash'), 90);
-  }
-
-  function updateCombo(){
-    comboLine.textContent = state.combo >= 3 ? (state.combo + ' COMBO') : '';
   }
 
   function missNote(n){
-    n.el.remove();
-    state.notes = state.notes.filter(x=>x!==n);
-    state.combo = 0;
-    state.health--;
+    n.resolved = true;
+    animateNoteMiss(n.el);
+    me.combo = 0;
+    updateCombo();
     missSound();
     floatText(n.lane, 'MISS', 'var(--magenta)');
-    updateCombo();
-    renderHealth();
-    if(state.health <= 0){
-      endGame();
+    if(mode==='duel'){
+      if(me.health>0) me.health--;
+      renderHealth();
+    } else {
+      me.health--;
+      renderHealth();
+      if(me.health<=0) endSolo();
     }
   }
 
-  function laneHeight(){
-    return laneEls[0].clientHeight;
+  function pushMyState(){
+    wsSend({ type:'state', payload: {
+      score: me.score, health: me.health, combo: me.combo, bestCombo: me.bestCombo, finished: me.finished
+    }});
   }
 
-  let rafId;
-  function tick(now){
-    if(!state.running) return;
-    if(now >= state.nextSpawn){
-      spawnNote();
-      scheduleNextSpawn(now);
-    }
-    const lh = laneHeight();
-    for(const n of state.notes.slice()){
-      const progress = (now - n.spawnTime) / NOTE_TRAVEL_MS;
-      if(progress >= 1.05){
-        missNote(n);
-        continue;
+  function finishDuel(){
+    me.finished = true;
+    pushMyState();
+    stopDuelLoop();
+    show('screenWaitingResult');
+    el('ownResultLine').textContent = 'Side finished. Your score: ' + String(me.score).padStart(4,'0');
+    if(opp.finished){ showResults(); }
+    else { awaitingOpponentFinish = true; }
+  }
+
+  function tick(){
+    const now = Date.now();
+    const elapsed = now - startTime;
+
+    if(mode==='duel'){
+      if(!me.finished && elapsed >= DUEL_DURATION_MS){ finishDuel(); return; }
+      setSpinSpeed(bpmAtElapsed(elapsed));
+      while(chartIdx < chart.length && chart[chartIdx].time - NOTE_TRAVEL_MS <= elapsed){
+        createNoteEl(chart[chartIdx].lane, chart[chartIdx].time);
+        chartIdx++;
       }
-      const top = progress * HIT_RATIO * lh;
-      n.el.style.top = top + 'px';
+    } else if(mode==='solo'){
+      if(me.health<=0) return;
+      if(now >= nextSpawnTime){
+        const lane = Math.floor(Math.random()*4);
+        createNoteEl(lane, elapsed + NOTE_TRAVEL_MS);
+        const interval = 60000/bpm;
+        nextSpawnTime = now + (Math.random()<0.25 ? interval/2 : interval);
+      }
+      setSpinSpeed(bpm);
     }
-    rafId = requestAnimationFrame(tick);
+
+    const lh = laneEls()[0].clientHeight;
+    for(const n of activeNotes.slice()){
+      if(n.resolved) continue;
+      const progress = (elapsed - (n.time - NOTE_TRAVEL_MS)) / NOTE_TRAVEL_MS;
+      if(progress >= 1.05){ missNote(n); }
+      else { n.el.style.top = (progress*HIT_RATIO*lh) + 'px'; }
+    }
+    activeNotes = activeNotes.filter(n => !n.resolved);
+
+    if(mode==='duel' && !me.finished) rafId = requestAnimationFrame(tick);
+    else if(mode==='solo' && me.health>0) rafId = requestAnimationFrame(tick);
   }
 
-  function startGame(){
+  function clearLaneVisuals(){
+    laneEls().forEach(l => l.querySelectorAll('.note,.float-txt').forEach(e=>e.remove()));
+  }
+
+  function startDuelRound(){
+    mode = 'duel';
+    resetMe();
+    buildHealthUI();
+    renderHealth(); renderOppHealth();
+    renderCounter(); renderOppScore(); updateCombo();
+    clearLaneVisuals();
+    el('duelTopBar').classList.remove('hidden');
+    el('soloTopBar').classList.add('hidden');
+    el('chatPanel').classList.remove('hidden');
+    show('screenGame');
+    rafId = requestAnimationFrame(tick);
+    syncIntervalId = setInterval(pushMyState, SYNC_INTERVAL_MS);
+  }
+
+  function stopDuelLoop(){
+    cancelAnimationFrame(rafId);
+    clearInterval(syncIntervalId);
+  }
+
+  function showResults(){
+    let winnerText;
+    if(me.score === opp.score) winnerText = "IT'S A TIE";
+    else winnerText = (me.score > opp.score ? 'YOU WIN' : 'YOUR RIVAL WINS') + ' ON SCORE';
+    el('winnerLine').textContent = winnerText;
+    el('finalRow').innerHTML =
+      '<div><div class="fv" style="color:var(--amber)">' + String(me.score).padStart(4,'0') + '</div><div class="fl">YOU &middot; BEST COMBO ' + me.bestCombo + '</div></div>' +
+      '<div><div class="fv" style="color:var(--magenta)">' + String(opp.score).padStart(4,'0') + '</div><div class="fl">RIVAL</div></div>';
+    show('screenResults');
+  }
+
+  function beginCountdownAndPlay(){
     ensureAudio();
     if(audioCtx.state === 'suspended') audioCtx.resume();
-    state = freshState();
-    buildHealth();
+    chart = generateChart(seed, DUEL_DURATION_MS);
+    show('screenCountdown');
+    countdownIntervalId = setInterval(()=>{
+      const msLeft = startTime - Date.now();
+      if(msLeft <= 0){
+        clearInterval(countdownIntervalId);
+        startDuelRound();
+      } else {
+        el('countdownNum').textContent = Math.ceil(msLeft/1000);
+      }
+    }, 100);
+  }
+
+  // ---- Solo mode ----
+  function startSolo(){
+    closeConnection();
+    role = null; code = null;
+    mode = 'solo';
+    resetMe();
+    bpm = 100; hitsSinceRamp = 0;
+    buildHealthUI();
     renderHealth();
-    renderCounter();
-    updateCombo();
-    setSpinSpeed();
-    laneEls.forEach(l=>{ l.querySelectorAll('.note, .float-txt').forEach(e=>e.remove()); });
-    overlay.style.display = 'none';
-    state.running = true;
-    const now = performance.now();
-    state.nextSpawn = now + 300;
+    el('duelTopBar').classList.add('hidden');
+    el('soloTopBar').classList.remove('hidden');
+    el('chatPanel').classList.add('hidden');
+    clearLaneVisuals();
+    ensureAudio();
+    if(audioCtx.state === 'suspended') audioCtx.resume();
+    startTime = Date.now();
+    nextSpawnTime = startTime + 300;
+    renderCounter(); updateCombo();
+    show('screenGame');
     rafId = requestAnimationFrame(tick);
   }
 
-  function endGame(){
-    state.running = false;
+  function endSolo(){
     cancelAnimationFrame(rafId);
-    laneEls.forEach(l=>{ l.querySelectorAll('.note').forEach(e=>e.remove()); });
-    overlay.innerHTML = `
-      <h2>TAPE SNAPPED</h2>
-      <div class="final">${String(state.score).padStart(4,'0')}</div>
-      <p>Best combo: ${state.bestCombo}. Rewind and give it another spin.</p>
-      <button class="play-btn" id="playBtn2">▶ REWIND &amp; REPLAY</button>
-    `;
-    overlay.style.display = 'flex';
-    document.getElementById('playBtn2').addEventListener('click', startGame);
+    const isNewBest = me.score > soloBestScore;
+    if(isNewBest) soloBestScore = me.score;
+    el('soloFinalScore').textContent = String(me.score).padStart(4,'0');
+    el('soloBestComboLine').textContent = 'Best combo: ' + me.bestCombo;
+    el('soloBestScoreLine').textContent = isNewBest
+      ? 'New personal best!'
+      : ('Personal best this session: ' + String(soloBestScore).padStart(4,'0'));
+    show('screenSoloResults');
   }
 
-  playBtn.addEventListener('click', startGame);
-
-  tapZones.forEach(zone=>{
-    zone.addEventListener('pointerdown', (e)=>{
-      e.preventDefault();
-      registerHit(parseInt(zone.dataset.lane,10));
-    });
+  el('btnSolo').addEventListener('click', startSolo);
+  el('btnSoloAgain').addEventListener('click', startSolo);
+  el('btnSoloMenu').addEventListener('click', ()=>{
+    el('chatPanel').classList.remove('hidden');
+    disableChatInput();
+    mode = null;
+    show('screenMenu');
   });
 
+  // ---- Input ----
   window.addEventListener('keydown', (e)=>{
     if(e.repeat) return;
+    if(el('screenGame').classList.contains('hidden')) return;
     const idx = LANE_KEYS.indexOf(e.key.toLowerCase());
-    if(idx !== -1){
-      registerHit(idx);
-      flashZone(idx);
+    if(idx !== -1){ registerHit(idx); }
+  });
+  tapZoneEls().forEach(z=>{
+    z.addEventListener('pointerdown', (e)=>{ e.preventDefault(); registerHit(parseInt(z.dataset.lane,10)); });
+  });
+
+  // ---- Menu / lobby flow ----
+  el('btnHost').addEventListener('click', async ()=>{
+    if(!configOk) return;
+    role = 'host';
+    code = makeCode();
+    opponentConnected = false; iAmReady = false; opponentReady = false;
+    show('screenLobby');
+    updateLobbyUI();
+    try{
+      ws = await connect(code);
+      ws.addEventListener('message', (e)=> handleServerMessage(JSON.parse(e.data)));
+      wsSend({ type:'join', role:'host' });
+      enableChatInput();
+    }catch(e){
+      show('screenMenu');
     }
   });
 
-  state = freshState();
-  buildHealth();
-  renderHealth();
-  renderCounter();
+  el('btnJoin').addEventListener('click', ()=>{ show('screenJoinEntry'); el('joinError').textContent=''; });
+  el('btnJoinBack').addEventListener('click', ()=> show('screenMenu'));
+
+  el('btnJoinSubmit').addEventListener('click', async ()=>{
+    if(!configOk) return;
+    const entered = el('codeInput').value.trim().toUpperCase();
+    if(entered.length !== 4){ el('joinError').textContent = 'Enter a 4-character code.'; return; }
+    role = 'guest'; code = entered;
+    opponentConnected = false; iAmReady = false; opponentReady = false;
+    try{
+      ws = await connect(code);
+      ws.addEventListener('message', (e)=> handleServerMessage(JSON.parse(e.data)));
+      wsSend({ type:'join', role:'guest' });
+      enableChatInput();
+    }catch(e){
+      el('joinError').textContent = 'Could not reach the game server.';
+      show('screenJoinEntry');
+    }
+  });
+
+  el('btnReady').addEventListener('click', ()=>{
+    wsSend({ type:'ready' });
+    iAmReady = true;
+    updateLobbyUI();
+  });
+
+  el('btnLeaveLobby').addEventListener('click', ()=>{
+    closeConnection();
+    disableChatInput();
+    el('chatPanel').classList.remove('hidden');
+    role = null; code = null;
+    show('screenMenu');
+  });
+
+  el('btnRematch').addEventListener('click', ()=>{
+    iAmReady = false; opponentReady = false;
+    show('screenLobby');
+    updateLobbyUI();
+  });
+
+  el('btnLeaveMatch').addEventListener('click', ()=>{
+    closeConnection();
+    disableChatInput();
+    el('chatPanel').classList.remove('hidden');
+    role = null; code = null;
+    show('screenMenu');
+  });
+
+  show('screenMenu');
 })();
 </script>
 
